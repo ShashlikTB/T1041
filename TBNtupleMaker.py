@@ -72,7 +72,9 @@ while 1:
     if "starting spill" in padeline: 
         lastEvent=-1
         print padeline
-        timestr=padeline[padeline.index('at')+3:-1].strip()
+        if "WC" in padeline:
+            timestr=padeline[padeline.index('at')+3:padeline.index('WC')].strip()
+        else: timestr=padeline[padeline.index('at')+3:-1].strip()
         the_spill_pctime = time.mktime(time.strptime(timestr, "%m/%d/%Y %H:%M:%S %p"))  # time on PC
         the_spill_ts = the_spill_pctime                                                 # time on WC controller (temporary)
         the_spill_number = int(padeline[padeline.index('num')+4:padeline.index('at')-5])
