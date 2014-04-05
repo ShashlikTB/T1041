@@ -2,12 +2,14 @@
 rootFile=$1
 outDir=`echo $1 | awk -F".root" '{print $1}'`
 mkdir -p $outDir
+rm -f $outDir/*
 root -b -q root2html.C+\(\"$rootFile\"\,\"$outDir\"\)
 echo "output in $outDir"
 echo "generating html..."
 
 cd $outDir
-HTML=${outDir}.html
+#HTML=${outDir}.html
+HTML="index.html"
 
 PNGFILES=`ls -C1 *png`
 cat <<EOF > $HTML
