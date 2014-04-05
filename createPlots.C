@@ -2,6 +2,11 @@
 
 void createPlots() {
 
+  gROOT->Reset();
+  gROOT->SetBatch(true);
+  gROOT->SetStyle("Plain");
+  gStyle->SetOptStat(0000);
+
   makeHistograms("rec_capture_20140404_185141.root");
   makeHistograms("rec_capture_20140404_194302.root");
 

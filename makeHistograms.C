@@ -30,7 +30,7 @@ void makeHistograms(TString input){
     }
   }
 
-  for(unsigned int ui = 0; ui < histNames.size(); ui++) peakHeights[ui] = new TH1D(histNames[ui], histNames[ui], 500, 0, 500);
+  for(unsigned int ui = 0; ui < histNames.size(); ui++) peakHeights[ui] = new TH1D(histNames[ui], histNames[ui], 400, 0, 800);
 
   // loop over events
   for (int i=0; i< BeamData->GetEntries(); i++) {
@@ -64,7 +64,7 @@ void makeHistograms(TString input){
 
   } // events
 
-  TFile * out = new TFile("hist_"+input+".root", "RECREATE");
+  TFile * out = new TFile("hist_"+input, "RECREATE");
 
   for(unsigned int ui = 0; ui < peakHeights.size(); ui++) peakHeights[ui]->Write();
 
@@ -87,7 +87,7 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
 
   vector<TFile*> files;
   files.resize(fNames.size());
-  for(unsigned int ui = 0; ui < fNames.size(); ui++) files[i] = new TFile(fNames[ui], "READ");
+  for(unsigned int ui = 0; ui < fNames.size(); ui++) files[ui] = new TFile(fNames[ui], "READ");
 
   char char[100];
   int boardIDs[4] = {112, 113, 115, 116};
@@ -100,39 +100,37 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
     }
   }
 
-  vector<vector<TH1D*> > peakHeights;
-
-  for(unsigned int ui = 0; ui < fNames.size(); ui++) {
-
-    vector<TH1D*> v;
-    v.resize(128);
-
-    for(unsigned int uj = 0; uj < v.size(); uj++) v[ui] = (TH1D*)files[ui]->Get(histNames[uj]);
-    v[ui]->SetLineColor(ui + 1);
-
-    peakHeights.push_back(v);
-    v.clear();
-
-  }
-
   TLegend * leg = new TLegend(0.50, 0.65, 0.85, 0.85, NULL, "brNDC");
-  for(unsigned int ui = 0; ui < fNames.size(); ui++) leg->AddEntry(peakHeights[ui][0], legendTitles[ui], "LP");
   leg->SetFillColor(0);
   leg->SetTextSize(0.028);
 
   TCanvas * canv = new TCanvas("canv", "Plot", 10, 10, 2000, 2000);
   canv->SetLogy(true);
 
-  for(unsigned int ui = 0; ui < peakHeights[0].size(); ui++) {
-    peakHeights[0][ui]->Draw();
-    for(unsigned int uj = 1; uj < peakHeights.size(); uj++) peakHeights[uj][ui]->Draw("same");
+  vector<TH1D*> peakHeights;
+
+  for(unsigned int uChannel = 0; uChannel < 128; uChannel++) {
+
+    for(unsigned int uFile = 0; uFile < fNames.size(); uFile++) peakHeights.push_back((TH1D*)files[uFile]->Get(histNames[uChannel]));
+    
+    peakHeights[0]->Draw();
+    leg->AddEntry(peakHeights[0], legendTitles[0], "LP");
+    for(unsigned int uFile = 1; uFile < fNames.size(); uFile++) {
+      peakHeights[uFile]->SetLineColor(uFile + 1);
+      leg->AddEntry(peakHeights[uFile], legendTitles[uFile], "LP");
+      peakHeights[uFile]->Draw("same");
+    }
     leg->Draw("same");
-    canv->SaveAs(peakHeights[0][ui]->GetTitle() + ".png");
+
+    canv->SaveAs(TString(peakHeights[0]->GetTitle()) + ".gif");
+
+    leg->Clear();
+    peakHeights.clear();
+
   }
-      
-  peakHeights.clear();
+    
   files.clear();
-  legendTitles.clear();
+
 }
 
       
