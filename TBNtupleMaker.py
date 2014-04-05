@@ -1,4 +1,4 @@
-import os, re, glob, sys, array
+import os, re, glob, sys, array, getopt
 from ROOT import *
 from string import split
 import time
@@ -10,12 +10,18 @@ from TBUtils import *
 # python FakeDataNtupleMaker.py rec_capture_20140324_134340.txt wc_data.txt t1041_20140320232645.dat
 
 DEBUG_LEVEL=0
-NEventLimit = 500
+
+def usage():
+    print
+    print "Usage: python TBNtupleMaker [OPTION] PADE_FILE [WC_FILE]"
+    print "      -n max_events  : Maximum number of events to read"
+    print
+    sys.exit()
+
 
 #=======================================================================# 
 #  Declare data containers                                              #
 #=======================================================================#
-
 gROOT.ProcessLine(".L TBEvent.cc+")
 
 #=======================================================================# 
@@ -37,20 +43,23 @@ BeamTree.Branch("event", "TBEvent", AddressOf(event), 64000, 0)
 #=======================================================================# 
 #  Read in and characterize the input file                              #
 #=======================================================================#
-filelist = glob.glob(sys.argv[1])
-listsize = len(filelist)
-#print "number of input files: " + str(listsize)
+opts, args = getopt.getopt(sys.argv[1:], "n:")
 
-for ifile in range(0,len(filelist)):
-    print filelist[ifile]
-print "="*20
+NEventLimit = 1000000
+for o, a in opts:
+     if o == "-n":
+         NEventLimit=int(a)
+         INFO("Stop after maximum of",NEventLimit,"events")
 
-padeDat=sys.argv[1]
+if len(args)==0: usage()
+padeDat=args[0]
 if padeDat.endswith("bz2") : fPade = bz2.BZ2File(padeDat,"r")
-else : fPade = open(sys.argv[1], "r")
+else : fPade = open(padeDat, "r")
+
 haveWC=False
-if len(sys.argv)>2 : 
-    fWC =  open(sys.argv[2], "r")
+if len(args)>1: 
+    wcDat=args[1]
+    fWC =  open(wcDat, "r")
     haveWC=True
 
 lastEvent=-1
@@ -70,13 +79,13 @@ while 1:
 
     # new spill condition
     if "starting spill" in padeline: 
-        lastEvent=-1
         print padeline
+        lastEvent=-1
         if "WC" in padeline:
             timestr=padeline[padeline.index('at')+3:padeline.index('WC')].strip()
         else: timestr=padeline[padeline.index('at')+3:-1].strip()
         the_spill_pctime = time.mktime(time.strptime(timestr, "%m/%d/%Y %H:%M:%S %p"))  # time on PC
-        the_spill_ts = the_spill_pctime                                                 # time on WC controller (temporary)
+        the_spill_ts =  the_spill_pctime              # time on WC controller (temporary)  UPDATE ME!
         the_spill_number = int(padeline[padeline.index('num')+4:padeline.index('at')-5])
         lastSpill=the_spill_number
         nSpills=nSpills+1;

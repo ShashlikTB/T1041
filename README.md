@@ -4,7 +4,11 @@ T1041
 Analysis code for T1041 test beam run
 
 
-Usage: python TBNtupleMaker.py PADE_file.txt[.bz2] WC_file.dat.[bz2]
+Usage:  
+python TBNtupleMaker [OPTION] PADE_FILE [WC_FILE]
+       Options 
+       -n max_events  : Maximum number of events to read"
+
 
 git cheatsheet
 ==============
