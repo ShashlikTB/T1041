@@ -105,7 +105,7 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
   leg->SetTextSize(0.028);
 
   TCanvas * canv = new TCanvas("canv", "Plot", 10, 10, 2000, 2000);
-  canv->SetLogy(true);
+  canv->SetLogy(false);
 
   vector<TH1D*> peakHeights;
 
@@ -113,9 +113,11 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
 
     for(unsigned int uFile = 0; uFile < fNames.size(); uFile++) peakHeights.push_back((TH1D*)files[uFile]->Get(histNames[uChannel]));
     
+    peakHeights[0]->SetLineWidth(3);
     peakHeights[0]->Draw();
     leg->AddEntry(peakHeights[0], legendTitles[0], "LP");
     for(unsigned int uFile = 1; uFile < fNames.size(); uFile++) {
+      peakHeights[uFile]->SetLineWidth(3);
       peakHeights[uFile]->SetLineColor(uFile + 1);
       leg->AddEntry(peakHeights[uFile], legendTitles[uFile], "LP");
       peakHeights[uFile]->Draw("same");
