@@ -11,7 +11,11 @@ git cheatsheet
 
 clone a working copy
 
+HTTPS clone:
 git clone https://github.com/ShashlikTB/T1041.git
+SSH clone:
+git clone git@github.com:ShashlikTB/T1041.git
+
 
 update/add:
 git add <file>
