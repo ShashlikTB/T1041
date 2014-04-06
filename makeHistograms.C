@@ -30,7 +30,7 @@ void makeHistograms(TString input){
     }
   }
 
-  for(unsigned int ui = 0; ui < histNames.size(); ui++) peakHeights[ui] = new TH1D(histNames[ui], histNames[ui], 400, 0, 800);
+  for(unsigned int ui = 0; ui < histNames.size(); ui++) peakHeights[ui] = new TH1D(histNames[ui], histNames[ui]+";Peak Height in ADC Counts;Events", 800, 0, 800);
 
   // loop over events
   for (int i=0; i< BeamData->GetEntries(); i++) {
@@ -45,8 +45,28 @@ void makeHistograms(TString input){
       UShort_t peak = 0;
 
       // loop over ADC samples
-      UShort_t* wform=event->GetPadeChan(j).GetWform();
-      for (int k=0; k<event->GetPadeChan(j).__SAMPLES(); k++){
+
+      int windowLow, windowHigh;
+      if(event->GetPadeChan(j).GetBoardID() == 112) {
+	windowLow = 32;
+	windowHigh = 38;
+      }
+      else if(event->GetPadeChan(j).GetBoardID() == 113) {
+	windowLow = 22;
+	windowHigh = 28;
+      }
+      else if(event->GetPadeChan(j).GetBoardID() == 115) {
+	windowLow = 19;
+	windowHigh = 25;
+      }
+      else if(event->GetPadeChan(j).GetBoardID() == 116) {
+	windowLow = 26;
+	windowHigh = 32;
+      }
+      else continue;
+
+      UShort_t * wform=event->GetPadeChan(j).GetWform();
+      for (int k = windowLow; k <= windowHigh && k < event->GetPadeChan(j).__SAMPLES(); k++){
 
 	if(wform[k] > peak) peak = wform[k];
 
