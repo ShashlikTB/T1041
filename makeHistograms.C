@@ -134,12 +134,14 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
     for(unsigned int uFile = 0; uFile < fNames.size(); uFile++) peakHeights.push_back((TH1D*)files[uFile]->Get(histNames[uChannel]));
     
     peakHeights[0]->SetLineWidth(3);
+    peakHeights[0]->Scale(1./peakHeights[0]->Integral());
     peakHeights[0]->Draw();
-    leg->AddEntry(peakHeights[0], legendTitles[0], "LP");
+    leg->AddEntry(peakHeights[0], legendTitles[0]+Form(" (%.0f events)", peakHeights[0]->GetEntries()), "LP");
     for(unsigned int uFile = 1; uFile < fNames.size(); uFile++) {
       peakHeights[uFile]->SetLineWidth(3);
       peakHeights[uFile]->SetLineColor(uFile + 1);
-      leg->AddEntry(peakHeights[uFile], legendTitles[uFile], "LP");
+      peakHeights[uFile]->Scale(1./peakHeights[uFile]->Integral());
+      leg->AddEntry(peakHeights[uFile], legendTitles[uFile]+Form(" (%.0f events)", peakHeights[uFile]->GetEntries()), "LP");
       peakHeights[uFile]->Draw("same");
     }
     leg->Draw("same");
