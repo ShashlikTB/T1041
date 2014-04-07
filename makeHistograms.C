@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void makeHistograms(TString input){
+void makeHistograms(TString input, bool twoPeaksPerTrigger){
 
   if (!TClassTable::GetDict("TBEvent")) {
     gSystem->Load("TBEvent_cc.so");  // n.b. make sure to compile if changed
@@ -92,7 +92,7 @@ void makeHistograms(TString input){
 	if(boardIDs[k] == event->GetPadeChan(j).GetBoardID()) {
 	  int pos = k*32 + j;
 	  peakHeights[pos]->Fill(firstPeak);
-	  peakHeights[pos]->Fill(secondPeak);
+	  if(twoPeaksPerTrigger) peakHeights[pos]->Fill(secondPeak);
 	  break;
 	}
       }
