@@ -9,6 +9,7 @@ void createPlots() {
 
   bool twoPeaksPerTrigger = true;
 
+
   makeHistograms("rec_capture_20140404_185141.root", twoPeaksPerTrigger);
   makeHistograms("rec_capture_20140404_194302.root", twoPeaksPerTrigger);
 
