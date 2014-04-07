@@ -108,6 +108,7 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
   out->Write();
   out->Close();
 
+
 }
 
 void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
