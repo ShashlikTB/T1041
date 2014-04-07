@@ -115,7 +115,7 @@ while 1:
         event.SetEventnumber(eventNumber)
         nEventsTot=nEventsTot+1
         nEventsInSpill=nEventsInSpill+1
-        print "Event in spill",the_spill_number,"(",eventNumber,")  / total", nEventsTot
+        #print "Event in spill",the_spill_number,"(",eventNumber,")  / total", nEventsTot
         if haveWC:
             # read one WC event 
             endOfEvent=0
