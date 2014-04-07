@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "TTree.h"
 #include "TFile.h"
+#include "shashlik.h"
 
 #include "TBEvent.h"
 
@@ -12,26 +13,15 @@ void TBEvent::ResetData(){
   wc.clear();
 }
 
-Int_t TBEvent::GetPADEIndex(const Int_t board, const Int_t chan) const{
-  // starting w/ boards 112, 113, 115, 116
-  Int_t offset=0;
-  if (board==113) offset=32;
-  else if (board==115) offset=64;
-  else if (board==116) offset=96;
-  if (offset+chan >= N_PADE_CHANNELS) {
-    return -1;  // ERROR
-  }
-  return offset+chan;
-}
 
 void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 			      UShort_t  board_id, UInt_t hw_counter, 
 			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform){
 
-  Int_t idx=GetPADEIndex(board_id, ch_number);  // sanity check - need to complete this
-  if (idx<0){
-    cerr << "Warning: channel count error, board:channel" 
-	 << board_id << ":" << "ch_number" << endl;
+  Mapper *mapper=Mapper::Instance();
+  if (!mapper->validChannel(board_id, ch_number)){ // sanity check 
+    cerr << "Warning: channel ID error, board:channel " 
+	 << board_id << ":" << ch_number << endl;
   }
   PadeChannel pc;  // todo make consructor w/ fill inputs
   pc.Fill(ts, transfer_size, board_id, hw_counter, ch_number, eventnum, wform);

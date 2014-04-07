@@ -67,8 +67,6 @@ public:
   WCChannel GetWCChan(const int idx) {return wc[idx];}
   Int_t GetWCHits() const {return wc.size();}
 
-  // return index in storage array - HACK for now
-  Int_t GetPADEIndex(const Int_t board, const Int_t chan) const;
 
   // setters
   void SetSpill(Int_t s) {spillNumber=s;}

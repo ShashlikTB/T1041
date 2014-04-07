@@ -32,15 +32,6 @@ padeChannel = PadeChannel()
 
 
 #=======================================================================# 
-#  Declare new file and tree with branches                              #
-#=======================================================================#
-fout = TFile("outputNtuple.root", "recreate")
-#print "channel is "+ str(pade_channel.channel)
-#pade_channel_.channel = 3
-BeamTree = TTree("BeamData", "BeamData")
-BeamTree.Branch("event", "TBEvent", AddressOf(event), 64000, 0)
-
-#=======================================================================# 
 #  Read in and characterize the input file                              #
 #=======================================================================#
 opts, args = getopt.getopt(sys.argv[1:], "n:")
@@ -62,6 +53,16 @@ if len(args)>1:
     fWC =  open(wcDat, "r")
     haveWC=True
 
+
+#=======================================================================# 
+#  Declare new file and tree with branches                              #
+#=======================================================================#
+fout = TFile("outputNtuple.root", "recreate")
+#print "channel is "+ str(pade_channel.channel)
+#pade_channel_.channel = 3
+BeamTree = TTree("BeamData", "BeamData")
+BeamTree.Branch("event", "TBEvent", AddressOf(event), 64000, 0)
+
 lastEvent=-1
 lastSpill=-1
 nSpills=0
@@ -69,17 +70,28 @@ nEventsInSpill=0
 nEventsTot=0
 nPadeChannels=-1
 
+eventDict={} # dictionay holds events in a spill, by event #
 
 # read pade data file
 while 1:
     padeline=fPade.readline()
     if not padeline:  # end of file
-        if (nEventsTot>0) : BeamTree.Fill()  # write final event
+        if len(eventDict)>0:   # fill events from last spill into Tree
+            INFO("Write spill",the_spill_number)
+            for ievt in range(len(eventDict)):
+                event=eventDict[ievt]
+                BeamTree.Fill()
         break
 
     # new spill condition
     if "starting spill" in padeline: 
-        print padeline
+        if len(eventDict)>0:   # fill events from last spill into Tree
+            INFO("Write spill",the_spill_number)
+            for ievt in range(len(eventDict)):
+                event=eventDict[ievt]
+                BeamTree.Fill()
+        INFO(padeline)
+        eventDict={}
         lastEvent=-1
         if "WC" in padeline:
             timestr=padeline[padeline.index('at')+3:padeline.index('WC')].strip()
@@ -89,9 +101,6 @@ while 1:
         the_spill_number = int(padeline[padeline.index('num')+4:padeline.index('at')-5])
         lastSpill=the_spill_number
         nSpills=nSpills+1;
-        event.SetSpill(the_spill_number)
-        event.SetPCTime(long(the_spill_pctime))
-        event.SetSpillTime(long(the_spill_ts))
         # should begin by finding the WC spill, do "fseek"
         continue
 
@@ -103,16 +112,20 @@ while 1:
     pade_hw_counter=int(padeline[4]+padeline[5]+padeline[6],16)
     pade_ch_number=int(padeline[7],16)
     eventNumber = int(padeline[8]+padeline[9],16)
+    if pade_board_id==112: masterEvent=eventNumber
+    if not eventNumber in eventDict: 
+        eventDict[eventNumber]=TBEvent()
+        eventDict[eventNumber].SetSpill(the_spill_number)
+        eventDict[eventNumber].SetPCTime(long(the_spill_pctime))
+        eventDict[eventNumber].SetSpillTime(long(the_spill_ts))
+        eventDict[eventNumber].SetEventnumber(eventNumber)
 
     # new event condition
-    if eventNumber != lastEvent:  # new event condition
-        if (nEventsTot>0) : BeamTree.Fill() # write previous event
+    if masterEvent!=lastEvent:  # new event condition, new event in master PADE
         if (nEventsTot==NEventLimit) : break 
-        event.ResetData()
         nPadeChannels=0;          # counter channels found in this event
         foundWC=False;
-        lastEvent=eventNumber
-        event.SetEventnumber(eventNumber)
+        lastEvent=masterEvent
         nEventsTot=nEventsTot+1
         nEventsInSpill=nEventsInSpill+1
         print "Event in spill",the_spill_number,"(",eventNumber,")  / total", nEventsTot
@@ -154,9 +167,9 @@ while 1:
     for val in waveform:
         samples.append(int(val,16))
 
-    event.FillPadeChannel(pade_ts, pade_transfer_size, pade_board_id, 
-                          pade_hw_counter, pade_ch_number, eventNumber, samples)
-    if DEBUG_LEVEL>1: event.GetPadeChan(nPadeChannels).Dump()
+    eventDict[eventNumber].FillPadeChannel(pade_ts, pade_transfer_size, pade_board_id, 
+                                           pade_hw_counter, pade_ch_number, eventNumber, samples)
+    if DEBUG_LEVEL>1: eventDict[eventNumber].GetPadeChan(nPadeChannels).Dump()
     nPadeChannels=nPadeChannels+1;
 
 
