@@ -80,14 +80,11 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
       else continue;
 
       UShort_t * wform=event->GetPadeChan(j).GetWform();
-      for (int k = firstLow; k <= firstHigh && k < event->GetPadeChan(j).__SAMPLES(); k++){
-	if(wform[k] > firstPeak) firstPeak = wform[k];
+      for (int k = 0; k < event->GetPadeChan(j).__SAMPLES(); k++){
+        if(k >= firstLow && k <= firstHigh && wform[k] > firstPeak) firstPeak = wform[k];
+        if(k >= secondLow && k <= secondHigh && wform[k] > secondPeak) secondPeak = wform[k];
       }
-
-      for (int k = secondLow; k <= secondHigh && k < event->GetPadeChan(j).__SAMPLES(); k++){
-	if(wform[k] > secondPeak) secondPeak = wform[k];
-      }
-
+  
       for(int k = 0; k < 4; k++) {
 	if(boardIDs[k] == event->GetPadeChan(j).GetBoardID()) {
 	  int pos = k*32 + j;
