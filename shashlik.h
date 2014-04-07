@@ -2,7 +2,8 @@
 #define SHASHLIK_H
 #include <map>
 #include <cstdlib>
-using std::map;
+#include <iostream>
+using namespace std;
 
 
 const int NMODULES=16;
