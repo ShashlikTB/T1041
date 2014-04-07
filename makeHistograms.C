@@ -42,40 +42,57 @@ void makeHistograms(TString input){
     // loop over PADE channels
     for (int j=0; j<event->NPadeChan(); j++){
 
-      UShort_t peak = 0;
+      UShort_t firstPeak = 0;
+      UShort_t secondPeak = 0;
 
       // loop over ADC samples
 
-      int windowLow, windowHigh;
+      int firstLow, firstHigh;
+      int secondLow, secondHigh;
       if(event->GetPadeChan(j).GetBoardID() == 112) {
-	windowLow = 32;
-	windowHigh = 38;
+	firstLow = 32;
+	firstHigh = 38;
+
+	secondLow = 81;
+	secondHigh = 87;
       }
       else if(event->GetPadeChan(j).GetBoardID() == 113) {
-	windowLow = 22;
-	windowHigh = 28;
+	firstLow = 22;
+	firstHigh = 28;
+
+	secondLow = 71;
+	secondHigh = 77;
       }
       else if(event->GetPadeChan(j).GetBoardID() == 115) {
-	windowLow = 19;
-	windowHigh = 25;
+	firstLow = 19;
+	firstHigh = 25;
+
+	secondLow = 68;
+	secondHigh = 74;
       }
       else if(event->GetPadeChan(j).GetBoardID() == 116) {
-	windowLow = 26;
-	windowHigh = 32;
+	firstLow = 26;
+	firstHigh = 32;
+
+	secondLow = 75;
+	secondHigh = 81;
       }
       else continue;
 
       UShort_t * wform=event->GetPadeChan(j).GetWform();
-      for (int k = windowLow; k <= windowHigh && k < event->GetPadeChan(j).__SAMPLES(); k++){
+      for (int k = firstLow; k <= firstHigh && k < event->GetPadeChan(j).__SAMPLES(); k++){
+	if(wform[k] > firstPeak) firstPeak = wform[k];
+      }
 
-	if(wform[k] > peak) peak = wform[k];
-
+      for (int k = secondLow; k <= secondHigh && k < event->GetPadeChan(j).__SAMPLES(); k++){
+	if(wform[k] > secondPeak) secondPeak = wform[k];
       }
 
       for(int k = 0; k < 4; k++) {
 	if(boardIDs[k] == event->GetPadeChan(j).GetBoardID()) {
 	  int pos = k*32 + j;
-	  peakHeights[pos]->Fill(peak);
+	  peakHeights[pos]->Fill(firstPeak);
+	  peakHeights[pos]->Fill(secondPeak);
 	  break;
 	}
       }
