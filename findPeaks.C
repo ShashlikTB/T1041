@@ -77,12 +77,17 @@ void findPeaks() {
   TLegend * leg = new TLegend(0.50, 0.65, 0.85, 0.85, NULL, "brNDC");
   leg->SetFillColor(0);
   leg->SetTextSize(0.028);
-  leg->Add(h_exp_112, "Board 112", "LP");
-  leg->Add(h_exp_113, "Board 113", "LP");
-  leg->Add(h_exp_115, "Board 115", "LP");
-  leg->Add(h_exp_116, "Board 116", "LP");
+  leg->AddEntry(h_exp_112, "Board 112", "LP");
+  leg->AddEntry(h_exp_113, "Board 113", "LP");
+  leg->AddEntry(h_exp_115, "Board 115", "LP");
+  leg->AddEntry(h_exp_116, "Board 116", "LP");
 
-  h_exp->Draw();
+  h_exp_112->Draw();
+  h_exp_113->Draw("same");
+  h_exp_115->Draw("same");
+  h_exp_116->Draw("same");
+  leg->Draw("same");
+
   canv->SaveAs("expectedPhotons.gif");
 
 
