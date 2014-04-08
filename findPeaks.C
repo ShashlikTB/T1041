@@ -74,7 +74,7 @@ void findPeaks() {
   h_exp_116->SetLineColor(kGreen+3);
   h_exp_116->Draw("same");
 
-  TLegend * leg = new TLegend(0.50, 0.65, 0.85, 0.85, NULL, "brNDC");
+  TLegend * leg = new TLegend(0.60, 0.65, 0.85, 0.85, NULL, "brNDC");
   leg->SetFillColor(0);
   leg->SetTextSize(0.028);
   leg->AddEntry(h_exp_112, "Board 112", "LP");
@@ -101,10 +101,10 @@ void doFits(TString input) {
   char char[100];
   int boardIDs[4] = {112, 113, 115, 116};
 
-  TH1D * h_spacing_112 = new TH1D("spacing_112", "all_112_spacing", 100, 0, 100);
-  TH1D * h_spacing_113 = new TH1D("spacing_113", "all_113_spacing", 100, 0, 100);
-  TH1D * h_spacing_115 = new TH1D("spacing_115", "all_115_spacing", 100, 0, 100);
-  TH1D * h_spacing_116 = new TH1D("spacing_116", "all_116_spacing", 100, 0, 100);
+  TH1D * h_spacing_112 = new TH1D("spacing_112", "Peak spacing;ADC Counts;Events", 100, 0, 100);
+  TH1D * h_spacing_113 = new TH1D("spacing_113", "Peak spacing;ADC Counts;Events", 100, 0, 100);
+  TH1D * h_spacing_115 = new TH1D("spacing_115", "Peak spacing;ADC Counts;Events", 100, 0, 100);
+  TH1D * h_spacing_116 = new TH1D("spacing_116", "Peak spacing;ADC Counts;Events", 100, 0, 100);
 
   vector<TString> histNames;
 
