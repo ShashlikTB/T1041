@@ -57,11 +57,12 @@ class TBEvent : public TObject {
   ClassDef(TBEvent,1);  //Event structure
 public:
   void ResetData();
-
+  void cp(const TBEvent &e);  // copy constructor interfce for python, ugh!
 
   // getters
   Int_t NPadeChan() const {return padeChannel.size();}
   PadeChannel GetPadeChan(const int idx) const {return padeChannel[idx];}
+  Int_t GetSpillNumber() const {return spillNumber;}
   ULong64_t GetPCTime() const {return pcTime;}
   ULong64_t GetSpillTime() const {return spillTime;}
   WCChannel GetWCChan(const int idx) {return wc[idx];}
@@ -72,7 +73,7 @@ public:
   void SetSpill(Int_t s) {spillNumber=s;}
   void SetPCTime(ULong64_t t) {pcTime=t;}
   void SetSpillTime(ULong64_t t) {spillTime=t;}
-  void SetEventnumber(Int_t n) {eventnumber=n;}
+  void SetEventNumber(Int_t n) {eventNumber=n;}
   void SetPadeChannel(const PadeChannel p, Int_t i) {padeChannel[i]=p;}
   void FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 		       UShort_t  board_id, UInt_t hw_counter, 
@@ -80,12 +81,11 @@ public:
   void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
 
 
-
 private:
   Int_t         spillNumber;
   ULong64_t     pcTime;                   // spill time stamp from PC
   ULong64_t     spillTime;                // spill time stamp from WC controller
-  Int_t         eventnumber;              // from pade
+  Int_t         eventNumber;              // from pade
   vector<PadeChannel> padeChannel;       
   vector<WCChannel> wc;   
 };

@@ -34,6 +34,15 @@ void TBEvent::AddWCHit(UChar_t num, UChar_t wire, UShort_t count){
   wc.push_back(wctmp);
 }
 
+void TBEvent::cp(const TBEvent &e){
+  spillNumber = e.spillNumber;
+  pcTime = e.pcTime;
+  spillTime = e.spillTime;
+  eventNumber = e.eventNumber;
+  padeChannel = e.padeChannel;
+  wc = e.wc;
+}
+
 
 void PadeChannel::Dump() const{
   cout << "Header ==> timestamp: " << _ts << (hex) << " size: " 

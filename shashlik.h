@@ -5,7 +5,6 @@
 #include <iostream>
 using namespace std;
 
-
 const int NMODULES=16;
 const int MODULEXY[]={
    1, 1, 4,

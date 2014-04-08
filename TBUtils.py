@@ -5,7 +5,7 @@ def INFO(*arg):
     s=""
     for i in range(len(arg)):
         s=s+" "+str(arg[i])
-    sys.stderr.write("Info: "+s+"\n")
+    sys.stdout.write("Info: "+s+"\n")
 
 
 def WARN(*arg):
@@ -14,6 +14,6 @@ def WARN(*arg):
     s=""
     for i in range(len(arg)):
         s=s+" "+str(arg[i])
-    sys.stderr.write(RED_ON+"Warning: "+s+"\n"+COL_OFF)
+    sys.stdout.write(RED_ON+"Warning: "+s+"\n"+COL_OFF)
 
 

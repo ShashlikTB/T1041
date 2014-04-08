@@ -16,6 +16,7 @@ void readerExample(){
   for (Int_t i=0; i< BeamData->GetEntries(); i++) {
     BeamData->GetEntry(i);
     // loop over PADE channels
+    cout << (dec) << "Spill number: " << event->GetSpillNumber()<<endl;
     for (Int_t j=0; j<event->NPadeChan(); j++){
       cout << "board : " << (dec) << event->GetPadeChan(j).GetBoardID() << endl;
       // loop over ADC samples

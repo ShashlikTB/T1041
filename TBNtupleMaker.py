@@ -1,3 +1,5 @@
+# Note: we assume the 1st PADE block in each event is always the MASTER
+
 import os, re, glob, sys, array, getopt
 from ROOT import *
 from string import split
@@ -9,15 +11,17 @@ from TBUtils import *
 # Unify PADE blocks and WC blocks into one Ntuple by doing
 # python FakeDataNtupleMaker.py rec_capture_20140324_134340.txt wc_data.txt t1041_20140320232645.dat
 
-DEBUG_LEVEL=0
+DEBUG_LEVEL = 0
+NEventLimit = 1000000
+MASTERID = 112
 
 def usage():
     print
     print "Usage: python TBNtupleMaker [OPTION] PADE_FILE [WC_FILE]"
-    print "      -n max_events  : Maximum number of events to read"
-    print
+    print "      -n max_events  : Maximum (requested) number of events to read"
+    print "                       Always read at least 1 spill"
+    print 
     sys.exit()
-
 
 #=======================================================================# 
 #  Declare data containers                                              #
@@ -30,13 +34,25 @@ gROOT.ProcessLine(".L TBEvent.cc+")
 event = TBEvent()
 padeChannel = PadeChannel()
 
+#=======================================================================# 
+#  Declare new file and tree with branches                              #
+#=======================================================================#
+fout = TFile("outputNtuple.root", "recreate")
+BeamTree = TTree("BeamData", "BeamData")
+BeamTree.Branch("event", "TBEvent", AddressOf(event), 64000, 0)
+
+def fillTree():
+    INFO("Write spill",the_spill_number)
+    for ievt in range(len(eventDict)):
+        event.cp(eventDict[ievt])
+        BeamTree.Fill()
+
 
 #=======================================================================# 
 #  Read in and characterize the input file                              #
 #=======================================================================#
 opts, args = getopt.getopt(sys.argv[1:], "n:")
 
-NEventLimit = 1000000
 for o, a in opts:
      if o == "-n":
          NEventLimit=int(a)
@@ -52,57 +68,43 @@ if len(args)>1:
     wcDat=args[1]
     fWC =  open(wcDat, "r")
     haveWC=True
+else:
+    INFO("No WC file provided")
 
 
-#=======================================================================# 
-#  Declare new file and tree with branches                              #
-#=======================================================================#
-fout = TFile("outputNtuple.root", "recreate")
-#print "channel is "+ str(pade_channel.channel)
-#pade_channel_.channel = 3
-BeamTree = TTree("BeamData", "BeamData")
-BeamTree.Branch("event", "TBEvent", AddressOf(event), 64000, 0)
 
 lastEvent=-1
-lastSpill=-1
 nSpills=0
 nEventsInSpill=0
 nEventsTot=0
-nPadeChannels=-1
 
-eventDict={} # dictionay holds events in a spill, by event #
+eventDict={} # dictionary holds events in a spill, use event # as key
 
-# read pade data file
+# read PADE data file
 while 1:
     padeline=fPade.readline()
     if not padeline:  # end of file
         if len(eventDict)>0:   # fill events from last spill into Tree
-            INFO("Write spill",the_spill_number)
-            for ievt in range(len(eventDict)):
-                event=eventDict[ievt]
-                BeamTree.Fill()
+            fillTree()
         break
 
     # new spill condition
     if "starting spill" in padeline: 
         if len(eventDict)>0:   # fill events from last spill into Tree
-            INFO("Write spill",the_spill_number)
-            for ievt in range(len(eventDict)):
-                event=eventDict[ievt]
-                BeamTree.Fill()
+            fillTree()
+            if (nEventsTot>=NEventLimit): break
         INFO(padeline)
         eventDict={}
         lastEvent=-1
+        nEventsInSpill=0
         if "WC" in padeline:
             timestr=padeline[padeline.index('at')+3:padeline.index('WC')].strip()
         else: timestr=padeline[padeline.index('at')+3:-1].strip()
         the_spill_pctime = time.mktime(time.strptime(timestr, "%m/%d/%Y %H:%M:%S %p"))  # time on PC
         the_spill_ts =  the_spill_pctime              # time on WC controller (temporary)  UPDATE ME!
         the_spill_number = int(padeline[padeline.index('num')+4:padeline.index('at')-5])
-        lastSpill=the_spill_number
         nSpills=nSpills+1;
-        # should begin by finding the WC spill, do "fseek"
-        continue
+        continue # read next line in PADE file
 
     # unpack PADE channel line
     padeline=padeline.split()
@@ -112,23 +114,22 @@ while 1:
     pade_hw_counter=int(padeline[4]+padeline[5]+padeline[6],16)
     pade_ch_number=int(padeline[7],16)
     eventNumber = int(padeline[8]+padeline[9],16)
-    if pade_board_id==112: masterEvent=eventNumber
-    if not eventNumber in eventDict: 
+
+    # new event condition
+    if pade_board_id==MASTERID and eventNumber!=lastEvent: 
+        lastEvent=eventNumber    # last event in master
+        nEventsTot=nEventsTot+1
+        nEventsInSpill=nEventsInSpill+1
+        print "Event in spill",the_spill_number,"(",eventNumber,")  / total", nEventsTot
+
         eventDict[eventNumber]=TBEvent()
         eventDict[eventNumber].SetSpill(the_spill_number)
         eventDict[eventNumber].SetPCTime(long(the_spill_pctime))
         eventDict[eventNumber].SetSpillTime(long(the_spill_ts))
-        eventDict[eventNumber].SetEventnumber(eventNumber)
+        eventDict[eventNumber].SetEventNumber(eventNumber)
 
-    # new event condition
-    if masterEvent!=lastEvent:  # new event condition, new event in master PADE
-        if (nEventsTot==NEventLimit) : break 
-        nPadeChannels=0;          # counter channels found in this event
+        # read WC data (hack for now)
         foundWC=False;
-        lastEvent=masterEvent
-        nEventsTot=nEventsTot+1
-        nEventsInSpill=nEventsInSpill+1
-        print "Event in spill",the_spill_number,"(",eventNumber,")  / total", nEventsTot
         if haveWC:
             # read one WC event 
             endOfEvent=0
@@ -152,16 +153,22 @@ while 1:
                  if "Channel" in wcline[0]: 
                      wire=int(wcline[1])
                      tdcCount=int(wcline[2])
-                     event.AddWCHit(tdcNum,wire,tdcCount)
+                     eventDict[eventNumber].AddWCHit(tdcNum,wire,tdcCount)
                      endOfEvent=fWC.tell()
                      if DEBUG_LEVEL>1: event.GetWCChan(nhits).Dump()
                      nhits=nhits+1
+
+    else: # not new event condition
+        if not eventNumber in eventDict:
+            if DEBUG_LEVEL>0:
+                WARN("Event not found in PADE master=> board",pade_board_id,"event:",eventNumber)
+            continue  # skip this extra event in the PADE slave
 
     # continuation of channel line unpacking                 
     waveform=(padeline[10:])    
     nsamples=len(waveform)        # need error checking here
     if nsamples != padeChannel.__SAMPLES():
-        WARN("Incorrect number of ADC samples, expected",
+        WARNx(5,"Incorrect number of ADC samples, expected",
              padeChannel.__SAMPLES(),"found:",nsamples)
     samples=array("i")
     for val in waveform:
@@ -170,7 +177,6 @@ while 1:
     eventDict[eventNumber].FillPadeChannel(pade_ts, pade_transfer_size, pade_board_id, 
                                            pade_hw_counter, pade_ch_number, eventNumber, samples)
     if DEBUG_LEVEL>1: eventDict[eventNumber].GetPadeChan(nPadeChannels).Dump()
-    nPadeChannels=nPadeChannels+1;
 
 
             
