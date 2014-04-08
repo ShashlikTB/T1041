@@ -89,11 +89,11 @@ const int FIBERMAP[]={
 11313,	1501,		11610,	-1501,
 11329,	1502,		11626,	-1502,
 11312,	1503,		11611,	-1503,
-11328,	1504,		11625,	-1504,
+11328,	1504,		11627,	-1504,
 11310,	1401,		11613,	-1401,
 11326,	1402,		11629,	-1402,
 11311,	1403,		11612,	-1403,
-11325,	1404,		11628,	-1404,
+11327,	1404,		11628,	-1404,
 11324,	1301,		11631,	-1301,
 11308,	1302,		11615,	-1302,
 11325,	1303,		11630,	-1303,
@@ -150,7 +150,7 @@ class Mapper{
 
   Mapper(){  // Private so that it can  not be called
     // fill maps
-    for (int i=0; i<NPADECHANNELS; i+=2){
+    for (int i=0; i<NPADECHANNELS*2; i+=2){
       int channelID=FIBERMAP[i];
       int fiberID=FIBERMAP[i+1];
       if (_padeMap.find(channelID)!=_padeMap.end()) 
