@@ -2,13 +2,6 @@
 
 using namespace std;
 
-int goodColors[6] = {kBlack,
-		     kRed,
-		     kBlue,
-		     8,
-		     kAzure-2,
-		     kCyan+3};
-
 void makeHistograms(TString input, bool twoPeaksPerTrigger){
 
   if (!TClassTable::GetDict("TBEvent")) {
@@ -149,6 +142,13 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles, TString 
       histNames.push_back(TString(char));
     }
   }
+
+  int goodColors[6] = {kBlack,
+		       kRed,
+		       kBlue,
+		       8,
+		       kAzure-2,
+		       kCyan+3};
 
   TLegend * leg = new TLegend(0.50, 0.65, 0.85, 0.85, NULL, "brNDC");
   if(legendHeader != "") leg->SetHeader(legendHeader);
