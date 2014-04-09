@@ -88,11 +88,13 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
         if(k >= secondLow && k <= secondHigh && wform[k] > secondPeak) secondPeak = wform[k];
       }
   
+      peakHeights[j]->Fill(firstPeak);
+      if(twoPeaksPerTrigger) peakHeights[j]->Fill(secondPeak);
+
       for(int k = 0; k < 4; k++) {
 	if(boardIDs[k] == event->GetPadeChan(j).GetBoardID()) {
 	  int pos = k*32 + j;
-	  peakHeights[pos]->Fill(firstPeak);
-	  if(twoPeaksPerTrigger) peakHeights[pos]->Fill(secondPeak);
+	  
 	  break;
 	}
       }
@@ -167,7 +169,7 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles, TString 
     peakHeights[0]->SetLineWidth(3);
     peakHeights[0]->SetLineColor(goodColors[0]);
     peakHeights[0]->Scale(1./peakHeights[0]->Integral());
-    peakHeights[0]->Draw();
+    peakHeights[0]->Draw("hist");
     leg->AddEntry(peakHeights[0], legendTitles[0]+Form(" (%.0f events)", peakHeights[0]->GetEntries()), "LP");
 
     for(unsigned int uFile = 1; uFile < fNames.size(); uFile++) {
@@ -175,7 +177,7 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles, TString 
       peakHeights[uFile]->SetLineColor(goodColors[uFile]);
       peakHeights[uFile]->Scale(1./peakHeights[uFile]->Integral());
       leg->AddEntry(peakHeights[uFile], legendTitles[uFile]+Form(" (%.0f events)", peakHeights[uFile]->GetEntries()), "LP");
-      peakHeights[uFile]->Draw("same");
+      peakHeights[uFile]->Draw("same hist");
     }
     leg->Draw("same");
 
