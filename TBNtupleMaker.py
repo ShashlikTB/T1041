@@ -32,7 +32,7 @@ opts, args = getopt.getopt(sys.argv[1:], "n:")
 for o, a in opts:
      if o == "-n":
          NEventLimit=int(a)
-         logger.Info("Stop after maximum of",NEventLimit,"events or 1 spill")
+         logger.Info("Stop at end of spill after reading at least",NEventLimit,"events")
 
 if len(args)==0: usage()
 padeDat=args[0]
@@ -66,7 +66,7 @@ padeChannel = PadeChannel()
 #  Declare new file and tree with branches                              #
 #=======================================================================#
 fout = TFile(outFile, "recreate")
-logger.Info("Witing to output file",outFile)
+logger.Info("Writing to output file",outFile)
 BeamTree = TTree("BeamData", "BeamData")
 BeamTree.Branch("event", "TBEvent", AddressOf(event), 64000, 0)
 
@@ -81,6 +81,8 @@ lastEvent=-1
 nSpills=0
 nEventsInSpill=0
 nEventsTot=0
+lastBoardID=-1
+lastChannel=-1
 
 eventDict={} # dictionary holds events in a spill, use event # as key
 
@@ -118,6 +120,15 @@ while 1:
     pade_hw_counter=int(padeline[4]+padeline[5]+padeline[6],16)
     pade_ch_number=int(padeline[7],16)
     eventNumber = int(padeline[8]+padeline[9],16)
+
+    # new board/channel condition
+    if pade_board_id != lastBoardID or pade_ch_number != lastChannel:
+        lastBoardID=pade_board_id
+        lastChannel=pade_ch_number
+        lastPacket=pade_hw_counter-1
+    if (pade_hw_counter-lastPacket) != 1:
+        logger.Warn("Packet counter error. Board:",pade_board_id)
+    lastPacket=pade_hw_counter
 
     # new event condition in master
     if pade_board_id==MASTERID and eventNumber!=lastEvent: 
@@ -165,7 +176,7 @@ while 1:
     else: # not new event condition
         if not eventNumber in eventDict:
             logger.Warn("Event count mismatch",
-                        "Event",eventNumber,"not present in PADE master. Board",
+                        "Event",eventNumber,"not present in PADE master. Board:",
                         pade_board_id,"event:",eventNumber,
                         "Last in master:",nEventsInSpill-1)
             continue  # skip this extra event in the PADE slave
