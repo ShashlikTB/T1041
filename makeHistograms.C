@@ -2,6 +2,13 @@
 
 using namespace std;
 
+int goodColors[6] = {kBlack,
+		     kRed,
+		     kBlue,
+		     8,
+		     kAzure-2,
+		     kCyan+3};
+
 void makeHistograms(TString input, bool twoPeaksPerTrigger){
 
   if (!TClassTable::GetDict("TBEvent")) {
@@ -30,7 +37,10 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
     }
   }
 
-  for(unsigned int ui = 0; ui < histNames.size(); ui++) peakHeights[ui] = new TH1D(histNames[ui], histNames[ui]+";Peak Height in ADC Counts;Events", 800, 0, 800);
+  for(unsigned int ui = 0; ui < histNames.size(); ui++) {
+    peakHeights[ui] = new TH1D(histNames[ui], histNames[ui]+";Peak Height in ADC Counts;Events", 800, 0, 800);
+    peakHeights[ui]->Sumw2();
+  }
 
   // loop over events
   for (int i=0; i< BeamData->GetEntries(); i++) {
@@ -108,7 +118,7 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
 
 }
 
-void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
+void overlayPlots(vector<TString> fNames, vector<TString> legendTitles, TString legendHeader) {
 
   if(fNames.size() != legendTitles.size()) {
     cout << endl << "Give me the same number of files as titles!" << endl << endl;
@@ -117,6 +127,11 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
 
   if(fNames.size() == 0) {
     cout << endl << "No files, nothing to do!" << endl << endl;
+    return;
+  }
+
+  if(fNames.size() > 6) {
+    cout << endl << "Only 6 colors defined -- don't overlay so many!" << endl << endl;
     return;
   }
 
@@ -136,6 +151,7 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
   }
 
   TLegend * leg = new TLegend(0.50, 0.65, 0.85, 0.85, NULL, "brNDC");
+  if(legendHeader != "") leg->SetHeader(legendHeader);
   leg->SetFillColor(0);
   leg->SetTextSize(0.028);
 
@@ -149,12 +165,14 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles) {
     for(unsigned int uFile = 0; uFile < fNames.size(); uFile++) peakHeights.push_back((TH1D*)files[uFile]->Get(histNames[uChannel]));
     
     peakHeights[0]->SetLineWidth(3);
+    peakHeights[0]->SetLineColor(goodColors[0]);
     peakHeights[0]->Scale(1./peakHeights[0]->Integral());
     peakHeights[0]->Draw();
     leg->AddEntry(peakHeights[0], legendTitles[0]+Form(" (%.0f events)", peakHeights[0]->GetEntries()), "LP");
+
     for(unsigned int uFile = 1; uFile < fNames.size(); uFile++) {
       peakHeights[uFile]->SetLineWidth(3);
-      peakHeights[uFile]->SetLineColor(uFile + 1);
+      peakHeights[uFile]->SetLineColor(goodColors[uFile]);
       peakHeights[uFile]->Scale(1./peakHeights[uFile]->Integral());
       leg->AddEntry(peakHeights[uFile], legendTitles[uFile]+Form(" (%.0f events)", peakHeights[uFile]->GetEntries()), "LP");
       peakHeights[uFile]->Draw("same");

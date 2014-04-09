@@ -15,6 +15,7 @@ void findPeaks() {
   gROOT->SetStyle("Plain");
   gStyle->SetOptStat(0000);
   gStyle->SetOptTitle(1);
+  gStyle->SetOptFit(1);
 
   doFits("hist_20ns_LED_optimizedBias.root");
 
@@ -25,6 +26,10 @@ void findPeaks() {
   TH1D * h_exp_115 = new TH1D("exp_115", "Expected Number of #gammas;Channel;<N_{#gamma}>", 128, 0, 128); h_exp_115->Sumw2();
   TH1D * h_exp_116 = new TH1D("exp_116", "Expected Number of #gammas;Channel;<N_{#gamma}>", 128, 0, 128); h_exp_116->Sumw2();
   
+  TH1D * h_exp_perBoard = new TH1D("all_expected", "Expected Number of #gamma for each SiPM;;<N_{#gamma}>", 4, 0, 128); h_exp_perBoard->Sumw2();
+
+  TH1D * h_temp = new TH1D("temp", "temp", 120, 0, 12); h_temp->Sumw2();
+
   for(int i = 0; i < 128; i++) {
     
     TH1D * h = (TH1D*)f->Get("peakIntegral_"+TString(Form("%d", i)));
@@ -32,7 +37,19 @@ void findPeaks() {
     TF1 * func = new TF1("func", poissonFunc, 0, 12, 2);
     func->SetParameters(500, 1);
 
-    TFitResultPtr fitres = h->Fit(func, "QS");
+    if((i % 32) != 0 || i == 0) h_temp->Add(h);
+    if(i != 0 && (i % 32) == 0) {
+      TFitResultPtr overallres = h_temp->Fit(func, "QS");
+      h_exp_perBoard->SetBinContent((int)(i/32), overallres->Parameter(1));
+      h_exp_perBoard->SetBinError((int)(i/32), overallres->ParError(1));
+      h_temp->Reset();
+      h_temp->Add(h);
+    }
+
+    TF1 * func2 = new TF1("func2", poissonFunc, 0, 12, 2);
+    func2->SetParameters(500, 1);
+
+    TFitResultPtr fitres = h->Fit(func2, "QS");
     
     if(fitres->ParError(1) > fitres->Parameter(1)) continue;
 
@@ -55,24 +72,27 @@ void findPeaks() {
 
   }
 
+  TFitResultPtr overallres = h_temp->Fit(func, "QS");
+  h_exp_perBoard->SetBinContent(4, overallres->Parameter(1));
+  h_exp_perBoard->SetBinError(4, overallres->ParError(1));
+
   TCanvas * canv = new TCanvas("canv", "Plot", 10, 10, 2000, 2000);
   canv->SetLogy(false);
 
   h_exp_112->SetLineWidth(3);
   h_exp_112->SetLineColor(kBlack);
-  h_exp_112->Draw();
 
   h_exp_113->SetLineWidth(3);
   h_exp_113->SetLineColor(kBlue);
-  h_exp_113->Draw("same");
 
   h_exp_115->SetLineWidth(3);
   h_exp_115->SetLineColor(kRed);
-  h_exp_115->Draw("same");
 
   h_exp_116->SetLineWidth(3);
   h_exp_116->SetLineColor(kGreen+3);
-  h_exp_116->Draw("same");
+
+  h_exp_perBoard->SetLineWidth(5);
+  h_exp_perBoard->SetLineColor(kMagenta);
 
   TLegend * leg = new TLegend(0.60, 0.65, 0.85, 0.85, NULL, "brNDC");
   leg->SetFillColor(0);
@@ -86,6 +106,7 @@ void findPeaks() {
   h_exp_113->Draw("same");
   h_exp_115->Draw("same");
   h_exp_116->Draw("same");
+  h_exp_perBoard->Draw("same");
   leg->Draw("same");
 
   canv->SaveAs("expectedPhotons.gif");
@@ -175,6 +196,7 @@ void doFits(TString input) {
     }
 
     for(unsigned int k = 0; k < xpos.size() - 1; k++) {
+
       peakSpacing[i]->Fill(xpos[k+1] - xpos[k]);
 
       if(i < 32) h_spacing_112->Fill(xpos[k+1] - xpos[k]);
@@ -201,19 +223,26 @@ void doFits(TString input) {
   TCanvas * canv = new TCanvas("canv", "Plot", 10, 10, 2000, 2000);
   canv->SetLogy(false);
 
+  TF1 * func_gaus = new TF1("func_gaus", "gaus", 0, 20);
+
+  h_spacing_112->SetLineWidth(3);
+  h_spacing_112->Fit(func_gaus);
   h_spacing_112->Draw();
   canv->SaveAs("spacing_112.gif");
 
+  h_spacing_113->SetLineWidth(3);
   h_spacing_113->Draw();
   canv->SaveAs("spacing_113.gif");
 
+  h_spacing_115->SetLineWidth(3);
   h_spacing_115->Draw();
   canv->SaveAs("spacing_115.gif");
 
+  h_spacing_116->SetLineWidth(3);
   h_spacing_116->Draw();
   canv->SaveAs("spacing_116.gif");
 
-  
+  durp;
 
   out->Write();
   out->Close();

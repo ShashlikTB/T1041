@@ -9,17 +9,22 @@ void createPlots() {
 
   bool twoPeaksPerTrigger = true;
 
-
-  makeHistograms("rec_capture_20140404_185141.root", twoPeaksPerTrigger);
-  makeHistograms("rec_capture_20140404_194302.root", twoPeaksPerTrigger);
+  makeHistograms("0ns_LED_HighEndBias.root", twoPeaksPerTrigger);
+  makeHistograms("0ns_LED_LowEndBias.root", twoPeaksPerTrigger);
+  makeHistograms("0ns_LED_PeakBias.root", twoPeaksPerTrigger);
 
   vector<TString> fNames, legendTitles;
-  fNames.push_back("hist_rec_capture_20140404_185141.root");
-  fNames.push_back("hist_rec_capture_20140404_194302.root");
 
-  legendTitles.push_back("15 ns");
-  legendTitles.push_back("20 ns");
+  fNames.push_back("hist_0ns_LED_HighEndBias.root");
+  fNames.push_back("hist_0ns_LED_LowEndBias.root");
+  fNames.push_back("hist_0ns_LED_PeakBias.root");
 
-  overlayPlots(fNames, legendTitles);
+  legendTitles.push_back("HighEnd Bias");
+  legendTitles.push_back("LowEnd Bias");
+  legendTitles.push_back("Peak Bias");
+
+  TString legendHeader = "No Light";
+
+  overlayPlots(fNames, legendTitles, legendHeader);
 
 }
