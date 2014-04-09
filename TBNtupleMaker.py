@@ -23,6 +23,35 @@ def usage():
     print 
     sys.exit()
 
+logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
+#=======================================================================# 
+#  Read in and characterize the input file                              #
+#=======================================================================#
+opts, args = getopt.getopt(sys.argv[1:], "n:")
+
+for o, a in opts:
+     if o == "-n":
+         NEventLimit=int(a)
+         logger.Info("Stop after maximum of",NEventLimit,"events or 1 spill")
+
+if len(args)==0: usage()
+padeDat=args[0]
+outFile=padeDat.replace(".txt",".root")
+if padeDat.endswith("bz2"): 
+    fPade = bz2.BZ2File(padeDat,"r")
+    outFile=outFile.replace(".bz2","")
+else : fPade = open(padeDat, "r")
+
+
+haveWC=False
+if len(args)>1: 
+    wcDat=args[1]
+    fWC =  open(wcDat, "r")
+    haveWC=True
+else:
+    logger.Info("No WC file provided")
+
+
 #=======================================================================# 
 #  Declare data containers                                              #
 #=======================================================================#
@@ -33,44 +62,19 @@ gROOT.ProcessLine(".L TBEvent.cc+")
 #=======================================================================#
 event = TBEvent()
 padeChannel = PadeChannel()
-
 #=======================================================================# 
 #  Declare new file and tree with branches                              #
 #=======================================================================#
-fout = TFile("outputNtuple.root", "recreate")
+fout = TFile(outFile, "recreate")
+logger.Info("Witing to output file",outFile)
 BeamTree = TTree("BeamData", "BeamData")
 BeamTree.Branch("event", "TBEvent", AddressOf(event), 64000, 0)
 
 def fillTree():
-    INFO("Write spill",the_spill_number)
+    logger.Info("Write spill",the_spill_number)
     for ievt in range(len(eventDict)):
         event.cp(eventDict[ievt])
         BeamTree.Fill()
-
-
-#=======================================================================# 
-#  Read in and characterize the input file                              #
-#=======================================================================#
-opts, args = getopt.getopt(sys.argv[1:], "n:")
-
-for o, a in opts:
-     if o == "-n":
-         NEventLimit=int(a)
-         INFO("Stop after maximum of",NEventLimit,"events")
-
-if len(args)==0: usage()
-padeDat=args[0]
-if padeDat.endswith("bz2") : fPade = bz2.BZ2File(padeDat,"r")
-else : fPade = open(padeDat, "r")
-
-haveWC=False
-if len(args)>1: 
-    wcDat=args[1]
-    fWC =  open(wcDat, "r")
-    haveWC=True
-else:
-    INFO("No WC file provided")
-
 
 
 lastEvent=-1
@@ -93,7 +97,7 @@ while 1:
         if len(eventDict)>0:   # fill events from last spill into Tree
             fillTree()
             if (nEventsTot>=NEventLimit): break
-        INFO(padeline)
+        logger.Info(padeline)
         eventDict={}
         lastEvent=-1
         nEventsInSpill=0
@@ -115,7 +119,7 @@ while 1:
     pade_ch_number=int(padeline[7],16)
     eventNumber = int(padeline[8]+padeline[9],16)
 
-    # new event condition
+    # new event condition in master
     if pade_board_id==MASTERID and eventNumber!=lastEvent: 
         lastEvent=eventNumber    # last event in master
         nEventsTot=nEventsTot+1
@@ -160,24 +164,32 @@ while 1:
 
     else: # not new event condition
         if not eventNumber in eventDict:
-            if DEBUG_LEVEL>0:
-                WARN("Event not found in PADE master=> board",pade_board_id,"event:",eventNumber)
+            logger.Warn("Event count mismatch",
+                        "Event",eventNumber,"not present in PADE master. Board",
+                        pade_board_id,"event:",eventNumber,
+                        "Last in master:",nEventsInSpill-1)
             continue  # skip this extra event in the PADE slave
 
     # continuation of channel line unpacking                 
     waveform=(padeline[10:])    
     nsamples=len(waveform)        # need error checking here
     if nsamples != padeChannel.__SAMPLES():
-        WARNx(5,"Incorrect number of ADC samples, expected",
-             padeChannel.__SAMPLES(),"found:",nsamples)
+        logger.Warn("Incorrect number of ADC samples, expected",
+                    padeChannel.__SAMPLES(),"found:",nsamples)
     samples=array("i")
     for val in waveform:
         samples.append(int(val,16))
 
     eventDict[eventNumber].FillPadeChannel(pade_ts, pade_transfer_size, pade_board_id, 
-                                           pade_hw_counter, pade_ch_number, eventNumber, samples)
-    if DEBUG_LEVEL>1: eventDict[eventNumber].GetPadeChan(nPadeChannels).Dump()
-
+                                           pade_hw_counter, pade_ch_number, 
+                                           eventNumber, samples)
+    if DEBUG_LEVEL>1: eventDict[eventNumber].GetLastPadeChan().Dump()
+    pade_ts=0
+    pade_transfer_size=0
+    pade_board_id=0
+    pade_hw_counter=0 
+    pade_ch_number=0
+    eventNumber=0
 
             
 #=======================================================================# 
@@ -189,8 +201,10 @@ BeamTree.Write()
 print "closing file: outputNtuple.root"
 fout.Close() 
 
+print
+logger.Info("Summary: nSpills = "+str(nSpills)+" Total Events= "+str(nEventsTot))
 
-INFO("Summary: nSpills = "+str(nSpills)+" Total Events= "+str(nEventsTot))
+logger.Summary()
 
 print "Exiting" 
 exit(0)

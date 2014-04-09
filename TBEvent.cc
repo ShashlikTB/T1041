@@ -45,12 +45,12 @@ void TBEvent::cp(const TBEvent &e){
 
 
 void PadeChannel::Dump() const{
-  cout << "Header ==> timestamp: " << _ts << (hex) << " size: " 
+  cout << "Header ==> timestamp: " <<  _ts << " size: " 
        << _transfer_size << " board: " << _board_id << " xfer#: " 
        << _hw_counter << " ch#: " <<  _ch_number << " event#: " 
-       << _eventnum << endl << "samples=> ";
+       << _eventnum << endl << "samples=> " << (hex);
   for (int i=0; i<N_PADE_SAMPLES; i++) cout << _wform[i] << " ";
-  cout << endl;
+  cout << (dec) << endl;
 }
 
 

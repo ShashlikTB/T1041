@@ -62,6 +62,7 @@ public:
   // getters
   Int_t NPadeChan() const {return padeChannel.size();}
   PadeChannel GetPadeChan(const int idx) const {return padeChannel[idx];}
+  PadeChannel GetLastPadeChan() const {return padeChannel.back();}
   Int_t GetSpillNumber() const {return spillNumber;}
   ULong64_t GetPCTime() const {return pcTime;}
   ULong64_t GetSpillTime() const {return spillTime;}
