@@ -8,6 +8,8 @@
 #include "TBEvent.h"
 
 using namespace std;
+
+
 void TBEvent::ResetData(){
   padeChannel.clear();
   wc.clear();
@@ -52,7 +54,6 @@ void PadeChannel::Dump() const{
   for (int i=0; i<N_PADE_SAMPLES; i++) cout << _wform[i] << " ";
   cout << (dec) << endl;
 }
-
 
 void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size, 
 		      UShort_t board_id, UInt_t hw_counter, 

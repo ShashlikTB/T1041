@@ -9,6 +9,8 @@ const Int_t MAX_WC_HITS=512;         // n.b. may be too small
 class PadeChannel : public TObject {
   ClassDef(PadeChannel,1); 
  public:
+  PadeChannel() {}; 
+
   void Fill(ULong64_t ts, UShort_t transfer_size, 
 	    UShort_t  board_id, UInt_t hw_counter, 
 	    UInt_t ch_number,  UInt_t eventnum, Int_t *wform);
