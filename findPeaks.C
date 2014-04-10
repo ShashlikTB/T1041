@@ -211,8 +211,8 @@ void doFits(TString input) {
   TFile * out = new TFile("peakSpacings_"+input, "RECREATE");
   
   for(int i = 0; i < 128; i++) {
-    //peakSpacing[i]->Write();
-    //peakIntegral[i]->Write();
+    peakSpacing[i]->Write();
+    peakIntegral[i]->Write();
   }
 
   h_spacing_112->Write();
