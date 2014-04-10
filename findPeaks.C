@@ -19,7 +19,7 @@ void findPeaks(TString input) {
 
   doFits(input);
 
-  TFile * f = new TFile("peakSpacings"+input, "READ");
+  TFile * f = new TFile("peakSpacings_"+input, "READ");
 
   TH1D * h_exp_112 = new TH1D("exp_112", "Expected Number of #gammas;Channel;<N_{#gamma}>", 128, 0, 128); h_exp_112->Sumw2();
   TH1D * h_exp_113 = new TH1D("exp_113", "Expected Number of #gammas;Channel;<N_{#gamma}>", 128, 0, 128); h_exp_113->Sumw2();
@@ -208,11 +208,11 @@ void doFits(TString input) {
 
   }
 
-  TFile * out = new TFile("peakSpacings"+input, "RECREATE");
+  TFile * out = new TFile("peakSpacings_"+input, "RECREATE");
   
   for(int i = 0; i < 128; i++) {
-    peakSpacing[i]->Write();
-    peakIntegral[i]->Write();
+    //peakSpacing[i]->Write();
+    //peakIntegral[i]->Write();
   }
 
   h_spacing_112->Write();
