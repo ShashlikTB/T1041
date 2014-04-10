@@ -8,7 +8,7 @@ Double_t poissonFunc(Double_t * x, Double_t * par) {
   return par[0] * TMath::Poisson(x[0], par[1]);
 }
 
-void findPeaks() {
+void findPeaks(TString input) {
 
   gROOT->Reset();
   gROOT->SetBatch(true);
@@ -17,9 +17,9 @@ void findPeaks() {
   gStyle->SetOptTitle(1);
   gStyle->SetOptFit(1);
 
-  doFits("hist_20ns_LED_optimizedBias.root");
+  doFits(input);
 
-  TFile * f = new TFile("peakSpacings.root", "READ");
+  TFile * f = new TFile("peakSpacings"+input, "READ");
 
   TH1D * h_exp_112 = new TH1D("exp_112", "Expected Number of #gammas;Channel;<N_{#gamma}>", 128, 0, 128); h_exp_112->Sumw2();
   TH1D * h_exp_113 = new TH1D("exp_113", "Expected Number of #gammas;Channel;<N_{#gamma}>", 128, 0, 128); h_exp_113->Sumw2();
@@ -208,7 +208,7 @@ void doFits(TString input) {
 
   }
 
-  TFile * out = new TFile("peakSpacings.root", "RECREATE");
+  TFile * out = new TFile("peakSpacings"+input, "RECREATE");
   
   for(int i = 0; i < 128; i++) {
     peakSpacing[i]->Write();
