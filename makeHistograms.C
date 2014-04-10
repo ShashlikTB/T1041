@@ -23,6 +23,12 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
   vector<TH1D*> peakHeights;
   peakHeights.resize(128);
 
+  vector<TH1D*> firstPeakHeights;
+  firstPeakHeights.resize(128);
+
+  vector<TH1D*> secondPeakHeights;
+  secondPeakHeights.resize(128);
+
   for(int i = 0; i < 4; i++) {
     for(int j = 0; j < 32; j++) {
       sprintf(char, "peakHeight_board-%d_chan-%d", boardIDs[i], j);
@@ -33,6 +39,12 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
   for(unsigned int ui = 0; ui < histNames.size(); ui++) {
     peakHeights[ui] = new TH1D(histNames[ui], histNames[ui]+";Peak Height in ADC Counts;Events", 800, 0, 800);
     peakHeights[ui]->Sumw2();
+
+    firstPeakHeights[ui] = new TH1D("first_"+histNames[ui], "first_"+histNames[ui]+";Peak Height in ADC Counts;Events", 800, 0, 800);
+    firstPeakHeights[ui]->Sumw2();
+
+    secondPeakHeights[ui] = new TH1D("second_"+histNames[ui], "second_"+histNames[ui]+";Peak Height in ADC Counts;Events", 800, 0, 800);
+    secondPeakHeights[ui]->Sumw2();
   }
 
   // loop over events
@@ -89,14 +101,10 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
       }
   
       peakHeights[j]->Fill(firstPeak);
-      if(twoPeaksPerTrigger) peakHeights[j]->Fill(secondPeak);
-
-      for(int k = 0; k < 4; k++) {
-	if(boardIDs[k] == event->GetPadeChan(j).GetBoardID()) {
-	  int pos = k*32 + j;
-	  
-	  break;
-	}
+      firstPeakHeights[j]->Fill(firstPeak);
+      if(twoPeaksPerTrigger) {
+	peakHeights[j]->Fill(secondPeak);
+	secondPeakHeights[j]->Fill(secondPeak);
       }
 
     } // pade channels
@@ -105,7 +113,11 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
 
   TFile * out = new TFile("hist_"+input, "RECREATE");
 
-  for(unsigned int ui = 0; ui < peakHeights.size(); ui++) peakHeights[ui]->Write();
+  for(unsigned int ui = 0; ui < peakHeights.size(); ui++) {
+    peakHeights[ui]->Write();
+    firstPeakHeights[ui]->Write();
+    secondPeakHeights[ui]->Write();
+  }
 
   out->Write();
   out->Close();

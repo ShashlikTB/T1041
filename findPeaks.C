@@ -242,8 +242,6 @@ void doFits(TString input) {
   h_spacing_116->Draw();
   canv->SaveAs("spacing_116.gif");
 
-  durp;
-
   out->Write();
   out->Close();
 
