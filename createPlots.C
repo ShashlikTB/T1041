@@ -10,19 +10,19 @@ void createPlots() {
 
   bool twoPeaksPerTrigger = true;
 
-  makeHistograms("0ns_LED_HighEndBias.root", twoPeaksPerTrigger);
-  makeHistograms("0ns_LED_LowEndBias.root", twoPeaksPerTrigger);
-  makeHistograms("0ns_LED_PeakBias.root", twoPeaksPerTrigger);
+  makeHistograms("0ns_HighEndBias.root", twoPeaksPerTrigger);
+  makeHistograms("0ns_LowEndBias.root", twoPeaksPerTrigger);
+  makeHistograms("0ns_PeakBias.root", twoPeaksPerTrigger);
 
-  makeHistograms("20ns_LED_HighEndBias.root", twoPeaksPerTrigger);
-  makeHistograms("20ns_LED_LowEndBias.root", twoPeaksPerTrigger);
-  makeHistograms("20ns_LED_PeakBias.root", twoPeaksPerTrigger);
+  makeHistograms("20ns_HighEndBias.root", twoPeaksPerTrigger);
+  makeHistograms("20ns_LowEndBias.root", twoPeaksPerTrigger);
+  makeHistograms("20ns_PeakBias.root", twoPeaksPerTrigger);
 
   vector<TString> fNames, legendTitles;
 
-  fNames.push_back("hist_0ns_LED_HighEndBias.root");
-  fNames.push_back("hist_0ns_LED_LowEndBias.root");
-  fNames.push_back("hist_0ns_LED_PeakBias.root");
+  fNames.push_back("hist_0ns_HighEndBias.root");
+  fNames.push_back("hist_0ns_LowEndBias.root");
+  fNames.push_back("hist_0ns_PeakBias.root");
 
   legendTitles.push_back("HighEnd Bias");
   legendTitles.push_back("LowEnd Bias");
@@ -33,5 +33,7 @@ void createPlots() {
   overlayPlots(fNames, legendTitles, legendHeader);
 
   for(unsigned int i = 0; i < fNames.size(); i++) findPeaks(fNames[i]);
+
+  calibrationData();
 
 }

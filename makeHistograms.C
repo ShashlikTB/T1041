@@ -204,4 +204,259 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles, TString 
 
 }
 
-      
+void plotCalibration(int board) {
+
+  TFile * f0_low = new TFile("peakSpacings_hist_0ns_LowEndBias", "READ");
+  TFile * f0_peak = new TFile("peakSpacings_hist_0ns_PeakBias", "READ");
+  TFile * f0_high = new TFile("peakSpacings_hist_0ns_HighEndBias", "READ");
+
+  TFile * f20_low = new TFile("peakSpacings_hist_20ns_LowEndBias", "READ");
+  TFile * f20_peak = new TFile("peakSpacings_hist_20ns_PeakBias", "READ");
+  TFile * f20_high = new TFile("peakSpacings_hist_20ns_HighEndBias", "READ");
+
+  TTree * tree20_low = (TTree*)f20_low->Get("tree");
+  TTree * tree20_peak = (TTree*)f20_peak->Get("tree");
+  TTree * tree20_high = (TTree*)f20_high->Get("tree");
+
+  TTree * tree0_low = (TTree*)f0_low->Get("tree");
+  TTree * tree0_peak = (TTree*)f0_peak->Get("tree");
+  TTree * tree0_high = (TTree*)f0_high->Get("tree");
+
+  Float_t spacing01_20, spacing12_20, spacing23_20;
+  Float_t spacing01_0, spacing12_0, spacing23_0;
+
+  tree20_low->SetBranchAddress("boardID", &boardID_20);
+  tree20_low->SetBranchAddress("npeaks", &npeaks_20);
+  tree20_low->SetBranchAddress("channel", &channel_20);
+  tree20_low->SetBranchAddress("spacing01", &spacing01_20);
+  tree20_low->SetBranchAddress("spacing12", &spacing12_20);
+  tree20_low->SetBranchAddress("spacing23", &spacing23_20);
+  tree20_peak->SetBranchAddress("boardID", &boardID_20);
+  tree20_peak->SetBranchAddress("npeaks", &npeaks_20);
+  tree20_peak->SetBranchAddress("channel", &channel_20);
+  tree20_peak->SetBranchAddress("spacing01", &spacing01_20);
+  tree20_peak->SetBranchAddress("spacing12", &spacing12_20);
+  tree20_peak->SetBranchAddress("spacing23", &spacing23_20);
+  tree20_high->SetBranchAddress("boardID", &boardID_20);
+  tree20_high->SetBranchAddress("npeaks", &npeaks_20);
+  tree20_high->SetBranchAddress("channel", &channel_20);
+  tree20_high->SetBranchAddress("spacing01", &spacing01_20);
+  tree20_high->SetBranchAddress("spacing12", &spacing12_20);
+  tree20_high->SetBranchAddress("spacing23", &spacing23_20);
+
+  tree0_low->SetBranchAddress("boardID", &boardID_0);
+  tree0_low->SetBranchAddress("npeaks", &npeaks_0);
+  tree0_low->SetBranchAddress("channel", &channel_0);
+  tree0_low->SetBranchAddress("spacing01", &spacing01_0);
+  tree0_low->SetBranchAddress("spacing12", &spacing12_0);
+  tree0_low->SetBranchAddress("spacing23", &spacing23_0);
+  tree0_peak->SetBranchAddress("boardID", &boardID_0);
+  tree0_peak->SetBranchAddress("npeaks", &npeaks_0);
+  tree0_peak->SetBranchAddress("channel", &channel_0);
+  tree0_peak->SetBranchAddress("spacing01", &spacing01_0);
+  tree0_peak->SetBranchAddress("spacing12", &spacing12_0);
+  tree0_peak->SetBranchAddress("spacing23", &spacing23_0);
+  tree0_high->SetBranchAddress("boardID", &boardID_0);
+  tree0_high->SetBranchAddress("npeaks", &npeaks_0);
+  tree0_high->SetBranchAddress("channel", &channel_0);
+  tree0_high->SetBranchAddress("spacing01", &spacing01_0);
+  tree0_high->SetBranchAddress("spacing12", &spacing12_0);
+  tree0_high->SetBranchAddress("spacing23", &spacing23_0);
+  
+  TFile * out = new TFile("calibration_"+TString(Form("%d", board))+".root", "RECREATE");
+
+  TH1D * h_seen_20_low_01 = new TH1D("seen_20_low_01", "seen_20_low_01", 100, 0, 100);
+  TH1D * h_seen_20_low_12 = new TH1D("seen_20_low_12", "seen_20_low_12", 100, 0, 100);
+  TH1D * h_seen_20_low_23 = new TH1D("seen_20_low_23", "seen_20_low_23", 100, 0, 100);
+  TH1D * h_notSeen_20_low_01 = new TH1D("notSeen_20_low_01", "notSeen_20_low_01", 100, 0, 100);
+  TH1D * h_notSeen_20_low_12 = new TH1D("notSeen_20_low_12", "notSeen_20_low_12", 100, 0, 100);
+  TH1D * h_notSeen_20_low_23 = new TH1D("notSeen_20_low_23", "notSeen_20_low_23", 100, 0, 100);
+
+  TH1D * h_seen_20_peak_01 = new TH1D("seen_20_peak_01", "seen_20_peak_01", 100, 0, 100);
+  TH1D * h_seen_20_peak_12 = new TH1D("seen_20_peak_12", "seen_20_peak_12", 100, 0, 100);
+  TH1D * h_seen_20_peak_23 = new TH1D("seen_20_peak_23", "seen_20_peak_23", 100, 0, 100);
+  TH1D * h_notSeen_20_peak_01 = new TH1D("notSeen_20_peak_01", "notSeen_20_peak_01", 100, 0, 100);
+  TH1D * h_notSeen_20_peak_12 = new TH1D("notSeen_20_peak_12", "notSeen_20_peak_12", 100, 0, 100);
+  TH1D * h_notSeen_20_peak_23 = new TH1D("notSeen_20_peak_23", "notSeen_20_peak_23", 100, 0, 100);
+
+  TH1D * h_seen_20_high_01 = new TH1D("seen_20_high_01", "seen_20_high_01", 100, 0, 100);
+  TH1D * h_seen_20_high_12 = new TH1D("seen_20_high_12", "seen_20_high_12", 100, 0, 100);
+  TH1D * h_seen_20_high_23 = new TH1D("seen_20_high_23", "seen_20_high_23", 100, 0, 100);
+  TH1D * h_notSeen_20_high_01 = new TH1D("notSeen_20_high_01", "notSeen_20_high_01", 100, 0, 100);
+  TH1D * h_notSeen_20_high_12 = new TH1D("notSeen_20_high_12", "notSeen_20_high_12", 100, 0, 100);
+  TH1D * h_notSeen_20_high_23 = new TH1D("notSeen_20_high_23", "notSeen_20_high_23", 100, 0, 100);
+
+  TH1D * h_seen_0_low_01 = new TH1D("seen_0_low_01", "seen_0_low_01", 100, 0, 100);
+  TH1D * h_seen_0_low_12 = new TH1D("seen_0_low_12", "seen_0_low_12", 100, 0, 100);
+  TH1D * h_seen_0_low_23 = new TH1D("seen_0_low_23", "seen_0_low_23", 100, 0, 100);
+  TH1D * h_notSeen_0_low_01 = new TH1D("notSeen_0_low_01", "notSeen_0_low_01", 100, 0, 100);
+  TH1D * h_notSeen_0_low_12 = new TH1D("notSeen_0_low_12", "notSeen_0_low_12", 100, 0, 100);
+  TH1D * h_notSeen_0_low_23 = new TH1D("notSeen_0_low_23", "notSeen_0_low_23", 100, 0, 100);
+
+  TH1D * h_seen_0_peak_01 = new TH1D("seen_0_peak_01", "seen_0_peak_01", 100, 0, 100);
+  TH1D * h_seen_0_peak_12 = new TH1D("seen_0_peak_12", "seen_0_peak_12", 100, 0, 100);
+  TH1D * h_seen_0_peak_23 = new TH1D("seen_0_peak_23", "seen_0_peak_23", 100, 0, 100);
+  TH1D * h_notSeen_0_peak_01 = new TH1D("notSeen_0_peak_01", "notSeen_0_peak_01", 100, 0, 100);
+  TH1D * h_notSeen_0_peak_12 = new TH1D("notSeen_0_peak_12", "notSeen_0_peak_12", 100, 0, 100);
+  TH1D * h_notSeen_0_peak_23 = new TH1D("notSeen_0_peak_23", "notSeen_0_peak_23", 100, 0, 100);
+
+  TH1D * h_seen_0_high_01 = new TH1D("seen_0_high_01", "seen_0_high_01", 100, 0, 100);
+  TH1D * h_seen_0_high_12 = new TH1D("seen_0_high_12", "seen_0_high_12", 100, 0, 100);
+  TH1D * h_seen_0_high_23 = new TH1D("seen_0_high_23", "seen_0_high_23", 100, 0, 100);
+  TH1D * h_notSeen_0_high_01 = new TH1D("notSeen_0_high_01", "notSeen_0_high_01", 100, 0, 100);
+  TH1D * h_notSeen_0_high_12 = new TH1D("notSeen_0_high_12", "notSeen_0_high_12", 100, 0, 100);
+  TH1D * h_notSeen_0_high_23 = new TH1D("notSeen_0_high_23", "notSeen_0_high_23", 100, 0, 100);
+
+  TH1D * h_byChannel_20_low_01 = new TH2D("byChannel_20_low_01", "byChannel_20_low_01", 32, 0, 32);
+  TH1D * h_byChannel_20_low_12 = new TH2D("byChannel_20_low_12", "byChannel_20_low_12", 32, 0, 32);
+  TH1D * h_byChannel_20_low_23 = new TH2D("byChannel_20_low_23", "byChannel_20_low_23", 32, 0, 32);
+  TH1D * h_byChannel_20_peak_01 = new TH2D("byChannel_20_peak_01", "byChannel_20_peak_01", 32, 0, 32);
+  TH1D * h_byChannel_20_peak_12 = new TH2D("byChannel_20_peak_12", "byChannel_20_peak_12", 32, 0, 32);
+  TH1D * h_byChannel_20_peak_23 = new TH2D("byChannel_20_peak_23", "byChannel_20_peak_23", 32, 0, 32);
+  TH1D * h_byChannel_20_high_01 = new TH2D("byChannel_20_high_01", "byChannel_20_high_01", 32, 0, 32);
+  TH1D * h_byChannel_20_high_12 = new TH2D("byChannel_20_high_12", "byChannel_20_high_12", 32, 0, 32);
+  TH1D * h_byChannel_20_high_23 = new TH2D("byChannel_20_high_23", "byChannel_20_high_23", 32, 0, 32);
+
+  TH1D * h_byChannel_0_low_01 = new TH2D("byChannel_0_low_01", "byChannel_0_low_01", 32, 0, 32);
+  TH1D * h_byChannel_0_low_12 = new TH2D("byChannel_0_low_12", "byChannel_0_low_12", 32, 0, 32);
+  TH1D * h_byChannel_0_low_23 = new TH2D("byChannel_0_low_23", "byChannel_0_low_23", 32, 0, 32);
+  TH1D * h_byChannel_0_peak_01 = new TH2D("byChannel_0_peak_01", "byChannel_0_peak_01", 32, 0, 32);
+  TH1D * h_byChannel_0_peak_12 = new TH2D("byChannel_0_peak_12", "byChannel_0_peak_12", 32, 0, 32);
+  TH1D * h_byChannel_0_peak_23 = new TH2D("byChannel_0_peak_23", "byChannel_0_peak_23", 32, 0, 32);
+  TH1D * h_byChannel_0_high_01 = new TH2D("byChannel_0_high_01", "byChannel_0_high_01", 32, 0, 32);
+  TH1D * h_byChannel_0_high_12 = new TH2D("byChannel_0_high_12", "byChannel_0_high_12", 32, 0, 32);
+  TH1D * h_byChannel_0_high_23 = new TH2D("byChannel_0_high_23", "byChannel_0_high_23", 32, 0, 32);
+
+  for(int i = 0; i < tree0_low->GetEntries(); i++) {
+    tree0_low->GetEntry(i);
+  
+    if(boardID_0 != board) continue;
+
+    for(int j = 0; j < tree20_low->GetEntries(); j++) {
+      tree20_low->GetEntry(j);
+
+      if(boardID_20 != boardID_0) continue;
+      if(channel_20 != channel_0) continue;
+
+      h_byChannel_20_low_01->SetBinContent(channel_20 + 1, spacing01_20);
+      h_byChannel_20_low_12->SetBinContent(channel_20 + 1, spacing12_20);
+      h_byChannel_20_low_23->SetBinContent(channel_20 + 1, spacing23_20);
+
+      h_byChannel_0_low_01->SetBinContent(channel_0 + 1, spacing01_0);
+      h_byChannel_0_low_12->SetBinContent(channel_0 + 1, spacing12_0);
+      h_byChannel_0_low_23->SetBinContent(channel_0 + 1, spacing23_0);
+
+      if(npeaks_0 <= 1) {
+        h_notSeen_20_low_01->Fill(spacing01_20);
+        h_notSeen_20_low_12->Fill(spacing12_20);
+        h_notSeen_20_low_23->Fill(spacing23_20);
+  
+        h_notSeen_0_low_01->Fill(spacing01_0);
+        h_notSeen_0_low_12->Fill(spacing12_0);
+        h_notSeen_0_low_23->Fill(spacing23_0);
+      }
+      else {
+        h_seen_20_low_01->Fill(spacing01_20);
+        h_seen_20_low_12->Fill(spacing12_20);
+        h_seen_20_low_23->Fill(spacing23_20);
+
+        h_seen_0_low_01->Fill(spacing01_0);
+        h_seen_0_low_12->Fill(spacing12_0);
+        h_seen_0_low_23->Fill(spacing23_0);
+      }
+  
+      break;
+    }
+
+  }
+
+  for(int i = 0; i < tree0_peak->GetEntries(); i++) {
+    tree0_peak->GetEntry(i);
+  
+    if(boardID_0 != board) continue;
+
+    for(int j = 0; j < tree20_peak->GetEntries(); j++) {
+      tree20_peak->GetEntry(j);
+
+      if(boardID_20 != boardID_0) continue;
+      if(channel_20 != channel_0) continue;
+
+      h_byChannel_20_peak_01->SetBinContent(channel_20 + 1, spacing01_20);
+      h_byChannel_20_peak_12->SetBinContent(channel_20 + 1, spacing12_20);
+      h_byChannel_20_peak_23->SetBinContent(channel_20 + 1, spacing23_20);
+
+      h_byChannel_0_peak_01->SetBinContent(channel_0 + 1, spacing01_0);
+      h_byChannel_0_peak_12->SetBinContent(channel_0 + 1, spacing12_0);
+      h_byChannel_0_peak_23->SetBinContent(channel_0 + 1, spacing23_0);
+
+      if(npeaks_0 <= 1) {
+        h_notSeen_20_peak_01->Fill(spacing01_20);
+        h_notSeen_20_peak_12->Fill(spacing12_20);
+        h_notSeen_20_peak_23->Fill(spacing23_20);
+  
+        h_notSeen_0_peak_01->Fill(spacing01_0);
+        h_notSeen_0_peak_12->Fill(spacing12_0);
+        h_notSeen_0_peak_23->Fill(spacing23_0);
+      }
+      else {
+        h_seen_20_peak_01->Fill(spacing01_20);
+        h_seen_20_peak_12->Fill(spacing12_20);
+        h_seen_20_peak_23->Fill(spacing23_20);
+
+        h_seen_0_peak_01->Fill(spacing01_0);
+        h_seen_0_peak_12->Fill(spacing12_0);
+        h_seen_0_peak_23->Fill(spacing23_0);
+      }
+  
+      break;
+    }
+
+  }
+  
+  for(int i = 0; i < tree0_high->GetEntries(); i++) {
+    tree0_high->GetEntry(i);
+  
+    if(boardID_0 != board) continue;
+
+    for(int j = 0; j < tree20_high->GetEntries(); j++) {
+      tree20_high->GetEntry(j);
+
+      if(boardID_20 != boardID_0) continue;
+      if(channel_20 != channel_0) continue;
+
+      h_byChannel_20_high_01->SetBinContent(channel_20 + 1, spacing01_20);
+      h_byChannel_20_high_12->SetBinContent(channel_20 + 1, spacing12_20);
+      h_byChannel_20_high_23->SetBinContent(channel_20 + 1, spacing23_20);
+
+      h_byChannel_0_high_01->SetBinContent(channel_0 + 1, spacing01_0);
+      h_byChannel_0_high_12->SetBinContent(channel_0 + 1, spacing12_0);
+      h_byChannel_0_high_23->SetBinContent(channel_0 + 1, spacing23_0);
+
+      if(npeaks_0 <= 1) {
+        h_notSeen_20_high_01->Fill(spacing01_20);
+        h_notSeen_20_high_12->Fill(spacing12_20);
+        h_notSeen_20_high_23->Fill(spacing23_20);
+  
+        h_notSeen_0_high_01->Fill(spacing01_0);
+        h_notSeen_0_high_12->Fill(spacing12_0);
+        h_notSeen_0_high_23->Fill(spacing23_0);
+      }
+      else {
+        h_seen_20_high_01->Fill(spacing01_20);
+        h_seen_20_high_12->Fill(spacing12_20);
+        h_seen_20_high_23->Fill(spacing23_20);
+
+        h_seen_0_high_01->Fill(spacing01_0);
+        h_seen_0_high_12->Fill(spacing12_0);
+        h_seen_0_high_23->Fill(spacing23_0);
+      }
+  
+      break;
+    }
+
+  }
+
+  out->Write();
+  out->Close();
+
+}
