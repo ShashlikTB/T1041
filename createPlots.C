@@ -1,4 +1,5 @@
 #include "makeHistograms.C"
+#include "findPeaks.C"
 
 void createPlots() {
 
@@ -13,6 +14,10 @@ void createPlots() {
   makeHistograms("0ns_LED_LowEndBias.root", twoPeaksPerTrigger);
   makeHistograms("0ns_LED_PeakBias.root", twoPeaksPerTrigger);
 
+  makeHistograms("20ns_LED_HighEndBias.root", twoPeaksPerTrigger);
+  makeHistograms("20ns_LED_LowEndBias.root", twoPeaksPerTrigger);
+  makeHistograms("20ns_LED_PeakBias.root", twoPeaksPerTrigger);
+
   vector<TString> fNames, legendTitles;
 
   fNames.push_back("hist_0ns_LED_HighEndBias.root");
@@ -26,5 +31,7 @@ void createPlots() {
   TString legendHeader = "No Light";
 
   overlayPlots(fNames, legendTitles, legendHeader);
+
+  for(unsigned int i = 0; i < fNames.size(); i++) findPeaks(fNames[i]);
 
 }

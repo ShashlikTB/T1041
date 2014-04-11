@@ -122,10 +122,20 @@ void doFits(TString input) {
   char char[100];
   int boardIDs[4] = {112, 113, 115, 116};
 
-  TH1D * h_spacing_112 = new TH1D("spacing_112", "Peak spacing;ADC Counts;Events", 100, 0, 100);
-  TH1D * h_spacing_113 = new TH1D("spacing_113", "Peak spacing;ADC Counts;Events", 100, 0, 100);
-  TH1D * h_spacing_115 = new TH1D("spacing_115", "Peak spacing;ADC Counts;Events", 100, 0, 100);
-  TH1D * h_spacing_116 = new TH1D("spacing_116", "Peak spacing;ADC Counts;Events", 100, 0, 100);
+  TH1D * h_spacing_112_01 = new TH1D("spacing_112_01", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+  TH1D * h_spacing_113_01 = new TH1D("spacing_113_01", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+  TH1D * h_spacing_115_01 = new TH1D("spacing_115_01", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+  TH1D * h_spacing_116_01 = new TH1D("spacing_116_01", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+
+  TH1D * h_spacing_112_12 = new TH1D("spacing_112_12", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+  TH1D * h_spacing_113_12 = new TH1D("spacing_113_12", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+  TH1D * h_spacing_115_12 = new TH1D("spacing_115_12", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+  TH1D * h_spacing_116_12 = new TH1D("spacing_116_12", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+
+  TH1D * h_spacing_112_23 = new TH1D("spacing_112_23", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+  TH1D * h_spacing_113_23 = new TH1D("spacing_113_23", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+  TH1D * h_spacing_115_23 = new TH1D("spacing_115_23", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
+  TH1D * h_spacing_116_23 = new TH1D("spacing_116_23", "Peak spacing 1 to 2;ADC Counts;Events", 50, 0, 50);
 
   vector<TString> histNames;
 
@@ -155,11 +165,27 @@ void doFits(TString input) {
     peakIntegral[ui]->Sumw2();
   }
 
+  Int_t boardID_, channel_, npeaks_;
+  Float_t spacing01_, spacing12_, spacing23_;
+  Float_t occupancy0_, occupancy1_, occupancy2_, occupancy3_;
+
+  TTree * tree = new TTree("tree", "tree");
+  tree->Branch("boardID", &boardID_, "boardID_/I");
+  tree->Branch("channel", &channel_, "channel_/I");
+  tree->Branch("npeaks", &npeaks_, "npeaks_/I");
+  tree->Branch("spacing01", &spacing01_, "spacing01_/F");
+  tree->Branch("spacing12", &spacing12_, "spacing12_/F");
+  tree->Branch("spacing23", &spacing23_, "spacing23_/F");
+  tree->Branch("occupancy0", &occupancy0_, "occupancy0_/F");
+  tree->Branch("occupancy1", &occupancy1_, "occupancy1_/F");
+  tree->Branch("occupancy2", &occupancy2_, "occupancy2_/F");
+  tree->Branch("occupancy3", &occupancy3_, "occupancy3_/F");
+
   for(int i = 0; i < 128; i++) {
 
     TSpectrum * s = new TSpectrum();
 
-    int npeaks = s->Search(peakHeights[i], 2, "nodraw", 0.05);
+    int npeaks = s->Search(peakHeights[i], 2, "nodraw", 0.005);
     Float_t * xpeaks = s->GetPositionX();
 
     vector<float> xpos;
@@ -195,14 +221,49 @@ void doFits(TString input) {
 
     }
 
+    if(i < 32) boardID_ = 112;
+    else if(i < 64) boardID_ = 113;
+    else if(i < 96) boardID_ = 115;
+    else boardID_ = 116;
+
+    channel_ = (i % 32);
+    npeaks_ = xpos.size();
+
+    spacing01_ = (npeaks_ > 1) ? xpos[1] - xpos[0] : -1;
+    spacing12_ = (npeaks_ > 2) ? xpos[2] - xpos[1] : -1;
+    spacing23_ = (npeaks_ > 3) ? xpos[3] - xpos[2] : -1;
+
+    occupancy0_ = peakIntegral[i]->GetBinContent(1);
+    occupancy1_ = peakIntegral[i]->GetBinContent(2);
+    occupancy2_ = peakIntegral[i]->GetBinContent(3);
+    occupancy3_ = peakIntegral[i]->GetBinContent(4);
+
+    tree->Fill();
+
     for(unsigned int k = 0; k < xpos.size() - 1; k++) {
 
       peakSpacing[i]->Fill(xpos[k+1] - xpos[k]);
 
-      if(i < 32) h_spacing_112->Fill(xpos[k+1] - xpos[k]);
-      else if(i < 64) h_spacing_113->Fill(xpos[k+1] - xpos[k]);
-      else if(i < 96) h_spacing_115->Fill(xpos[k+1] - xpos[k]);
-      else h_spacing_116->Fill(xpos[k+1] - xpos[k]);
+      if(k == 0) {
+	if(i < 32) h_spacing_112_01->Fill(xpos[k+1] - xpos[k]);
+	else if(i < 64) h_spacing_113_01->Fill(xpos[k+1] - xpos[k]);
+	else if(i < 96) h_spacing_115_01->Fill(xpos[k+1] - xpos[k]);
+	else h_spacing_116_01->Fill(xpos[k+1] - xpos[k]);
+      }
+
+      if(k == 1) {
+	if(i < 32) h_spacing_112_12->Fill(xpos[k+1] - xpos[k]);
+	else if(i < 64) h_spacing_113_12->Fill(xpos[k+1] - xpos[k]);
+	else if(i < 96) h_spacing_115_12->Fill(xpos[k+1] - xpos[k]);
+	else h_spacing_116_12->Fill(xpos[k+1] - xpos[k]);
+      }
+
+      if(k == 2) {
+	if(i < 32) h_spacing_112_23->Fill(xpos[k+1] - xpos[k]);
+	else if(i < 64) h_spacing_113_23->Fill(xpos[k+1] - xpos[k]);
+	else if(i < 96) h_spacing_115_23->Fill(xpos[k+1] - xpos[k]);
+	else h_spacing_116_23->Fill(xpos[k+1] - xpos[k]);
+      }
 
     }
 
@@ -210,36 +271,48 @@ void doFits(TString input) {
 
   TFile * out = new TFile("peakSpacings_"+input, "RECREATE");
   
+  tree->Write();
+
   for(int i = 0; i < 128; i++) {
     peakSpacing[i]->Write();
     peakIntegral[i]->Write();
   }
 
-  h_spacing_112->Write();
-  h_spacing_113->Write();
-  h_spacing_115->Write();
-  h_spacing_116->Write();
+  h_spacing_112_01->Write();
+  h_spacing_113_01->Write();
+  h_spacing_115_01->Write();
+  h_spacing_116_01->Write();
 
+  h_spacing_112_12->Write();
+  h_spacing_113_12->Write();
+  h_spacing_115_12->Write();
+  h_spacing_116_12->Write();
+
+  h_spacing_112_23->Write();
+  h_spacing_113_23->Write();
+  h_spacing_115_23->Write();
+  h_spacing_116_23->Write();
+  
   TCanvas * canv = new TCanvas("canv", "Plot", 10, 10, 2000, 2000);
   canv->SetLogy(false);
 
   TF1 * func_gaus = new TF1("func_gaus", "gaus", 0, 20);
 
-  h_spacing_112->SetLineWidth(3);
-  h_spacing_112->Fit(func_gaus);
-  h_spacing_112->Draw();
+  h_spacing_112_12->SetLineWidth(3);
+  h_spacing_112_12->Fit(func_gaus);
+  h_spacing_112_12->Draw();
   canv->SaveAs("spacing_112.gif");
 
-  h_spacing_113->SetLineWidth(3);
-  h_spacing_113->Draw();
+  h_spacing_113_12->SetLineWidth(3);
+  h_spacing_113_12->Draw();
   canv->SaveAs("spacing_113.gif");
 
-  h_spacing_115->SetLineWidth(3);
-  h_spacing_115->Draw();
+  h_spacing_115_12->SetLineWidth(3);
+  h_spacing_115_12->Draw();
   canv->SaveAs("spacing_115.gif");
 
-  h_spacing_116->SetLineWidth(3);
-  h_spacing_116->Draw();
+  h_spacing_116_12->SetLineWidth(3);
+  h_spacing_116_12->Draw();
   canv->SaveAs("spacing_116.gif");
 
   out->Write();
