@@ -8,11 +8,11 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
     gSystem->Load("TBEvent_cc.so");  // n.b. make sure to compile if changed
   }
 
-  TFile * out = new TFile("hist_"+input, "RECREATE");
-
   TFile *f = new TFile(input);
   // create a pointer to an event object for reading the branch values.
   TBEvent *event = new TBEvent();
+
+  TTree * BeamData = (TTree*)f->Get("BeamData");
 
   TBranch *bevent = BeamData->GetBranch("event");
   bevent->SetAddress(&event);
@@ -53,6 +53,8 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
   Int_t maxVal1_, maxVal2_;
   Int_t maxTime1_, maxTime2_;
 
+  TFile * out = new TFile("hist_"+input, "RECREATE");
+  
   TTree * tree = new TTree("tree", "tree");
   tree->Branch("boardID", &boardID_, "boardID_/I");
   tree->Branch("channel", &channel_, "channel_/I");
@@ -79,32 +81,32 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
       int firstLow, firstHigh;
       int secondLow, secondHigh;
       if(event->GetPadeChan(j).GetBoardID() == 112) {
-	firstLow = 32;
-	firstHigh = 38;
+	firstLow = 33;
+	firstHigh = 36;
 
-	secondLow = 81;
-	secondHigh = 87;
+	secondLow = 83;
+	secondLow = 86;
       }
       else if(event->GetPadeChan(j).GetBoardID() == 113) {
-	firstLow = 22;
-	firstHigh = 28;
+	firstLow = 23;
+	firstHigh = 26;
 
-	secondLow = 71;
-	secondHigh = 77;
+	secondLow = 73;
+	secondHigh = 75;
       }
       else if(event->GetPadeChan(j).GetBoardID() == 115) {
-	firstLow = 19;
-	firstHigh = 25;
+	firstLow = 20;
+	firstHigh = 22;
 
-	secondLow = 68;
-	secondHigh = 74;
+	secondLow = 69;
+	secondHigh = 72;
       }
       else if(event->GetPadeChan(j).GetBoardID() == 116) {
-	firstLow = 26;
-	firstHigh = 32;
+	firstLow = 27;
+	firstHigh = 29;
 
-	secondLow = 75;
-	secondHigh = 81;
+	secondLow = 76;
+	secondHigh = 78;
       }
       else continue;
 
