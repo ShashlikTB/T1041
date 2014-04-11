@@ -1,4 +1,4 @@
-import sys, bz2, inspect
+import sys, bz2, inspect, re
 from commands import getoutput,getstatusoutput
 
 
@@ -41,7 +41,7 @@ class Logger():
         print 
         if len(self.warnings)==0: print "No Warnings reported"
         else:
-            for a in self.warnings: print "%5d %s" % (self.warnings[a],a)
+            for a in self.warnings: print "(%5d) %s" % (self.warnings[a],a)
         print "="*40
         print " WARNING Summary (end)"
         print "="*40        
@@ -65,6 +65,20 @@ def ParsePADEdata(padeline):
     return (pade_ts,pade_transfer_size,pade_board_id,
             pade_hw_counter,pade_ch_number,eventNumber,waveform)
 
+
+
+def ParsePadeHeader(padeline):
+    master = "Master" in padeline
+    padeline=re.sub('=', ' ', padeline).split()
+    boardID=int(padeline[5])
+    status=int(padeline[7],16)
+    trgStatus=int(padeline[9],16)
+    events=int(padeline[13])
+    memReg=int(padeline[16],16)
+    trigPtr=int(padeline[19],16)
+    pTemp=int(padeline[21],16)
+    sTemp=int(padeline[23],16)
+    return (master,boardID,status,trgStatus,events,memReg,trigPtr,pTemp,sTemp)
 
 
 def readWCevent(fWC):

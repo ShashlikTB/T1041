@@ -1,9 +1,9 @@
 #ifndef TBEVENT_H
 #define TBEVENT_H
 
-const Int_t N_PADE_CHANNELS=128;   // n.b. enlarge later for Chrenkov data
-const Int_t N_PADE_SAMPLES=120;     // n.b. may be too small
-const Int_t MAX_WC_HITS=512;         // n.b. may be too small
+const Int_t N_PADE_CHANNELS=128;    // n.b. enlarge later for Chrenkov data
+const Int_t N_PADE_SAMPLES=120;     // fixed in FW
+
 
 
 class PadeChannel : public TObject {
@@ -34,11 +34,34 @@ class PadeChannel : public TObject {
   Int_t         _flag;
 };
 
+class PadeBoard : public TObject{
+  ClassDef(PadeBoard,1); 
+ public:
+  PadeBoard(){;}
+ PadeBoard(Bool_t master, UShort_t board, UShort_t stat,
+	    UShort_t tstat, UShort_t events, UShort_t mreg,
+	    UShort_t pTrg, UShort_t pTmp, UShort_t sTmp):
+  _isMaster(master), _boardID(board), _status(stat), _trgStatus(tstat), 
+    _events(events), _memReg(mreg), _trigPtr(pTrg), 
+    _pTemp(pTmp), _sTemp(sTmp){;}
+
+ private:
+  Bool_t _isMaster;
+  UShort_t _boardID;
+  UShort_t _status;
+  UShort_t _trgStatus;
+  UShort_t _events;
+  UShort_t _memReg;
+  UShort_t _trigPtr;
+  UShort_t _pTemp;
+  UShort_t _sTemp;
+};
+
 class WCChannel : public TObject{
   ClassDef(WCChannel,1); 
  public:
   WCChannel(){;}
- WCChannel(UChar_t num, UChar_t wire, UShort_t count) :
+  WCChannel(UChar_t num, UChar_t wire, UShort_t count) :
   _tdcNumber(num), _tdcWire(wire), _tdcCount(count){;}
   void Dump() const;
 
@@ -87,7 +110,8 @@ private:
   ULong64_t     pcTime;                   // spill time stamp from PC
   ULong64_t     spillTime;                // spill time stamp from WC controller
   Int_t         eventNumber;              // from pade
-  vector<PadeChannel> padeChannel;       
+  vector<PadeBoard> padeBoard;
+  vector<PadeChannel> padeChannel;
   vector<WCChannel> wc;   
 };
 

@@ -83,6 +83,7 @@ nEventsTot=0
 lastBoardID=-1
 
 eventDict={} # dictionary holds events in a spill, use event # as key
+fakeSpillData=False
 
 # read PADE data file
 while 1:
@@ -92,7 +93,18 @@ while 1:
             fillTree()
         break
 
-    if "spill status" in padeline: continue # TBD
+    ###########################################################
+    ########## Dealing with spill header information ##########
+
+    if "fake" in padeline:
+        fakeSpillData=True
+        continue
+
+    if "spill status" in padeline:
+        (master,boardID,status,trgStatus,
+         events,memReg,trigPtr,pTemp,sTemp) = ParsePadeHeader(padeline)
+        continue
+
     # new spill condition
     if "starting spill" in padeline: 
         if len(eventDict)>0:   # fill events from last spill into Tree
@@ -103,14 +115,19 @@ while 1:
         lastEvent=-1
         newEvent=False
         nEventsInSpill=0
+
         if "WC" in padeline:
             timestr=padeline[padeline.index('at')+3:padeline.index('WC')].strip()
         else: timestr=padeline[padeline.index('at')+3:-1].strip()
         the_spill_pctime = time.mktime(time.strptime(timestr, "%m/%d/%Y %H:%M:%S %p"))  # time on PC
-        the_spill_ts =  the_spill_pctime              # time on WC controller (temporary)  UPDATE ME!
+        the_spill_ts =  the_spill_pctime          # time on WC controller (temporary)  UPDATE ME!
         the_spill_number = int(padeline[padeline.index('num')+4:padeline.index('at')-5])
+
         nSpills=nSpills+1;
         continue # read next line in PADE file
+
+    ########## Dealing with spill header information ########## 
+    ###########################################################
 
     
     # parse PADE channel data
@@ -145,12 +162,14 @@ while 1:
 
     writeChan=True     # assume channel is good to write, until proven guilty
     # new event condition in master
-    if newMasterEvent: 
+    if newMasterEvent:
         nEventsTot=nEventsTot+1
         nEventsInSpill=nEventsInSpill+1
-        print "Event in spill",the_spill_number,"(",eventNumber,")  / total", nEventsTot
+        if eventNumber==1 or eventNumber%100==0:
+            print "Event in spill",the_spill_number,"(",eventNumber,")  / total", nEventsTot
 
         eventDict[eventNumber]=TBEvent()
+
         eventDict[eventNumber].SetSpill(the_spill_number)
         eventDict[eventNumber].SetPCTime(long(the_spill_pctime))
         eventDict[eventNumber].SetSpillTime(long(the_spill_ts))
