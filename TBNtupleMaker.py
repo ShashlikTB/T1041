@@ -8,8 +8,10 @@ import time
 from array import array
 import bz2
 from TBUtils import *
+import re 
 
 
+from wcFileParser import * 
 
 # Argparse Definitions 
 
@@ -145,7 +147,19 @@ def generateSpillDict(spillLine):
         
         
     
-    
+def filterNonMasterEvents(spills): 
+    keysToRemove = []
+    for spill in spills: 
+        for key in spill['events']: 
+            evt = spill['events'][key]
+            if not evt.channels.has_key(MASTERID):
+                logger.Warn("Found an excess slave board event: %s, Removing" % key)
+                keysToRemove.append(key)
+
+    for key in keysToRemove:
+        del spill['events'][key]
+        
+            
 
 def fillTree():
     logger.Info("Write spill",the_spill_number)
@@ -153,46 +167,43 @@ def fillTree():
         event.cp(eventDict[ievt])
         BeamTree.Fill()
 
+
+
 def processPadeLine(line): 
     line = line.strip()
     data = line.split(' ')
     
 
 
+
+    
+    
+
+
 def processPadeFile(filename): 
-    outputFile = None
     fPade = None
     if filename.endswith(".txt"): 
         logger.Info("Txt File")
-        outputFile = filename.replace(".txt", ".root")
         fPade = open(filename, "r")
     elif filename.endswith(".bz2"): 
         fPade = bz2.BZ2File(filename, "r")
-        outputFile = filename.replace(".txt", ".root")
-        outputFile = outputFile.replace(".bz2", "")
     if fPade is None: 
         logger.Warn("Could not open Pade file...Aborting!")
         exit()
 
-    #=======================================================================# 
-    #  Declare an element of the event class for our event                  #
-    #=======================================================================#
-
-
-    
-    fout = TFile(outputFile, "recreate")
-    logger.Info("Writing to output file",outputFile)
-
     spills = []
     currentSpill = None
     lastPacket = 0
-    lastEvent = 0
+    lastEvent = -1
     totalEventCount = 0
     currEventCount = 0
 
     for line in fPade: 
-        
-        if line.find('starting') != -1: 
+
+        if line.find('spill status') != -1:
+            #print and skip
+            print line
+        elif line.find('starting') != -1: 
             currEventCount = 0
             print 'Starting new spill: %s' % line
             
@@ -236,31 +247,34 @@ def processPadeFile(filename):
 
             if pade_event_number != lastEvent and pade_board_id == MASTERID: 
                 lastEvent = pade_event_number
+                print 'Event in spill %s ( %s ) / total %s' % (currentSpill['spillNumber'],currEventCount, totalEventCount)
                 currEventCount += 1
                 totalEventCount += 1
-                print 'Event in spill %s ( %s ) / total %s' % (currentSpill['spillNumber'],currEventCount, totalEventCount)
             
-                
-
-
 
     spills.append(currentSpill)
-    # for spill in spills:
-    #     for key in spill['events']:
-    #         print "Hardware Counter %s" % str(spill['events'][key].channels[112][0].hwCounter)
-    #         try: 
-    #             mc = spill['events'][key].channels[MASTERID]
-    #         except KeyError:
-    #             print "Couldn't find Master Channel Event %s" % str(key)
 
+##  add a hardware counter check 
+    
+    filterNonMasterEvents(spills)
 
-    return (fout, spills)
+    return spills
         
-fout, spills = processPadeFile(args.filename[0])
+spills = processPadeFile(args.filename[0])
 
     #=======================================================================# 
     #  Declare new file and tree with branches                              #
     #=======================================================================#
+
+outputFile = args.filename[0].replace(".txt", ".root")
+
+if outputFile.endswith('.bz2'): 
+    outputFile = outputFile.replace(".bz2", "")
+
+fout = TFile(outputFile, "recreate")
+logger.Info("Writing to output file",outputFile)
+
+
 treeEvent = TBEvent()
 BeamTree = TTree("BeamData", "BeamData")
 BeamTree.Branch("event", "TBEvent", AddressOf(treeEvent), 64000, 0)
