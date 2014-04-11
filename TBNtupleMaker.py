@@ -147,7 +147,6 @@ def generateSpillDict(spillLine):
     
     
 
-
 def fillTree():
     logger.Info("Write spill",the_spill_number)
     for ievt in range(len(eventDict)):
@@ -187,16 +186,24 @@ def processPadeFile(filename):
     spills = []
     currentSpill = None
     lastPacket = 0
+    lastEvent = 0
+    totalEventCount = 0
+    currEventCount = 0
+
     for line in fPade: 
         
         if line.find('starting') != -1: 
+            currEventCount = 0
+            print 'Starting new spill: %s' % line
+            
             if not currentSpill:
                 currentSpill = generateSpillDict(line)
             else:
                 spills.append(currentSpill)
                 currentSpill = generateSpillDict(line)
         else:
-        
+
+
             split = line.strip().split(' ')
             chLine = split[0:10]
             waveform = split[10:]
@@ -207,6 +214,9 @@ def processPadeFile(filename):
             pade_hardware_counter = int(chLine[4]+chLine[5]+chLine[6],16)
             pade_channel = int(chLine[7],16)
             pade_event_number = int(chLine[8]+chLine[9],16)
+
+
+
             pc = PadeChannel(pade_ts, pade_transfer_size, pade_board_id, 
                              pade_hardware_counter, pade_channel, pade_event_number, 
                              waveform)
@@ -222,6 +232,16 @@ def processPadeFile(filename):
                 currentSpill['events'][pade_event_number].channels[pade_board_id] = []
                 currentSpill['events'][pade_event_number].channels[pade_board_id].append(pc)
             currentSpill['nEvents'] = len(currentSpill['events'])
+
+
+            if pade_event_number != lastEvent and pade_board_id == MASTERID: 
+                lastEvent = pade_event_number
+                currEventCount += 1
+                totalEventCount += 1
+                print 'Event in spill %s ( %s ) / total %s' % (currentSpill['spillNumber'],currEventCount, totalEventCount)
+            
+                
+
 
 
     spills.append(currentSpill)
