@@ -47,6 +47,18 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
     secondPeakHeights[ui]->Sumw2();
   }
 
+  Int_t boardID, channel;
+  Int_t maxVal1, maxVal2;
+  Int_t maxTime1, maxTime2;
+
+  TTree * tree = new TTree("tree", "tree");
+  tree->Branch("boardID", &boardID, "boardID/I");
+  tree->Branch("channel", &channel, "channel/I");
+  tree->Branch("firstMax", &maxVal1, "maxVal1/I");
+  tree->Branch("firstTime", &maxTime1, "maxTime1/I");
+  tree->Branch("secondMax", &maxVal2, "maxVal2/I");
+  tree->Branch("secondTime", &maxTime2, "maxTime2/I");
+
   // loop over events
   for (int i=0; i< BeamData->GetEntries(); i++) {
 
@@ -94,12 +106,32 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
       }
       else continue;
 
+      maxVal1 = 0;
+      maxTime1 = 0;
+      maxVal2 = 0;
+      maxTime2 = 0;
+
+      boardID = event->GetPadeChan(j).GetBoardID();
+      channel = (j % 32);
+
       UShort_t * wform=event->GetPadeChan(j).GetWform();
       for (int k = 0; k < event->GetPadeChan(j).__SAMPLES(); k++){
-        if(k >= firstLow && k <= firstHigh && wform[k] > firstPeak) firstPeak = wform[k];
-        if(k >= secondLow && k <= secondHigh && wform[k] > secondPeak) secondPeak = wform[k];
+        if(k >= firstLow && k <= firstHigh && wform[k] > firstPeak) {
+	  firstPeak = wform[k];
+	  maxTime1 = k;
+	  maxVal1 = firstPeak;
+	}
+
+        if(k >= secondLow && k <= secondHigh && wform[k] > secondPeak) {
+	  secondPeak = wform[k];
+	  maxTime2 = k;
+	  maxVal2 = secondPeak;
+	}
+
       }
   
+      tree->Fill();
+
       peakHeights[j]->Fill(firstPeak);
       firstPeakHeights[j]->Fill(firstPeak);
       if(twoPeaksPerTrigger) {
@@ -118,6 +150,8 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
     firstPeakHeights[ui]->Write();
     secondPeakHeights[ui]->Write();
   }
+
+  tree->Write();
 
   out->Write();
   out->Close();
@@ -320,13 +354,13 @@ void calibrationData(int board) {
       if(boardID_20 != boardID_0) continue;
       if(channel_20 != channel_0) continue;
 
-      if(npeaks_20 > 0) h_byChannel_20_low_01->SetBinContent(channel_20 + 1, spacing01_20);
-      if(npeaks_20 > 1) h_byChannel_20_low_12->SetBinContent(channel_20 + 1, spacing12_20);
-      if(npeaks_20 > 2) h_byChannel_20_low_23->SetBinContent(channel_20 + 1, spacing23_20);
+      if(npeaks_20 > 0) h_byChannel_20_low_01->Fill(channel_20 + 1, spacing01_20);
+      if(npeaks_20 > 1) h_byChannel_20_low_12->Fill(channel_20 + 1, spacing12_20);
+      if(npeaks_20 > 2) h_byChannel_20_low_23->Fill(channel_20 + 1, spacing23_20);
 
-      if(npeaks_0 > 0) h_byChannel_0_low_01->SetBinContent(channel_0 + 1, spacing01_0);
-      if(npeaks_0 > 1) h_byChannel_0_low_12->SetBinContent(channel_0 + 1, spacing12_0);
-      if(npeaks_0 > 2) h_byChannel_0_low_23->SetBinContent(channel_0 + 1, spacing23_0);
+      if(npeaks_0 > 0) h_byChannel_0_low_01->Fill(channel_0 + 1, spacing01_0);
+      if(npeaks_0 > 1) h_byChannel_0_low_12->Fill(channel_0 + 1, spacing12_0);
+      if(npeaks_0 > 2) h_byChannel_0_low_23->Fill(channel_0 + 1, spacing23_0);
 
       if(npeaks_0 <= 1) {
         h_notSeen_20_low_01->Fill(spacing01_20);
@@ -355,13 +389,13 @@ void calibrationData(int board) {
       if(boardID_20 != boardID_0) continue;
       if(channel_20 != channel_0) continue;
 
-      if(npeaks_20 > 0) h_byChannel_20_peak_01->SetBinContent(channel_20 + 1, spacing01_20);
-      if(npeaks_20 > 1) h_byChannel_20_peak_12->SetBinContent(channel_20 + 1, spacing12_20);
-      if(npeaks_20 > 2) h_byChannel_20_peak_23->SetBinContent(channel_20 + 1, spacing23_20);
+      if(npeaks_20 > 0) h_byChannel_20_peak_01->Fill(channel_20 + 1, spacing01_20);
+      if(npeaks_20 > 1) h_byChannel_20_peak_12->Fill(channel_20 + 1, spacing12_20);
+      if(npeaks_20 > 2) h_byChannel_20_peak_23->Fill(channel_20 + 1, spacing23_20);
 
-      if(npeaks_0 > 0) h_byChannel_0_peak_01->SetBinContent(channel_0 + 1, spacing01_0);
-      if(npeaks_0 > 1) h_byChannel_0_peak_12->SetBinContent(channel_0 + 1, spacing12_0);
-      if(npeaks_0 > 2) h_byChannel_0_peak_23->SetBinContent(channel_0 + 1, spacing23_0);
+      if(npeaks_0 > 0) h_byChannel_0_peak_01->Fill(channel_0 + 1, spacing01_0);
+      if(npeaks_0 > 1) h_byChannel_0_peak_12->Fill(channel_0 + 1, spacing12_0);
+      if(npeaks_0 > 2) h_byChannel_0_peak_23->Fill(channel_0 + 1, spacing23_0);
 
       if(npeaks_0 <= 1) {
         h_notSeen_20_peak_01->Fill(spacing01_20);
@@ -390,13 +424,13 @@ void calibrationData(int board) {
       if(boardID_20 != boardID_0) continue;
       if(channel_20 != channel_0) continue;
 
-      if(npeaks_20 > 0) h_byChannel_20_high_01->SetBinContent(channel_20 + 1, spacing01_20);
-      if(npeaks_20 > 1) h_byChannel_20_high_12->SetBinContent(channel_20 + 1, spacing12_20);
-      if(npeaks_20 > 2) h_byChannel_20_high_23->SetBinContent(channel_20 + 1, spacing23_20);
+      if(npeaks_20 > 0) h_byChannel_20_high_01->Fill(channel_20 + 1, spacing01_20);
+      if(npeaks_20 > 1) h_byChannel_20_high_12->Fill(channel_20 + 1, spacing12_20);
+      if(npeaks_20 > 2) h_byChannel_20_high_23->Fill(channel_20 + 1, spacing23_20);
 
-      if(npeaks_0 > 0) h_byChannel_0_high_01->SetBinContent(channel_0 + 1, spacing01_0);
-      if(npeaks_0 > 1) h_byChannel_0_high_12->SetBinContent(channel_0 + 1, spacing12_0);
-      if(npeaks_0 > 2) h_byChannel_0_high_23->SetBinContent(channel_0 + 1, spacing23_0);
+      if(npeaks_0 > 0) h_byChannel_0_high_01->Fill(channel_0 + 1, spacing01_0);
+      if(npeaks_0 > 1) h_byChannel_0_high_12->Fill(channel_0 + 1, spacing12_0);
+      if(npeaks_0 > 2) h_byChannel_0_high_23->Fill(channel_0 + 1, spacing23_0);
 
       if(npeaks_0 <= 1) {
         h_notSeen_20_high_01->Fill(spacing01_20);
