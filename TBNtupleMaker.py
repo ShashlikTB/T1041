@@ -1,12 +1,34 @@
 # Note: we assume the 1st PADE block in each event is always the MASTER
 
 import os, re, glob, sys, array, getopt
-from ROOT import *
+import argparse 
+
 from string import split
 import time
 from array import array
 import bz2
 from TBUtils import *
+
+
+
+# Argparse Definitions 
+
+parser = argparse.ArgumentParser(description='Test Beam Ntuple Maker')
+parser.add_argument('filename', metavar='filename', type=str, nargs=1, 
+                    help="Filename to process")
+parser.add_argument('-n', default=1, metavar='max_events', type=int, nargs=1, 
+                    help="Maximum (requested) number of events to read, This will always read at least 1 spill")
+parser.add_argument('--wc', type=str, nargs=1, 
+                    help="WC File")
+
+args = parser.parse_args()
+
+
+
+## Root breaks normal argument parsing, so import it after we're done getting arguments
+
+
+from ROOT import *
 
 # Unify PADE blocks and WC blocks into one Ntuple by doing
 # python FakeDataNtupleMaker.py rec_capture_20140324_134340.txt wc_data.txt t1041_20140320232645.dat
@@ -15,38 +37,12 @@ DEBUG_LEVEL = 0
 NEventLimit = 1000000
 MASTERID = 112
 
-def usage():
-    print
-    print "Usage: python TBNtupleMaker [OPTION] PADE_FILE [WC_FILE]"
-    print "      -n max_events  : Maximum (requested) number of events to read"
-    print "                       Always read at least 1 spill"
-    print 
-    sys.exit()
-
 logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
-#=======================================================================# 
-#  Read in and characterize the input file                              #
-#=======================================================================#
-opts, args = getopt.getopt(sys.argv[1:], "n:")
-
-for o, a in opts:
-     if o == "-n":
-         NEventLimit=int(a)
-         logger.Info("Stop at end of spill after reading at least",NEventLimit,"events")
-
-if len(args)==0: usage()
-padeDat=args[0]
-outFile=padeDat.replace(".txt",".root")
-if padeDat.endswith("bz2"): 
-    fPade = bz2.BZ2File(padeDat,"r")
-    outFile=outFile.replace(".bz2","")
-else : fPade = open(padeDat, "r")
 
 
-haveWC=False
-if len(args)>1: 
-    wcDat=args[1]
-    fWC =  open(wcDat, "r")
+haveWC = False
+if args.wc:
+    fWC =  open(args.wc[0], "r")
     haveWC=True
 else:
     logger.Info("No WC file provided")
@@ -55,26 +51,238 @@ else:
 #=======================================================================# 
 #  Declare data containers                                              #
 #=======================================================================#
-gROOT.ProcessLine(".L TBEvent.cc+")
+gSystem.Load("./TBEvent.so")
 
-#=======================================================================# 
-#  Declare an element of the event class for our event                  #
-#=======================================================================#
-event = TBEvent()
-padeChannel = PadeChannel()
-#=======================================================================# 
-#  Declare new file and tree with branches                              #
-#=======================================================================#
-fout = TFile(outFile, "recreate")
-logger.Info("Writing to output file",outFile)
-BeamTree = TTree("BeamData", "BeamData")
-BeamTree.Branch("event", "TBEvent", AddressOf(event), 64000, 0)
+
+
+class PadeChannel: 
+    def __init__(self): 
+        self.timestamp = 0
+        self.transferSize = 0
+        self.boardID = 0
+        self.hwCounter = 0
+        self.chNumber = 0
+        self.eventNumber = 0
+        self.samples = []
+        self.flag = 0
+
+    def __init__(self, ts, transferSize, bid, hwCounter, chNum, eventNum, samples):
+        self.timestamp = ts
+        self.transferSize = transferSize
+        self.boardID = bid
+        self.hwCounter = hwCounter
+        self.chNumber = chNum
+        self.eventNumber = eventNum
+        self.samples = samples
+        self.flag = 0
+
+
+    def __repr__(self): 
+        rep = '\r\n'.join(["timestamp: %r",
+        "transferSize: %r",
+        "boardID: %r",
+        "hwCounter: %r",
+        "chNumber: %r",
+        "eventNumber: %r",
+        "samples: %r"])
+        return rep % (self.timestamp, self.transferSize, self.boardID, self.hwCounter,
+                      self.chNumber, self.eventNumber, self.samples)
+
+
+    
+
+
+class PadeEvent:
+    def __init__(self): 
+        self.spillNumber = 0
+        self.pcTime = 0
+        self.spillTime = 0
+        self.eventNumber = 0
+        self.channels = {}
+        self.wcChannels = {}
+
+    def __init__(self, spillNumber, pcTime, spillTime, eventNumber): 
+        self.spillNumber = spillNumber
+        self.pcTime = pcTime
+        self.spillTime = spillTime
+        self.eventNumber = eventNumber
+        self.channels = {}
+        self.wcChannels = {}
+
+    def AddChannel(pc): 
+        try:
+            self.channels[pc.chNumber].append(pc)
+        except KeyError:
+            self.channels[pc.chNumber] = []
+            self.channels[pc.chNumber].append(pc)
+            
+
+
+def generateSpillDict(spillLine): 
+    
+    spill = {
+        'nEvents':0,
+        'events':{},
+        'spillNumber':0,
+        'pcTime':0,
+        }
+    
+    try:
+        if "WC" in spillLine:
+            timestr=spillLine[spillLine.index('at')+3:spillLine.index('WC')].strip()
+        else: timestr=spillLine[spillLine.index('at')+3:-1].strip()
+        # time on PC
+        spill['pcTime']= time.mktime(time.strptime(timestr, "%m/%d/%Y %H:%M:%S %p")) 
+        spill['spillNumber'] = int(spillLine[spillLine.index('num')+4:spillLine.index('at')-5])
+
+    except:
+        print "Warning! problem generating spill dictionary from %s" % spillLine
+    
+    
+    return spill
+
+
+        
+        
+    
+    
+
 
 def fillTree():
     logger.Info("Write spill",the_spill_number)
     for ievt in range(len(eventDict)):
         event.cp(eventDict[ievt])
         BeamTree.Fill()
+
+def processPadeLine(line): 
+    line = line.strip()
+    data = line.split(' ')
+    
+
+
+def processPadeFile(filename): 
+    outputFile = None
+    fPade = None
+    if filename.endswith(".txt"): 
+        logger.Info("Txt File")
+        outputFile = filename.replace(".txt", ".root")
+        fPade = open(filename, "r")
+    elif filename.endswith(".bz2"): 
+        fPade = bz2.BZ2File(filename, "r")
+        outputFile = filename.replace(".txt", ".root")
+        outputFile = outputFile.replace(".bz2", "")
+    if fPade is None: 
+        logger.Warn("Could not open Pade file...Aborting!")
+        exit()
+
+    #=======================================================================# 
+    #  Declare an element of the event class for our event                  #
+    #=======================================================================#
+
+
+    
+    fout = TFile(outputFile, "recreate")
+    logger.Info("Writing to output file",outputFile)
+
+    spills = []
+    currentSpill = None
+    lastPacket = 0
+    for line in fPade: 
+        
+        if line.find('starting') != -1: 
+            if not currentSpill:
+                currentSpill = generateSpillDict(line)
+            else:
+                spills.append(currentSpill)
+                currentSpill = generateSpillDict(line)
+        else:
+        
+            split = line.strip().split(' ')
+            chLine = split[0:10]
+            waveform = split[10:]
+        
+            pade_ts = long(chLine[0])
+            pade_transfer_size = int(chLine[1]+chLine[2],16)
+            pade_board_id = int(chLine[3],16)
+            pade_hardware_counter = int(chLine[4]+chLine[5]+chLine[6],16)
+            pade_channel = int(chLine[7],16)
+            pade_event_number = int(chLine[8]+chLine[9],16)
+            pc = PadeChannel(pade_ts, pade_transfer_size, pade_board_id, 
+                             pade_hardware_counter, pade_channel, pade_event_number, 
+                             waveform)
+
+            try: 
+                currentSpill['events'][pade_event_number].channels == None 
+            except KeyError:
+                currentSpill['events'][pade_event_number] = PadeEvent(0,0,0,pade_event_number)
+
+            try: 
+                currentSpill['events'][pade_event_number].channels[pade_board_id].append(pc)
+            except:
+                currentSpill['events'][pade_event_number].channels[pade_board_id] = []
+                currentSpill['events'][pade_event_number].channels[pade_board_id].append(pc)
+            currentSpill['nEvents'] = len(currentSpill['events'])
+
+
+    spills.append(currentSpill)
+    # for spill in spills:
+    #     for key in spill['events']:
+    #         print "Hardware Counter %s" % str(spill['events'][key].channels[112][0].hwCounter)
+    #         try: 
+    #             mc = spill['events'][key].channels[MASTERID]
+    #         except KeyError:
+    #             print "Couldn't find Master Channel Event %s" % str(key)
+
+
+    return (fout, spills)
+        
+fout, spills = processPadeFile(args.filename[0])
+
+    #=======================================================================# 
+    #  Declare new file and tree with branches                              #
+    #=======================================================================#
+treeEvent = TBEvent()
+BeamTree = TTree("BeamData", "BeamData")
+BeamTree.Branch("event", "TBEvent", AddressOf(treeEvent), 64000, 0)
+
+
+
+for spill in spills: 
+    for key in spill['events']: 
+        currEvent = TBEvent()
+        currEvent.SetSpill(spill['spillNumber'])
+        currEvent.SetPCTime(long(spill['pcTime']))
+        currEvent.SetSpillTime(long(spill['pcTime']))
+
+
+        evt = spill['events'][key]
+        currEvent.SetEventNumber(evt.eventNumber)
+        for ch in evt.channels: 
+            channel = evt.channels[ch][0]
+
+
+            samples=array("i")
+            for val in channel.samples:
+                samples.append(int(val,16))
+            currEvent.FillPadeChannel(channel.timestamp, channel.transferSize, 
+                                      channel.boardID, channel.hwCounter, 
+                                      channel.chNumber, channel.eventNumber, samples)
+        treeEvent.cp(currEvent)
+        BeamTree.Fill()
+        
+            
+
+
+BeamTree.Write()
+fout.Close()
+
+
+exit()
+
+
+
+
+
 
 
 lastEvent=-1
@@ -87,6 +295,11 @@ lastChannel=-1
 eventDict={} # dictionary holds events in a spill, use event # as key
 
 # read PADE data file
+
+
+    
+
+
 while 1:
     padeline=fPade.readline()
     if not padeline:  # end of file
