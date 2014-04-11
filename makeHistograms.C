@@ -8,6 +8,8 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
     gSystem->Load("TBEvent_cc.so");  // n.b. make sure to compile if changed
   }
 
+  TFile * out = new TFile("hist_"+input, "RECREATE");
+
   TFile *f = new TFile(input);
   // create a pointer to an event object for reading the branch values.
   TBEvent *event = new TBEvent();
@@ -143,7 +145,7 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
 
   } // events
 
-  TFile * out = new TFile("hist_"+input, "RECREATE");
+  out->cd();
 
   for(unsigned int ui = 0; ui < peakHeights.size(); ui++) {
     peakHeights[ui]->Write();
