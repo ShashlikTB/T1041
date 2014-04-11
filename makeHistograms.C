@@ -204,15 +204,15 @@ void overlayPlots(vector<TString> fNames, vector<TString> legendTitles, TString 
 
 }
 
-void plotCalibration(int board) {
+void calibrationData(int board) {
 
-  TFile * f0_low = new TFile("peakSpacings_hist_0ns_LowEndBias", "READ");
-  TFile * f0_peak = new TFile("peakSpacings_hist_0ns_PeakBias", "READ");
-  TFile * f0_high = new TFile("peakSpacings_hist_0ns_HighEndBias", "READ");
+  TFile * f0_low = new TFile("peakSpacings_hist_0ns_LowEndBias.root", "READ");
+  TFile * f0_peak = new TFile("peakSpacings_hist_0ns_PeakBias.root", "READ");
+  TFile * f0_high = new TFile("peakSpacings_hist_0ns_HighEndBias.root", "READ");
 
-  TFile * f20_low = new TFile("peakSpacings_hist_20ns_LowEndBias", "READ");
-  TFile * f20_peak = new TFile("peakSpacings_hist_20ns_PeakBias", "READ");
-  TFile * f20_high = new TFile("peakSpacings_hist_20ns_HighEndBias", "READ");
+  TFile * f20_low = new TFile("peakSpacings_hist_20ns_LowEndBias.root", "READ");
+  TFile * f20_peak = new TFile("peakSpacings_hist_20ns_PeakBias.root", "READ");
+  TFile * f20_high = new TFile("peakSpacings_hist_20ns_HighEndBias.root", "READ");
 
   TTree * tree20_low = (TTree*)f20_low->Get("tree");
   TTree * tree20_peak = (TTree*)f20_peak->Get("tree");
@@ -221,6 +221,9 @@ void plotCalibration(int board) {
   TTree * tree0_low = (TTree*)f0_low->Get("tree");
   TTree * tree0_peak = (TTree*)f0_peak->Get("tree");
   TTree * tree0_high = (TTree*)f0_high->Get("tree");
+
+  Int_t boardID_20, npeaks_20, channel_20;
+  Int_t boardID_0, npeaks_0, channel_0;
 
   Float_t spacing01_20, spacing12_20, spacing23_20;
   Float_t spacing01_0, spacing12_0, spacing23_0;
