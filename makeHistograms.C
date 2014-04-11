@@ -390,13 +390,13 @@ void calibrationData(int board) {
       if(boardID_20 != boardID_0) continue;
       if(channel_20 != channel_0) continue;
 
-      h_byChannel_20_high_01->SetBinContent(channel_20 + 1, spacing01_20);
-      h_byChannel_20_high_12->SetBinContent(channel_20 + 1, spacing12_20);
-      h_byChannel_20_high_23->SetBinContent(channel_20 + 1, spacing23_20);
+      if(npeaks_20 > 0) h_byChannel_20_high_01->SetBinContent(channel_20 + 1, spacing01_20);
+      if(npeaks_20 > 1) h_byChannel_20_high_12->SetBinContent(channel_20 + 1, spacing12_20);
+      if(npeaks_20 > 2) h_byChannel_20_high_23->SetBinContent(channel_20 + 1, spacing23_20);
 
-      h_byChannel_0_high_01->SetBinContent(channel_0 + 1, spacing01_0);
-      h_byChannel_0_high_12->SetBinContent(channel_0 + 1, spacing12_0);
-      h_byChannel_0_high_23->SetBinContent(channel_0 + 1, spacing23_0);
+      if(npeaks_0 > 0) h_byChannel_0_high_01->SetBinContent(channel_0 + 1, spacing01_0);
+      if(npeaks_0 > 1) h_byChannel_0_high_12->SetBinContent(channel_0 + 1, spacing12_0);
+      if(npeaks_0 > 2) h_byChannel_0_high_23->SetBinContent(channel_0 + 1, spacing23_0);
 
       if(npeaks_0 <= 1) {
         h_notSeen_20_high_01->Fill(spacing01_20);
