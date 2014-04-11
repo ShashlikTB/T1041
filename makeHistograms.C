@@ -47,17 +47,17 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
     secondPeakHeights[ui]->Sumw2();
   }
 
-  Int_t boardID, channel;
-  Int_t maxVal1, maxVal2;
-  Int_t maxTime1, maxTime2;
+  Int_t boardID_, channel_;
+  Int_t maxVal1_, maxVal2_;
+  Int_t maxTime1_, maxTime2_;
 
   TTree * tree = new TTree("tree", "tree");
-  tree->Branch("boardID", &boardID, "boardID/I");
-  tree->Branch("channel", &channel, "channel/I");
-  tree->Branch("firstMax", &maxVal1, "maxVal1/I");
-  tree->Branch("firstTime", &maxTime1, "maxTime1/I");
-  tree->Branch("secondMax", &maxVal2, "maxVal2/I");
-  tree->Branch("secondTime", &maxTime2, "maxTime2/I");
+  tree->Branch("boardID", &boardID_, "boardID_/I");
+  tree->Branch("channel", &channel_, "channel_/I");
+  tree->Branch("firstMax", &maxVal1_, "maxVal1_/I");
+  tree->Branch("firstTime", &maxTime1_, "maxTime1_/I");
+  tree->Branch("secondMax", &maxVal2_, "maxVal2_/I");
+  tree->Branch("secondTime", &maxTime2_, "maxTime2_/I");
 
   // loop over events
   for (int i=0; i< BeamData->GetEntries(); i++) {
@@ -106,26 +106,26 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
       }
       else continue;
 
-      maxVal1 = 0;
-      maxTime1 = 0;
-      maxVal2 = 0;
-      maxTime2 = 0;
+      maxVal1_ = 0;
+      maxTime1_ = 0;
+      maxVal2_ = 0;
+      maxTime2_ = 0;
 
-      boardID = event->GetPadeChan(j).GetBoardID();
-      channel = (j % 32);
+      boardID_ = event->GetPadeChan(j).GetBoardID();
+      channel_ = (j % 32);
 
       UShort_t * wform=event->GetPadeChan(j).GetWform();
       for (int k = 0; k < event->GetPadeChan(j).__SAMPLES(); k++){
         if(k >= firstLow && k <= firstHigh && wform[k] > firstPeak) {
 	  firstPeak = wform[k];
-	  maxTime1 = k;
-	  maxVal1 = firstPeak;
+	  maxTime1_ = k;
+	  maxVal1_ = firstPeak;
 	}
 
         if(k >= secondLow && k <= secondHigh && wform[k] > secondPeak) {
 	  secondPeak = wform[k];
-	  maxTime2 = k;
-	  maxVal2 = secondPeak;
+	  maxTime2_ = k;
+	  maxVal2_ = secondPeak;
 	}
 
       }
