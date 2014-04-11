@@ -289,46 +289,25 @@ void calibrationData(int board) {
   TH1D * h_notSeen_20_high_12 = new TH1D("notSeen_20_high_12", "notSeen_20_high_12", 100, 0, 100);
   TH1D * h_notSeen_20_high_23 = new TH1D("notSeen_20_high_23", "notSeen_20_high_23", 100, 0, 100);
 
-  TH1D * h_seen_0_low_01 = new TH1D("seen_0_low_01", "seen_0_low_01", 100, 0, 100);
-  TH1D * h_seen_0_low_12 = new TH1D("seen_0_low_12", "seen_0_low_12", 100, 0, 100);
-  TH1D * h_seen_0_low_23 = new TH1D("seen_0_low_23", "seen_0_low_23", 100, 0, 100);
-  TH1D * h_notSeen_0_low_01 = new TH1D("notSeen_0_low_01", "notSeen_0_low_01", 100, 0, 100);
-  TH1D * h_notSeen_0_low_12 = new TH1D("notSeen_0_low_12", "notSeen_0_low_12", 100, 0, 100);
-  TH1D * h_notSeen_0_low_23 = new TH1D("notSeen_0_low_23", "notSeen_0_low_23", 100, 0, 100);
+  TH1D * h_byChannel_20_low_01 = new TH1D("byChannel_20_low_01", "byChannel_20_low_01", 32, 0, 32);
+  TH1D * h_byChannel_20_low_12 = new TH1D("byChannel_20_low_12", "byChannel_20_low_12", 32, 0, 32);
+  TH1D * h_byChannel_20_low_23 = new TH1D("byChannel_20_low_23", "byChannel_20_low_23", 32, 0, 32);
+  TH1D * h_byChannel_20_peak_01 = new TH1D("byChannel_20_peak_01", "byChannel_20_peak_01", 32, 0, 32);
+  TH1D * h_byChannel_20_peak_12 = new TH1D("byChannel_20_peak_12", "byChannel_20_peak_12", 32, 0, 32);
+  TH1D * h_byChannel_20_peak_23 = new TH1D("byChannel_20_peak_23", "byChannel_20_peak_23", 32, 0, 32);
+  TH1D * h_byChannel_20_high_01 = new TH1D("byChannel_20_high_01", "byChannel_20_high_01", 32, 0, 32);
+  TH1D * h_byChannel_20_high_12 = new TH1D("byChannel_20_high_12", "byChannel_20_high_12", 32, 0, 32);
+  TH1D * h_byChannel_20_high_23 = new TH1D("byChannel_20_high_23", "byChannel_20_high_23", 32, 0, 32);
 
-  TH1D * h_seen_0_peak_01 = new TH1D("seen_0_peak_01", "seen_0_peak_01", 100, 0, 100);
-  TH1D * h_seen_0_peak_12 = new TH1D("seen_0_peak_12", "seen_0_peak_12", 100, 0, 100);
-  TH1D * h_seen_0_peak_23 = new TH1D("seen_0_peak_23", "seen_0_peak_23", 100, 0, 100);
-  TH1D * h_notSeen_0_peak_01 = new TH1D("notSeen_0_peak_01", "notSeen_0_peak_01", 100, 0, 100);
-  TH1D * h_notSeen_0_peak_12 = new TH1D("notSeen_0_peak_12", "notSeen_0_peak_12", 100, 0, 100);
-  TH1D * h_notSeen_0_peak_23 = new TH1D("notSeen_0_peak_23", "notSeen_0_peak_23", 100, 0, 100);
-
-  TH1D * h_seen_0_high_01 = new TH1D("seen_0_high_01", "seen_0_high_01", 100, 0, 100);
-  TH1D * h_seen_0_high_12 = new TH1D("seen_0_high_12", "seen_0_high_12", 100, 0, 100);
-  TH1D * h_seen_0_high_23 = new TH1D("seen_0_high_23", "seen_0_high_23", 100, 0, 100);
-  TH1D * h_notSeen_0_high_01 = new TH1D("notSeen_0_high_01", "notSeen_0_high_01", 100, 0, 100);
-  TH1D * h_notSeen_0_high_12 = new TH1D("notSeen_0_high_12", "notSeen_0_high_12", 100, 0, 100);
-  TH1D * h_notSeen_0_high_23 = new TH1D("notSeen_0_high_23", "notSeen_0_high_23", 100, 0, 100);
-
-  TH1D * h_byChannel_20_low_01 = new TH2D("byChannel_20_low_01", "byChannel_20_low_01", 32, 0, 32);
-  TH1D * h_byChannel_20_low_12 = new TH2D("byChannel_20_low_12", "byChannel_20_low_12", 32, 0, 32);
-  TH1D * h_byChannel_20_low_23 = new TH2D("byChannel_20_low_23", "byChannel_20_low_23", 32, 0, 32);
-  TH1D * h_byChannel_20_peak_01 = new TH2D("byChannel_20_peak_01", "byChannel_20_peak_01", 32, 0, 32);
-  TH1D * h_byChannel_20_peak_12 = new TH2D("byChannel_20_peak_12", "byChannel_20_peak_12", 32, 0, 32);
-  TH1D * h_byChannel_20_peak_23 = new TH2D("byChannel_20_peak_23", "byChannel_20_peak_23", 32, 0, 32);
-  TH1D * h_byChannel_20_high_01 = new TH2D("byChannel_20_high_01", "byChannel_20_high_01", 32, 0, 32);
-  TH1D * h_byChannel_20_high_12 = new TH2D("byChannel_20_high_12", "byChannel_20_high_12", 32, 0, 32);
-  TH1D * h_byChannel_20_high_23 = new TH2D("byChannel_20_high_23", "byChannel_20_high_23", 32, 0, 32);
-
-  TH1D * h_byChannel_0_low_01 = new TH2D("byChannel_0_low_01", "byChannel_0_low_01", 32, 0, 32);
-  TH1D * h_byChannel_0_low_12 = new TH2D("byChannel_0_low_12", "byChannel_0_low_12", 32, 0, 32);
-  TH1D * h_byChannel_0_low_23 = new TH2D("byChannel_0_low_23", "byChannel_0_low_23", 32, 0, 32);
-  TH1D * h_byChannel_0_peak_01 = new TH2D("byChannel_0_peak_01", "byChannel_0_peak_01", 32, 0, 32);
-  TH1D * h_byChannel_0_peak_12 = new TH2D("byChannel_0_peak_12", "byChannel_0_peak_12", 32, 0, 32);
-  TH1D * h_byChannel_0_peak_23 = new TH2D("byChannel_0_peak_23", "byChannel_0_peak_23", 32, 0, 32);
-  TH1D * h_byChannel_0_high_01 = new TH2D("byChannel_0_high_01", "byChannel_0_high_01", 32, 0, 32);
-  TH1D * h_byChannel_0_high_12 = new TH2D("byChannel_0_high_12", "byChannel_0_high_12", 32, 0, 32);
-  TH1D * h_byChannel_0_high_23 = new TH2D("byChannel_0_high_23", "byChannel_0_high_23", 32, 0, 32);
+  TH1D * h_byChannel_0_low_01 = new TH1D("byChannel_0_low_01", "byChannel_0_low_01", 32, 0, 32);
+  TH1D * h_byChannel_0_low_12 = new TH1D("byChannel_0_low_12", "byChannel_0_low_12", 32, 0, 32);
+  TH1D * h_byChannel_0_low_23 = new TH1D("byChannel_0_low_23", "byChannel_0_low_23", 32, 0, 32);
+  TH1D * h_byChannel_0_peak_01 = new TH1D("byChannel_0_peak_01", "byChannel_0_peak_01", 32, 0, 32);
+  TH1D * h_byChannel_0_peak_12 = new TH1D("byChannel_0_peak_12", "byChannel_0_peak_12", 32, 0, 32);
+  TH1D * h_byChannel_0_peak_23 = new TH1D("byChannel_0_peak_23", "byChannel_0_peak_23", 32, 0, 32);
+  TH1D * h_byChannel_0_high_01 = new TH1D("byChannel_0_high_01", "byChannel_0_high_01", 32, 0, 32);
+  TH1D * h_byChannel_0_high_12 = new TH1D("byChannel_0_high_12", "byChannel_0_high_12", 32, 0, 32);
+  TH1D * h_byChannel_0_high_23 = new TH1D("byChannel_0_high_23", "byChannel_0_high_23", 32, 0, 32);
 
   for(int i = 0; i < tree0_low->GetEntries(); i++) {
     tree0_low->GetEntry(i);
@@ -353,19 +332,11 @@ void calibrationData(int board) {
         h_notSeen_20_low_01->Fill(spacing01_20);
         h_notSeen_20_low_12->Fill(spacing12_20);
         h_notSeen_20_low_23->Fill(spacing23_20);
-  
-        h_notSeen_0_low_01->Fill(spacing01_0);
-        h_notSeen_0_low_12->Fill(spacing12_0);
-        h_notSeen_0_low_23->Fill(spacing23_0);
       }
       else {
         h_seen_20_low_01->Fill(spacing01_20);
         h_seen_20_low_12->Fill(spacing12_20);
         h_seen_20_low_23->Fill(spacing23_20);
-
-        h_seen_0_low_01->Fill(spacing01_0);
-        h_seen_0_low_12->Fill(spacing12_0);
-        h_seen_0_low_23->Fill(spacing23_0);
       }
   
       break;
@@ -396,19 +367,11 @@ void calibrationData(int board) {
         h_notSeen_20_peak_01->Fill(spacing01_20);
         h_notSeen_20_peak_12->Fill(spacing12_20);
         h_notSeen_20_peak_23->Fill(spacing23_20);
-  
-        h_notSeen_0_peak_01->Fill(spacing01_0);
-        h_notSeen_0_peak_12->Fill(spacing12_0);
-        h_notSeen_0_peak_23->Fill(spacing23_0);
       }
       else {
         h_seen_20_peak_01->Fill(spacing01_20);
         h_seen_20_peak_12->Fill(spacing12_20);
         h_seen_20_peak_23->Fill(spacing23_20);
-
-        h_seen_0_peak_01->Fill(spacing01_0);
-        h_seen_0_peak_12->Fill(spacing12_0);
-        h_seen_0_peak_23->Fill(spacing23_0);
       }
   
       break;
@@ -439,19 +402,11 @@ void calibrationData(int board) {
         h_notSeen_20_high_01->Fill(spacing01_20);
         h_notSeen_20_high_12->Fill(spacing12_20);
         h_notSeen_20_high_23->Fill(spacing23_20);
-  
-        h_notSeen_0_high_01->Fill(spacing01_0);
-        h_notSeen_0_high_12->Fill(spacing12_0);
-        h_notSeen_0_high_23->Fill(spacing23_0);
       }
       else {
         h_seen_20_high_01->Fill(spacing01_20);
         h_seen_20_high_12->Fill(spacing12_20);
         h_seen_20_high_23->Fill(spacing23_20);
-
-        h_seen_0_high_01->Fill(spacing01_0);
-        h_seen_0_high_12->Fill(spacing12_0);
-        h_seen_0_high_23->Fill(spacing23_0);
       }
   
       break;
