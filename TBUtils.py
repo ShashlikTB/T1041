@@ -1,6 +1,13 @@
-import sys, bz2, inspect, re
+# Created 4/12/2014 B.Hirosky: Initial release
+
+import sys, bz2, inspect, re, time
 from commands import getoutput,getstatusoutput
 
+def hit_continue(msg='Hit any key to continue'):
+    print
+    print msg
+    sys.stdout.flush()  # not working!!!
+    raw_input('')
 
 # a simple command sting builder
 def ccat(*arg):
@@ -53,7 +60,7 @@ def TBOpen(fin):
 ##############################
 # data file parsers
 ##############################
-def ParsePADEdata(padeline):
+def ParsePadeData(padeline):
     padeline=padeline.split()
     pade_ts=long(padeline[0])
     pade_transfer_size=int(padeline[1]+padeline[2],16)
@@ -65,6 +72,15 @@ def ParsePADEdata(padeline):
     return (pade_ts,pade_transfer_size,pade_board_id,
             pade_hw_counter,pade_ch_number,eventNumber,waveform)
 
+def ParsePadeSpillHeader(padeline):
+#    if "WC" in padeline:
+#        timestr=padeline[padeline.index('at')+3:padeline.index('WC')].strip()
+#    else: timestr=padeline[padeline.index('at')+3:-1].strip()
+    timestr=padeline[padeline.index('at')+3:padeline.index('WC')].strip()
+    the_spill_pctime = time.mktime(time.strptime(timestr, "%m/%d/%Y %H:%M:%S %p"))  # time on PC
+    the_spill_ts =  the_spill_pctime          # time on WC controller (temporary)  UPDATE ME!
+    the_spill_number = int(padeline[padeline.index('num')+4:padeline.index('at')-5])
+    return(timestr,the_spill_pctime,the_spill_ts,the_spill_number)
 
 
 def ParsePadeHeader(padeline):

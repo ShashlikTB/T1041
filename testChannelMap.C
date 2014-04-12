@@ -1,3 +1,8 @@
+// Display geometrical mapping of shashlik modules and PADE channels
+// Usage: root -l testChannelMap.C+
+// Created 4/12/2014 B.Hirosky: Initial release
+
+
 #include "TH2I.h"
 #include "shashlik.h"
 #include "TStyle.h"
@@ -6,58 +11,51 @@
 using namespace std;
 
 void testChannelMap(){
+  cout<<"========================================================"<<endl;
+  cout<<"All views are looking towards the detector from UPSTREAM"<<endl;
+  cout<<"========================================================"<<endl;
+
   gStyle->SetOptStat(0);
   Mapper *mapper=Mapper::Instance();
-  TH2I *hModF=new TH2I("hmap","Modules Front",4,0.5,4.5,4,0.5,4.5);
-  TH2I *hModR=new TH2I("hmap","Modules Rear",4,0.5,4.5,4,0.5,4.5);
-  TH2I *hChanF=new TH2I("hmap","Channels Front",8,0.5,4.5,8,0.5,4.5);
-  TH2I *hChanR=new TH2I("hmap","Channels Rear",8,0.5,4.5,8,0.5,4.5);
+  TH2I *hModU=new TH2I("hModU","Modules UpSteam",4,0.5,4.5,4,0.5,4.5);
+  TH2I *hModD=new TH2I("hModD","Modules DownStream",4,0.5,4.5,4,0.5,4.5);
+  TH2I *hChanU=new TH2I("hChanU","Channels UpStream",8,0.5,4.5,8,0.5,4.5);
+  TH2I *hChanD=new TH2I("hChanD","Channels DownStream",8,0.5,4.5,8,0.5,4.5);
   TCanvas *c1=new TCanvas("maps","maps",800,800);
   c1->Divide(2,2);
 
-  for (int i=1; i<NMODULES+1; i++){
+  for (int i=1; i<=NMODULES; i++){
     int x,y;
     mapper->ModuleXY(i,x,y);
-    hModF->Fill(x,y,i);
-    hModR->Fill(x,y,-i);
+    hModU->Fill(x,y,-i);
+    hModD->Fill(x,y,i);
   }
   c1->cd(1);
-  hModF->Draw("text");
+  hModD->Draw("text");
   c1->cd(2);
-  hModR->Draw("text");
+  hModU->Draw("text");
 
   for (int i=0; i<NPADECHANNELS/2; i++){
-    // font
+    // downstream channels
     int channelID=FIBERMAP[i*4];
     int fiberID=FIBERMAP[i*4+1];
-    int module=fiberID/100;
-    int fiber=fiberID-module*100;
-    int ix,iy;
-    mapper->ModuleXY(module,ix,iy);
-    float x=ix, y=iy;
-    //   cout << channelID << " " << fiberID << " " << module << " " << fiber << " "
-    //	 << x << " " << y << endl;
-    if (fiber==1) {x-=0.25; y+=0.25;}
-    else if (fiber==2) {x+=0.25; y+=0.25;}
-    else if (fiber==3) {x+=0.25; y-=0.25;}
-    else if (fiber==4) {x-=0.25; y-=0.25;}
-    hChanF->Fill(x,y,channelID);
-    // rear
+    float x,y;
+    cout << i<<" "<< channelID << " " << fiberID << "  ";
+    mapper->FiberXY(fiberID, x, y);
+    cout << x << " " << y << endl;
+    hChanD->Fill(x,y,channelID);
+    // upstream channels
     channelID=FIBERMAP[i*4+2];
     fiberID=FIBERMAP[i*4+3];
-    module=fiberID/100;
-    fiber=fiberID-module*100;
-    mapper->ModuleXY(module,ix,iy);
-    if (fiber==1) {x-=0.25; y+=0.25;}
-    else if (fiber==2) {x+=0.25; y+=0.25;}
-    else if (fiber==3) {x+=0.25; y-=0.25;}
-    else if (fiber==4) {x-=0.25; y-=0.25;}
-    hChanR->Fill(x,y,channelID);
+
+    hChanU->Fill(x,y,channelID);
   }
+ 
+
   c1->cd(3);
-  hChanF->Draw("text");
+  hChanD->Draw("text");
   c1->cd(4);
-  hChanR->Draw("text");
+  hChanU->Draw("text");
 }
 
 
