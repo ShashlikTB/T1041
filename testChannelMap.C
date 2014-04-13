@@ -40,9 +40,9 @@ void testChannelMap(){
     int channelID=FIBERMAP[i*4];
     int fiberID=FIBERMAP[i*4+1];
     float x,y;
-    cout << i<<" "<< channelID << " " << fiberID << "  ";
+    //    cout << i<<" "<< channelID << " " << fiberID << "  ";
     mapper->FiberXY(fiberID, x, y);
-    cout << x << " " << y << endl;
+    //    cout << x << " " << y << endl;
     hChanD->Fill(x,y,channelID);
     // upstream channels
     channelID=FIBERMAP[i*4+2];

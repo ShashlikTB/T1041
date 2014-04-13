@@ -4,10 +4,10 @@
 #ifndef TBEVENT_H
 #define TBEVENT_H
 
-const Int_t N_PADE_CHANNELS=128;    // n.b. enlarge later for Chrenkov data
+#include "TH1F.h"
+
 const Int_t N_PADE_SAMPLES=120;     // fixed in FW
-
-
+const Int_t PADE_THRESHOLD=100;
 
 class PadeChannel : public TObject {
   ClassDef(PadeChannel,1); 
@@ -25,6 +25,7 @@ class PadeChannel : public TObject {
   Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
   Int_t GetModule();
   Int_t GetFiber();
+  void GetHist(TH1F* h);
 
   // private:
   ULong64_t     _ts;

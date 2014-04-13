@@ -18,12 +18,20 @@ Simple event display
 
 python calDisplay.py filename.root  # makes integrated display of hits
 
-root [0] gROOT.ProcessLine(".L TBEvent.cc+")
-root [1] gROOT.ProcessLine(".L calDisplay.cc+")
-# make integrated display
-root [2] calDisplay("rec_capture_20140413_003028.root")
-# display a paticule event in the tree
-root [2] calDisplay("rec_capture_20140413_003028.root",4)
+$ root -l 
+.L TBEvent.cc+
+.L calDisplay.cc+
+// make integrated display
+calDisplay("rec_capture_20140413_003028.root")
+// display a paticule event in the tree
+calDisplay("rec_capture_20140413_003028.root",4)
+
+
+Simple wave fom scanner
+=======================
+python waveViewer.py rec_capture_20140413_003028.root
+
+
 
 Run Jordan's WC display
 =======================

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "TTree.h"
 #include "TFile.h"
+#include "TString.h"
 #include "shashlik.h"
 
 #include "TBEvent.h"
@@ -80,6 +81,18 @@ Int_t PadeChannel::GetModule(){
   return 0;
 }
 Int_t PadeChannel::GetFiber(){return 0;}
+
+void PadeChannel::GetHist(TH1F *h){
+  TString ti;
+  ti.Form("Board %d, channel %d",GetBoardID(),GetChannelID());
+  h->Reset();
+  h->SetTitle(ti);
+  h->SetBins(N_PADE_SAMPLES,0,N_PADE_SAMPLES);
+  for (int i=0; i<N_PADE_SAMPLES; i++){
+    h->SetBinContent(i,_wform[i]);
+  }
+}
+
 
 
 void WCChannel::Dump() const {
