@@ -11,6 +11,49 @@
 
 const int MAXADC=4095;
 
+//void drawChannelMap(TH2I*& hModU, TH2I*& hModD, TH2I*& hChanU, TH2I*& hChanD){
+void drawChannelMap(TCanvas*& can) {
+
+  Mapper *mapper=Mapper::Instance();
+  TH2I *hModU=new TH2I("hModU_label","Modules UpSteam",4,0.5,4.5,4,0.5,4.5);
+  TH2I *hModD=new TH2I("hModD_label","Modules DownStream",4,0.5,4.5,4,0.5,4.5);
+  TH2I *hChanU=new TH2I("hChanU_label","Channels UpStream",8,0.5,4.5,8,0.5,4.5);
+  TH2I *hChanD=new TH2I("hChanD_label","Channels DownStream",8,0.5,4.5,8,0.5,4.5);
+
+  for (int i=1; i<=NMODULES; i++){
+    int x,y;
+    mapper->ModuleXY(i,x,y);
+    hModU->Fill(x,y,-i);
+    hModD->Fill(x,y,i);
+  }
+  can->cd(1);
+  hModD->Draw("text same");
+  can->cd(2);
+  hModU->Draw("text same");
+
+  for (int i=0; i<NPADECHANNELS/2; i++){
+    // downstream channels
+    int channelID=FIBERMAP[i*4];
+    int fiberID=FIBERMAP[i*4+1];
+    float x,y;
+    //    cout << i<<" "<< channelID << " " << fiberID << "  ";
+    mapper->FiberXY(fiberID, x, y);
+    //    cout << x << " " << y << endl;
+    hChanD->Fill(x,y,channelID);
+    // upstream channels
+    channelID=FIBERMAP[i*4+2];
+    fiberID=FIBERMAP[i*4+3];
+
+    hChanU->Fill(x,y,channelID);
+  }
+ 
+
+  can->cd(3);
+  hChanD->Draw("text same");
+  can->cd(4);
+  hChanU->Draw("text same");
+}
+
 // inputs data file and event in file to display (default is to integrate all)
 void calDisplay(TString fdat, int ndisplay=0){
   TFile *f = new TFile(fdat);
@@ -83,6 +126,8 @@ void calDisplay(TString fdat, int ndisplay=0){
   hChanD->Draw("colz");
   c1->cd(4)->SetGrid();
   hChanU->Draw("colz");
+
+  drawChannelMap(c1);
 }
 
 

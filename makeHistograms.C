@@ -118,7 +118,7 @@ void makeHistograms(TString input, bool twoPeaksPerTrigger){
       boardID_ = event->GetPadeChan(j).GetBoardID();
       channel_ = (j % 32);
 
-      UShort_t * wform=event->GetPadeChan(j).GetWform();
+      UShort_t * wform = event->GetPadeChan(j).GetWform();
       for (int k = 0; k < event->GetPadeChan(j).__SAMPLES(); k++){
         if(k >= firstLow && k <= firstHigh && wform[k] > firstPeak) {
 	  firstPeak = wform[k];
