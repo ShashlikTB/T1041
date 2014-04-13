@@ -114,24 +114,31 @@ void calDisplay(TString fdat, int ndisplay=0){
       Int_t maxTime = 0;
 
       // find the value to plot (just using the peak sample value now)
-       for (Int_t k = 0; k < event->GetPadeChan(j).__SAMPLES(); k++){
-	 if (wform[k] > 200 && wform[k] < MAXADC && wform[k] > max) {
-	   max = wform[k];
-	   maxTime = k;
-	 }
+      bool overMax = false;
+      for (Int_t k = 0; k < event->GetPadeChan(j).__SAMPLES(); k++){
+	if(wform[k] > MAXADC) {
+	  overMax = true;
+	  break;
+	}
+	if (wform[k] > 200 && wform[k] > max) {
+	  max = wform[k];
+	  maxTime = k;
+	}
       }
 
+      if(overMax) continue;
+      
       ///////////////////////////////////////////////////////////////
       int module,fiber;
       mapper->Pade2Fiber(pch.GetBoardID(), pch.GetChannelID(), module, fiber);
       int xm,ym;
       mapper->ModuleXY(module,xm,ym);
       if (module<0) {
-	hModU->Fill(xm,ym,max);
+	hModU->Fill(xm, ym, max);
 	hModU_time->Fill(xm, ym, maxTime);
       }
       else {
-	hModD->Fill(xm,ym,max);
+	hModD->Fill(xm, ym, max);
 	hModD_time->Fill(xm, ym, maxTime);
       }
       
@@ -139,11 +146,11 @@ void calDisplay(TString fdat, int ndisplay=0){
       int fiberID=module*100+fiber;
       mapper->FiberXY(fiberID, xf, yf);
       if (module<0) {
-	hChanU->Fill(xf,yf,max);
+	hChanU->Fill(xf, yf, max);
 	hChanU_time->Fill(xf, yf, maxTime);
       }
       else {
-	hChanD->Fill(xf,yf,max);
+	hChanD->Fill(xf, yf, max);
 	hChanD_time->Fill(xf, yf, maxTime);
       }
 
