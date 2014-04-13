@@ -27,8 +27,10 @@ void drawChannelMap(TCanvas*& can) {
     hModD->Fill(x,y,i);
   }
   can->cd(1);
+  hModD->SetMarkerSize(3);
   hModD->Draw("text same");
   can->cd(2);
+  hModU->SetMarkerSize(3);
   hModU->Draw("text same");
 
   for (int i=0; i<NPADECHANNELS/2; i++){
@@ -49,35 +51,47 @@ void drawChannelMap(TCanvas*& can) {
  
 
   can->cd(3);
+  hChanD->SetMarkerSize(1.5);
   hChanD->Draw("text same");
   can->cd(4);
+  hChanU->SetMarkerSize(1.5);
   hChanU->Draw("text same");
 }
 
 // inputs data file and event in file to display (default is to integrate all)
 void calDisplay(TString fdat, int ndisplay=0){
+
+  gStyle->SetOptStat(0);
+
   TFile *f = new TFile(fdat);
   if (f->IsZombie()){
     cout << "Cannot open file: " << fdat << endl;
     return;
   }
+
   Bool_t singleEvent=ndisplay>0;
   Mapper *mapper=Mapper::Instance();
   TH2F *hModU=new TH2F("hModU","Modules UpSteam RO",4,0.5,4.5,4,0.5,4.5);
   TH2F *hModD=new TH2F("hModD","Modules DownStream RO",4,0.5,4.5,4,0.5,4.5);
   TH2F *hChanU=new TH2F("hChanU","Channels UpStream RO",8,0.5,4.5,8,0.5,4.5);
   TH2F *hChanD=new TH2F("hChanD","Channels DownStream RO",8,0.5,4.5,8,0.5,4.5);
+
   hModU->SetMinimum(0);
   hModD->SetMinimum(0);
   hChanU->SetMinimum(0);
   hChanU->SetMinimum(0);
+
   if (singleEvent){
     hModU->SetMaximum(MAXADC*4);
     hModD->SetMaximum(MAXADC*4);
     hChanU->SetMaximum(MAXADC);
     hChanU->SetMaximum(MAXADC);
   }
-  gStyle->SetOptStat(0);
+  
+  TH2F * hModD_time = (TH2F*)hModU->Clone("hModD_time");
+  TH2F * hModU_time = (TH2F*)hModU->Clone("hModU_time");
+  TH2F * hChanD_time = (TH2F*)hModU->Clone("hChanD_time");
+  TH2F * hChanU_time = (TH2F*)hModU->Clone("hChanU_time");
 
   TBEvent *event = new TBEvent();
   TTree *t1041 = (TTree*)f->Get("t1041"); 
@@ -91,33 +105,64 @@ void calDisplay(TString fdat, int ndisplay=0){
   }
   for (Int_t i=start; i<end; i++) {
     t1041->GetEntry(i);
-    for (Int_t j=0; j<event->NPadeChan(); j++){
-      PadeChannel pch=event->GetPadeChan(j);
+    for (Int_t j = 0; j < event->NPadeChan(); j++){
+      PadeChannel pch = event->GetPadeChan(j);
+
       // loop over ADC samples
-      UShort_t* wform=pch.GetWform();
-      UShort_t max=0;
+      UShort_t * wform = pch.GetWform();
+      UShort_t max = 0;
+      Int_t maxTime = 0;
+
       // find the value to plot (just using the peak sample value now)
-       for (Int_t k=0; k<event->GetPadeChan(j).__SAMPLES(); k++){
-	if (wform[k]>200 && wform[k]>max) max=wform[k];
+       for (Int_t k = 0; k < event->GetPadeChan(j).__SAMPLES(); k++){
+	 if (wform[k] > 200 && wform[k] < MAXADC && wform[k] > max) {
+	   max = wform[k];
+	   maxTime = k;
+	 }
       }
+
       ///////////////////////////////////////////////////////////////
       int module,fiber;
       mapper->Pade2Fiber(pch.GetBoardID(), pch.GetChannelID(), module, fiber);
       int xm,ym;
       mapper->ModuleXY(module,xm,ym);
-      if (module<0) hModU->Fill(xm,ym,max);
-      else hModD->Fill(xm,ym,max);
+      if (module<0) {
+	hModU->Fill(xm,ym,max);
+	hModU_time->Fill(xm, ym, maxTime);
+      }
+      else {
+	hModD->Fill(xm,ym,max);
+	hModD_time->Fill(xm, ym, maxTime);
+      }
       
       float xf,yf;
       int fiberID=module*100+fiber;
       mapper->FiberXY(fiberID, xf, yf);
-      if (module<0) hChanU->Fill(xf,yf,max);
-      else hChanD->Fill(xf,yf,max);
+      if (module<0) {
+	hChanU->Fill(xf,yf,max);
+	hChanU_time->Fill(xf, yf, maxTime);
+      }
+      else {
+	hChanD->Fill(xf,yf,max);
+	hChanD_time->Fill(xf, yf, maxTime);
+      }
 
     }
   }
-  TCanvas *c1=new TCanvas("c","c",800,800);
+
+  hModD->Scale(1./hModD->GetEntries());
+  hModU->Scale(1./hModU->GetEntries());
+  hChanD->Scale(1./hChanD->GetEntries());
+  hChanU->Scale(1./hChanU->GetEntries());
+  
+  hModD_time->Scale(1./hModD_time->GetEntries());
+  hModU_time->Scale(1./hModU_time->GetEntries());
+  hChanD_time->Scale(1./hChanD_time->GetEntries());
+  hChanU_time->Scale(1./hChanU_time->GetEntries());
+
+  TCanvas *c1=new TCanvas("c1","Average Peak Height",800,800);
   c1->Divide(2,2);
+
   c1->cd(1);
   hModD->Draw("colz");
   c1->cd(2);
@@ -126,8 +171,21 @@ void calDisplay(TString fdat, int ndisplay=0){
   hChanD->Draw("colz");
   c1->cd(4)->SetGrid();
   hChanU->Draw("colz");
-
   drawChannelMap(c1);
+
+  TCanvas * c2 = new TCanvas("c2", "Average Peak Timing", 800, 800);
+  c2->Divide(2, 2);
+
+  c2->cd(1);
+  hModD_time->Draw("colz");
+  c2->cd(2);
+  hModU_time->Draw("colz");
+  c2->cd(3)_time->SetGrid();
+  hChanD_time->Draw("colz");
+  c2->cd(4)_time->SetGrid();
+  hChanU_time->Draw("colz");
+  drawChannelMap(c2);
+
 }
 
 
