@@ -13,7 +13,7 @@
 const int MAXADC=4095;
 
 // inputs data file and event in file to display (default is to integrate all)
-void waveViewer(TString fdat){
+void waveViewer(TString fdat, Int_t board=-1, Int_t channel=-1){
   TFile *f = new TFile(fdat);
   if (f->IsZombie()){
     cout << "Cannot open file: " << fdat << endl;
@@ -32,10 +32,12 @@ void waveViewer(TString fdat){
     t1041->GetEntry(i);
     for (Int_t j=0; j<event->NPadeChan(); j++){
       PadeChannel pch=event->GetPadeChan(j);
+      if (board>0 && (int)pch.GetBoardID()!=board) continue;
+      if (channel>0 && (int)pch.GetChannelID()!=channel) continue;
       pch.GetHist(hw);
       hw->Draw();
       c->Update();
-      gSystem->Sleep(100);
+      gSystem->Sleep(1000);
     }
   }
 }

@@ -84,7 +84,7 @@ Int_t PadeChannel::GetFiber(){return 0;}
 
 void PadeChannel::GetHist(TH1F *h){
   TString ti;
-  ti.Form("Board %d, channel %d",GetBoardID(),GetChannelID());
+  ti.Form("Event %d : Board %d, channel %d",_eventnum, GetBoardID(),GetChannelID());
   h->Reset();
   h->SetTitle(ti);
   h->SetBins(N_PADE_SAMPLES,0,N_PADE_SAMPLES);
