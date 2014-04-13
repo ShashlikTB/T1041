@@ -4,9 +4,6 @@
 # https://drive.google.com/folderview?id=0B4UcugGDz9LwSzlBaDA4TEQ4Z1k&usp=sharing
 # https://cdcvs.fnal.gov/redmine/projects/ftbfwirechamberdaq/wiki/Processed_hit_data_description
 #
-# display integrated hits data for Shashlik calorimeter
-# this is just a wrapper for the ROOT C++ code
-# will replace w/ a simple GUI
 # Created 04/12/2014 B.Hirosky: Initial release
 ###############################################################################
 
@@ -81,8 +78,10 @@ padeDict={}  # dictionary holds PADE header data for a spill, use PADE ID as key
 def fillTree():
     logger.Info("Write spill",the_spill_number)
     for ievt in range(len(eventDict)):
-        tbevent.cp(eventDict[ievt])     
-        BeamTree.Fill()
+        if ievt in eventDict:
+            tbevent.cp(eventDict[ievt])     
+            BeamTree.Fill()
+        else: logger.Warn("Skip write of event in master",ievt,"of",len(eventDict))
 
 lastEvent=-1
 nSpills=0
@@ -216,10 +215,9 @@ while 1:
     else: # new event in a slave
         if not eventNumber in eventDict:
             logger.Warn("Event count mismatch. Slave:",
-                        pade_board_id,"reports",eventNumber-nEventsInSpill+1,
-                        "extra events in the spill")
+                        pade_board_id,"reports event",eventNumber,"not present in master.",
+                        "Total events in master:",nEventsInSpill)
             writeChan=False
-
     if writeChan:
         eventDict[eventNumber].FillPadeChannel(pade_ts, pade_transfer_size, pade_board_id, 
                                                pade_hw_counter, pade_ch_number, 

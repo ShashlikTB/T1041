@@ -9,17 +9,31 @@
 #include "TCanvas.h"
 #include "TStyle.h"
 
-void calDisplay(TString fdat){
+const int MAXADC=4095;
+
+// inputs data file and event in file to display (default is to integrate all)
+void calDisplay(TString fdat, int ndisplay=0){
   TFile *f = new TFile(fdat);
   if (f->IsZombie()){
     cout << "Cannot open file: " << fdat << endl;
     return;
   }
+  Bool_t singleEvent=ndisplay>0;
   Mapper *mapper=Mapper::Instance();
   TH2F *hModU=new TH2F("hModU","Modules UpSteam RO",4,0.5,4.5,4,0.5,4.5);
   TH2F *hModD=new TH2F("hModD","Modules DownStream RO",4,0.5,4.5,4,0.5,4.5);
   TH2F *hChanU=new TH2F("hChanU","Channels UpStream RO",8,0.5,4.5,8,0.5,4.5);
   TH2F *hChanD=new TH2F("hChanD","Channels DownStream RO",8,0.5,4.5,8,0.5,4.5);
+  hModU->SetMinimum(0);
+  hModD->SetMinimum(0);
+  hChanU->SetMinimum(0);
+  hChanU->SetMinimum(0);
+  if (singleEvent){
+    hModU->SetMaximum(MAXADC*4);
+    hModD->SetMaximum(MAXADC*4);
+    hChanU->SetMaximum(MAXADC);
+    hChanU->SetMaximum(MAXADC);
+  }
   gStyle->SetOptStat(0);
 
   TBEvent *event = new TBEvent();
@@ -27,15 +41,23 @@ void calDisplay(TString fdat){
   TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
 
-  for (Int_t i=0; i< t1041->GetEntries(); i++) {
+  Int_t start=0; Int_t end=t1041->GetEntries();
+  if (singleEvent) {
+    start=ndisplay-1;
+    end=ndisplay;
+  }
+  for (Int_t i=start; i<end; i++) {
     t1041->GetEntry(i);
     for (Int_t j=0; j<event->NPadeChan(); j++){
       PadeChannel pch=event->GetPadeChan(j);
       // loop over ADC samples
       UShort_t* wform=pch.GetWform();
       UShort_t max=0;
-      for (Int_t k=0; k<event->GetPadeChan(j).__SAMPLES(); k++)
-	if (wform[k]>max) max=wform[k];
+      // find the value to plot (just using the peak sample value now)
+       for (Int_t k=0; k<event->GetPadeChan(j).__SAMPLES(); k++){
+	if (wform[k]>200 && wform[k]>max) max=wform[k];
+      }
+      ///////////////////////////////////////////////////////////////
       int module,fiber;
       mapper->Pade2Fiber(pch.GetBoardID(), pch.GetChannelID(), module, fiber);
       int xm,ym;
@@ -62,5 +84,6 @@ void calDisplay(TString fdat){
   c1->cd(4)->SetGrid();
   hChanU->Draw("colz");
 }
+
 
 
