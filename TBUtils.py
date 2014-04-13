@@ -89,7 +89,7 @@ def ParsePadeHeader(padeline):
     boardID=int(padeline[5])
     status=int(padeline[7],16)
     trgStatus=int(padeline[9],16)
-    events=int(padeline[13])
+    events=int(padeline[13],16)
     memReg=int(padeline[16],16)
     trigPtr=int(padeline[19],16)
     pTemp=int(padeline[21],16)

@@ -9,7 +9,8 @@
 #include "TCanvas.h"
 #include "TStyle.h"
 
-void calDisplay(TString fdat){
+// inputs data file and event in file to display (default is to integrate all)
+void calDisplay(TString fdat, int ndisplay=0){
   TFile *f = new TFile(fdat);
   if (f->IsZombie()){
     cout << "Cannot open file: " << fdat << endl;
@@ -27,15 +28,22 @@ void calDisplay(TString fdat){
   TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
 
-  for (Int_t i=0; i< t1041->GetEntries(); i++) {
+  Int_t start=0; Int_t end=t1041->GetEntries();
+  if (ndisplay>0) {
+    start=ndisplay-1;
+    end=ndisplay;
+  }
+  for (Int_t i=start; i<end; i++) {
     t1041->GetEntry(i);
     for (Int_t j=0; j<event->NPadeChan(); j++){
       PadeChannel pch=event->GetPadeChan(j);
       // loop over ADC samples
       UShort_t* wform=pch.GetWform();
       UShort_t max=0;
+      // find the value to plot (just using the peak sample value now)
       for (Int_t k=0; k<event->GetPadeChan(j).__SAMPLES(); k++)
-	if (wform[k]>max) max=wform[k];
+	if (wform[k]>1000 && wform[k]>max) max=wform[k];
+      ///////////////////////////////////////////////////////////////
       int module,fiber;
       mapper->Pade2Fiber(pch.GetBoardID(), pch.GetChannelID(), module, fiber);
       int xm,ym;

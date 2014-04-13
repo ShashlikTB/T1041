@@ -1,0 +1,33 @@
+Make a tree
+===========
+python TBNtupleMaker [OPTION] PADE_FILE [WC_FILE]
+    -n max_events  : Maximum (requested) number of events to read"
+    print "                       Always read at least 1 spill"
+
+** No assosication of WC events and PADE events is made yet
+** Must give a PADE file, WC file is optional
+
+
+Display channel mapping
+======================
+root -l testChannelMap.C+
+
+
+Simple event display
+====================
+
+python calDisplay.py filename.root  # makes integrated display of hits
+
+root [0] gROOT.ProcessLine(".L TBEvent.cc+")
+root [1] gROOT.ProcessLine(".L calDisplay.cc+")
+# make integrated display
+root [2] calDisplay("rec_capture_20140413_003028.root")
+# display a paticule event in the tree
+root [2] calDisplay("rec_capture_20140413_003028.root",4)
+
+Run Jordan's WC display
+=======================
+root[0] gSystem->Load("TBEvent_cc.so")
+root[1] .L WC_Reader.C+
+root[2] WC_Reader("rec_capture_20140413_003028.root")
+
