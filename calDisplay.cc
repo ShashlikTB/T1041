@@ -180,9 +180,9 @@ void calDisplay(TString fdat, int ndisplay=0){
   hModD_time->Draw("colz");
   c2->cd(2);
   hModU_time->Draw("colz");
-  c2->cd(3)_time->SetGrid();
+  c2->cd(3)->SetGrid();
   hChanD_time->Draw("colz");
-  c2->cd(4)_time->SetGrid();
+  c2->cd(4)->SetGrid();
   hChanU_time->Draw("colz");
   drawChannelMap(c2);
 
