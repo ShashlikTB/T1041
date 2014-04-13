@@ -1,9 +1,12 @@
+// Created 4/12/2014 B.Hirosky: Initial release
+
+
 #ifndef TBEVENT_H
 #define TBEVENT_H
 
-const Int_t N_PADE_CHANNELS=128;   // n.b. enlarge later for Chrenkov data
-const Int_t N_PADE_SAMPLES=120;     // n.b. may be too small
-const Int_t MAX_WC_HITS=512;         // n.b. may be too small
+const Int_t N_PADE_CHANNELS=128;    // n.b. enlarge later for Chrenkov data
+const Int_t N_PADE_SAMPLES=120;     // fixed in FW
+
 
 
 class PadeChannel : public TObject {
@@ -34,11 +37,34 @@ class PadeChannel : public TObject {
   Int_t         _flag;
 };
 
+class PadeBoard : public TObject{
+  ClassDef(PadeBoard,1); 
+ public:
+  PadeBoard(){;}
+ PadeBoard(Bool_t master, UShort_t board, UShort_t stat,
+	    UShort_t tstat, UShort_t events, UShort_t mreg,
+	    UShort_t pTrg, UShort_t pTmp, UShort_t sTmp):
+  _isMaster(master), _boardID(board), _status(stat), _trgStatus(tstat), 
+    _events(events), _memReg(mreg), _trigPtr(pTrg), 
+    _pTemp(pTmp), _sTemp(sTmp){;}
+
+ private:
+  Bool_t _isMaster;
+  UShort_t _boardID;
+  UShort_t _status;
+  UShort_t _trgStatus;
+  UShort_t _events;
+  UShort_t _memReg;
+  UShort_t _trigPtr;
+  UShort_t _pTemp;
+  UShort_t _sTemp;
+};
+
 class WCChannel : public TObject{
   ClassDef(WCChannel,1); 
  public:
   WCChannel(){;}
- WCChannel(UChar_t num, UChar_t wire, UShort_t count) :
+  WCChannel(UChar_t num, UChar_t wire, UShort_t count) :
   _tdcNumber(num), _tdcWire(wire), _tdcCount(count){;}
   void Dump() const;
 
@@ -59,21 +85,16 @@ public:
   void ResetData();
   void cp(const TBEvent &e);  // copy constructor interfce for python, ugh!
 
-  // getters
+  // getters (tbd - return const references, not copies, where appopriate)
   Int_t NPadeChan() const {return padeChannel.size();}
   PadeChannel GetPadeChan(const int idx) const {return padeChannel[idx];}
   PadeChannel GetLastPadeChan() const {return padeChannel.back();}
   Int_t GetSpillNumber() const {return spillNumber;}
-  ULong64_t GetPCTime() const {return pcTime;}
-  ULong64_t GetSpillTime() const {return spillTime;}
   WCChannel GetWCChan(const int idx) {return wc[idx];}
   Int_t GetWCHits() const {return wc.size();}
 
-
   // setters
   void SetSpill(Int_t s) {spillNumber=s;}
-  void SetPCTime(ULong64_t t) {pcTime=t;}
-  void SetSpillTime(ULong64_t t) {spillTime=t;}
   void SetEventNumber(Int_t n) {eventNumber=n;}
   void SetPadeChannel(const PadeChannel p, Int_t i) {padeChannel[i]=p;}
   void FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
@@ -81,15 +102,30 @@ public:
 		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform);
   void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
 
+private:
+  Int_t         spillNumber;
+  Int_t         eventNumber;              // from pade
+  vector<PadeChannel> padeChannel;
+  vector<WCChannel> wc; 
+};
 
+class TBSpill : public TObject {
+  ClassDef(TBSpill,1);  // Spill header info
+public:
+  Int_t GetSpillNumber() const {return spillNumber;}
+  ULong64_t GetPCTime() const {return pcTime;}
+  ULong64_t GetSpillTime() const {return spillTime;}
+  // setters
+  void SetSpill(Int_t s) {spillNumber=s;}
+  void SetPCTime(ULong64_t t) {pcTime=t;}
+  void SetSpillTime(ULong64_t t) {spillTime=t;}
 private:
   Int_t         spillNumber;
   ULong64_t     pcTime;                   // spill time stamp from PC
   ULong64_t     spillTime;                // spill time stamp from WC controller
-  Int_t         eventNumber;              // from pade
-  vector<PadeChannel> padeChannel;       
-  vector<WCChannel> wc;   
+  vector<PadeBoard> padeBoard;
 };
+
 
 
 #endif

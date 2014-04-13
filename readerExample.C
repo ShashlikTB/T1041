@@ -1,4 +1,6 @@
 // ftp://root.cern.ch/root/doc/ROOTUsersGuideHTML/ch12s17.html
+// Created 4/12/2014 B.Hirosky: Initial release
+
 
 void readerExample(){
   if (!TClassTable::GetDict("TBEvent")) {
@@ -9,12 +11,12 @@ void readerExample(){
   // create a pointer to an event object for reading the branch values.
   TBEvent *event = new TBEvent();
 
-  TBranch *bevent = BeamData->GetBranch("event");
+  TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
 
   // loop over events
-  for (Int_t i=0; i< BeamData->GetEntries(); i++) {
-    BeamData->GetEntry(i);
+  for (Int_t i=0; i< t1041->GetEntries(); i++) {
+    t1041->GetEntry(i);
     // loop over PADE channels
     cout << (dec) << "Spill number: " << event->GetSpillNumber()<<endl;
     for (Int_t j=0; j<event->NPadeChan(); j++){

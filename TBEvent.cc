@@ -1,3 +1,4 @@
+// Created 4/12/2014 B.Hirosky: Initial release
 
 #include <iostream>
 #include <stdio.h>
@@ -36,8 +37,6 @@ void TBEvent::AddWCHit(UChar_t num, UChar_t wire, UShort_t count){
 
 void TBEvent::cp(const TBEvent &e){
   spillNumber = e.spillNumber;
-  pcTime = e.pcTime;
-  spillTime = e.spillTime;
   eventNumber = e.eventNumber;
   padeChannel = e.padeChannel;
   wc = e.wc;
