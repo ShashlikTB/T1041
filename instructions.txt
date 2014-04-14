@@ -35,7 +35,9 @@ python waveViewer.py rec_capture_20140413_003028.root
 
 Run Jordan's WC display
 =======================
-root[0] gSystem->Load("TBEvent_cc.so")
-root[1] .L WC_Reader.C+
-root[2] WC_Reader("rec_capture_20140413_003028.root")
+root[0] gSystem->Load("TBEvent_cc.so")  
+root[1] .L WC_Reader.C+  
+root[2] WC_Reader("rec_capture_20140413_003028.root")  
+OR
+python WC_Reader.py file.root
 
