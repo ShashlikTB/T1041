@@ -1,9 +1,9 @@
-#include "calDisplay.h"
+#include "dqmPlots.h"
 
 const UShort_t threshold = 200;
 
 // inputs data file and event in file to display (default is to integrate all)
-void calDisplay(TString fdat, int ndisplay = -1){
+void dqmDisplay(TString fdat, int ndisplay = -1){
 
   gStyle->SetOptStat(0);
 
@@ -32,15 +32,18 @@ void calDisplay(TString fdat, int ndisplay = -1){
   TH2F * hChanU_time = (TH2F*)channelHistogram(true, "Timing", 0, -1);
   TH2F * hChanD_time = (TH2F*)channelHistogram(false, "Timing", 0, -1);
 
-  TH2F * hModU_nhits = (TH2F*)moduleHistogram(true, "nHits", 0, t1041->GetEntries() / 64);
-  TH2F * hModD_nhits = (TH2F*)moduleHistogram(false, "nHits", 0, t1041->GetEntries() / 64);
-  TH2F * hChanU_nhits = (TH2F*)channelHistogram(true, "nHits", 0, t1041->GetEntries() / 128);
-  TH2F * hChanD_nhits = (TH2F*)channelHistogram(false, "nHits", 0, t1041->GetEntries() / 128);
+  int nPerMod = t1041->GetEntries() / 64;
+  int nPerFiber = t1041->GetEntries() / 128;
 
-  TH2F * hModU_ntriggers = (TH2F*)moduleHistogram(true, "nTriggers", 0, t1041->GetEntries() / 64);
-  TH2F * hModD_ntriggers = (TH2F*)moduleHistogram(false, "nTriggers", 0, t1041->GetEntries() / 64);
-  TH2F * hChanU_ntriggers = (TH2F*)channelHistogram(true, "nTriggers", 0, t1041->GetEntries() / 128);
-  TH2F * hChanD_ntriggers = (TH2F*)channelHistogram(false, "nTriggers", 0, t1041->GetEntries() / 128);
+  TH2F * hModU_nhits = (TH2F*)moduleHistogram(true, "nHits", nPerMod * .85, nPerMod * 1.1);
+  TH2F * hModD_nhits = (TH2F*)moduleHistogram(false, "nHits", nPerMod * .85, nPerMod * 1.1);
+  TH2F * hChanU_nhits = (TH2F*)channelHistogram(true, "nHits", nPerFiber * .25, nPerFiber * 1.1);
+  TH2F * hChanD_nhits = (TH2F*)channelHistogram(false, "nHits", nPerFiber * .25, nPerFiber * 1.1);
+
+  TH2F * hModU_ntriggers = (TH2F*)moduleHistogram(true, "nTriggers", nPerMod * .95, nPerMod * 1.3);
+  TH2F * hModD_ntriggers = (TH2F*)moduleHistogram(false, "nTriggers", nPerMod * .95, nPerMod * 1.3);
+  TH2F * hChanU_ntriggers = (TH2F*)channelHistogram(true, "nTriggers", nPerFiber * .95, nPerFiber * 1.3);
+  TH2F * hChanD_ntriggers = (TH2F*)channelHistogram(false, "nTriggers", nPerFiber * .95, nPerFiber * 1.3);
 
   Int_t start = 0; 
   Int_t end = t1041->GetEntries();
@@ -141,7 +144,7 @@ void calDisplay(TString fdat, int ndisplay = -1){
 
 }
 
-void displaySingleChannel(TString fdat, int board, int channel) {
+void displaySingleChannelWaveforms(TString fdat, int board, int channel) {
 
   gStyle->SetOptStat(0);
 
@@ -198,7 +201,7 @@ void displaySingleChannel(TString fdat, int board, int channel) {
   
 }
 
-void displaySingleEvent(TString fdat, int display) {
+void displaySingleEventWaveforms(TString fdat, int display) {
 
   gStyle->SetOptStat(0);
 

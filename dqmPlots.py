@@ -19,21 +19,9 @@ runDat=sys.argv[1]
 print "Processing file:",runDat
 
 gROOT.ProcessLine(".L TBEvent.cc+")
-gROOT.ProcessLine(".L calDisplay.cc+")
+gROOT.ProcessLine(".L dqm/dqmPlots.cc+")
 
-calDisplay(runDat)
-
+dqmDisplay(runDat)
+displayAllBigPeaks(runDat)
 
 hit_continue('Hit any key to exit')
-
-
-
-
-
-
-
-
-
-
-
-
