@@ -18,11 +18,10 @@ void calDisplay(TString fdat, int ndisplay=0){
   TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
 
-  Bool_t singleEvent = ndisplay >= 0;
+  Bool_t singleEvent = (ndisplay >= 0);
 
   Mapper * mapper = Mapper::Instance();
 
-  channelHistogram(bool isUpstream, TString title, Float_t zmin, Float_t zmax);
   TH2F * hModU = (TH2F*)moduleHistogram(true, "RO", threshold, MAXADC);
   TH2F * hModD = (TH2F*)moduleHistogram(false, "RO", threshold, MAXADC);
   TH2F * hChanU = (TH2F*)channelHistogram(true, "RO", threshold, MAXADC);
@@ -30,17 +29,17 @@ void calDisplay(TString fdat, int ndisplay=0){
 
   TH2F * hModU_time = (TH2F*)moduleHistogram(true, "Timing", 0, -1);
   TH2F * hModD_time = (TH2F*)moduleHistogram(false, "Timing", 0, -1);
-  TH2F * hModU_time = (TH2F*)channelHistogram(true, "Timing", 0, -1);
+  TH2F * hChanU_time = (TH2F*)channelHistogram(true, "Timing", 0, -1);
   TH2F * hChanD_time = (TH2F*)channelHistogram(false, "Timing", 0, -1);
 
   TH2F * hModU_nhits = (TH2F*)moduleHistogram(true, "nHits", -1, t1041->GetEntries() / 16);
   TH2F * hModD_nhits = (TH2F*)moduleHistogram(false, "nHits", -1, t1041->GetEntries() / 16);
-  TH2F * hModU_nhits = (TH2F*)channelHistogram(true, "nHits", -1, t1041->GetEntries() / 64);
+  TH2F * hChanU_nhits = (TH2F*)channelHistogram(true, "nHits", -1, t1041->GetEntries() / 64);
   TH2F * hChanD_nhits = (TH2F*)channelHistogram(false, "nHits", -1, t1041->GetEntries() / 64);
 
   TH2F * hModU_ntriggers = (TH2F*)moduleHistogram(true, "nTriggers", -1, t1041->GetEntries() * 4);
   TH2F * hModD_ntriggers = (TH2F*)moduleHistogram(false, "nTriggers", -1, t1041->GetEntries() * 4);
-  TH2F * hModU_ntriggers = (TH2F*)channelHistogram(true, "nTriggers", -1, t1041->GetEntries());
+  TH2F * hChanU_ntriggers = (TH2F*)channelHistogram(true, "nTriggers", -1, t1041->GetEntries());
   TH2F * hChanD_ntriggers = (TH2F*)channelHistogram(false, "nTriggers", -1, t1041->GetEntries());
 
   Int_t start = 0; 

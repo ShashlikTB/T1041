@@ -19,6 +19,9 @@ TH2F * moduleHistogram(bool isUpstream, TString title, UShort_t zmin, UShort_t z
 
   TH2F * h = new TH2F(hName, hTitle, 4, 0.5, 4.5, 4, 0.5, 4.5);
 
+  if(zmin > 0) h->SetMinimum(zmin);
+  if(zmax > 0) h->SetMaximum(zmax);
+
   return h;
 }
 
