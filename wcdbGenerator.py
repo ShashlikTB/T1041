@@ -31,6 +31,7 @@ def generateSpillDB(wcHandle, dbHandle):
                 if currentSpill: 
 			tstring = time.strptime(' '.join([currentSpill['date'], currentSpill['time']]) , "%d-%m-%y %H:%M:%S")
 			currentSpill['unixtime'] = time.mktime(tstring)
+
 			spills.append(currentSpill)
 			print "New Spill position: %s" % (pos - len(line))
 		currentSpill  =  {
@@ -55,6 +56,10 @@ def generateSpillDB(wcHandle, dbHandle):
 		    else:
 			    t = ':'.join(data[1:])
 		    currentSpill['time'] = t
+	    elif data[0] == 'EVENT':
+		    if currentSpill['date'] is None:
+			    logger.Warn('Bad Data File no SDATE/TIME...skipping')
+			    return
 
 	    if (pos > 0) and currentSpill == None:
 		    logger.Warn("Bad File...skipping")
