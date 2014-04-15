@@ -9,6 +9,7 @@
 #include "TH2F.h"
 #include "TCanvas.h"
 #include "TStyle.h"
+#include "TText.h"
 
 const int MAXADC=4095;
 
@@ -50,7 +51,7 @@ TH2F * channelHistogram(bool isUpstream, TString title, int zmin, int zmax, bool
   return h;
 }
 
-void drawChannelMap(TCanvas*& can) {
+void drawChannelMap(TCanvas*& can, int nEvents, int singleEventNumber) {
 
   Mapper * mapper=Mapper::Instance();
 
@@ -94,9 +95,25 @@ void drawChannelMap(TCanvas*& can) {
   can->cd(4);
   hChanU->SetMarkerSize(1.5);
   hChanU->Draw("text same");
+
+  TPad * extraPad = new TPad(TString(can->GetName()) + "_extraPad", "a transparent pad", 0, 0, 1, 1);
+  extraPad->SetFillStyle(4000);
+  extraPad->Draw();
+  extraPad->cd();
+
+  TText *t1 = new TText();
+  t1->SetTextFont(62);
+  t1->SetTextColor(1);
+  t1->SetTextAlign(21);
+  t1->SetTextSize(0.06);
+  if(singleEventNumber < 0) t1->DrawTextNDC(0, 1, TString(Form("%d", nEvents)) + " Events");
+  else t1->DrawTextNDC(0, 1, "Event " + TString(Form("%d", singleEventNumber)));;
+
 }
 
-void drawCalorimeterPlot(TString name, TH2F * hModU, TH2F * hModD, TH2F * hChanU, TH2F * hChanD) {
+void drawCalorimeterPlot(TString name, 
+			 TH2F * hModU, TH2F * hModD, TH2F * hChanU, TH2F * hChanD,
+			 int nEvents, int singleEventNumber) {
 
   TCanvas * canv =new TCanvas("canv_"+name, name, 2000, 2000);
   canv->Divide(2,2);
@@ -113,7 +130,7 @@ void drawCalorimeterPlot(TString name, TH2F * hModU, TH2F * hModD, TH2F * hChanU
   canv->cd(4)->SetGrid();
   hChanU->Draw("colz");
 
-  drawChannelMap(canv);
+  drawChannelMap(canv, nEvents, singleEventNumber);
 
   canv->SaveAs(name+".gif");
 

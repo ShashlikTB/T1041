@@ -134,13 +134,21 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
   hChanD_time->Divide(hChanD_nhits);
   hChanU_time->Divide(hChanU_nhits);
 
-  drawCalorimeterPlot("AvgPeakHeight", hModU, hModD, hChanU, hChanD);
+  drawCalorimeterPlot("AvgPeakHeight", 
+		      hModU, hModD, hChanU, hChanD,
+		      t1041->GetEntries() / 128, ndisplay);
 
-  drawCalorimeterPlot("AvgPeakTiming", hModU_time, hModD_time, hChanU_time, hChanD_time);
+  drawCalorimeterPlot("AvgPeakTiming",
+		      hModU_time, hModD_time, hChanU_time, hChanD_time,
+		      t1041->GetEntries() / 128, ndisplay);
 
-  drawCalorimeterPlot("NHits", hModU_nhits, hModD_nhits, hChanU_nhits, hChanD_nhits);
+  drawCalorimeterPlot("NHits", 
+		      hModU_nhits, hModD_nhits, hChanU_nhits, hChanD_nhits,
+		      t1041->GetEntries() / 128, ndisplay);
 
-  drawCalorimeterPlot("NTriggers", hModU_ntriggers, hModD_ntriggers, hChanU_ntriggers, hChanD_ntriggers);
+  drawCalorimeterPlot("NTriggers",
+		      hModU_ntriggers, hModD_ntriggers, hChanU_ntriggers, hChanD_ntriggers,
+		      t1041->GetEntries() / 128, ndisplay);
 
 }
 

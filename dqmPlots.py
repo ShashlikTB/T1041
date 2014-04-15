@@ -15,10 +15,11 @@ print "\nProcessing file:",runDat
 gROOT.SetBatch()
 gROOT.ProcessLine(".L TBEvent.cc+")
 gROOT.ProcessLine(".L dqm/dqmPlots.C+")
+gROOT.ProcessLine(".L WC_Reader.C+")
 
 if len(sys.argv) < 3:
     dqmDisplay(runDat)
     displayAllBigPeaks(runDat)
+    WC_Reader(runDat)
 else:
     dqmDisplay(runDat, int(sys.argv[2]))
-
