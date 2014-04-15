@@ -300,7 +300,12 @@ void displayAllBigPeaks(TString fdat) {
 
     if(waves[ui]->GetMaximum() > 1500) {
       waves[ui]->SetLineColor(nBigPeaks+2);
+      waves[ui]->SetLineWidth(3);
       nBigPeaks++;
+    }
+    else {
+      waves[ui]->SetLineColor(kBlack);
+      waves[ui]->SetLineStyle(3);
     }
 
     waves[ui]->Draw("same");
