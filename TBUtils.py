@@ -45,7 +45,8 @@ class Logger():
 #WC Database lookup
 #Simple, Naive version 
 def wcLookup(unixtime, filename):
-    if type(unixtime) is 'float':
+    if type(unixtime) is float:
+
         unixtime = str(unixtime)
 
     try:
@@ -54,8 +55,13 @@ def wcLookup(unixtime, filename):
             split = re.split(' +', line.strip())
             if split[0] == unixtime:
                 print "matched time! spill at byte offset: %s" % split[-1:][0]
+                return (split[3], int(split[4]))
+
+
 
     except IOError as e:
         print "Failed to open file %s due to %s" % (filename, e)
             
+
+    return None 
 
