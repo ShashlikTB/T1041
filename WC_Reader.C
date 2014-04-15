@@ -168,7 +168,7 @@ void WC_Reader(TString filename="outputNtuple.root"){
     BeamData->GetEntry(i);
     for(int j = 0; j < event->GetWCHits(); j++){
       Int_t module        = event->GetWCChan(j).GetTDCNum();
-      Int_t channelNumber = event->GetWCChan(j).GetWire();
+      //Int_t channelNumber = event->GetWCChan(j).GetWire();
       Int_t channelCount  = event->GetWCChan(j).GetCount();   
       for(Int_t moduleNo=0;moduleNo<16;moduleNo++){
         if(module == moduleNo+1){
