@@ -8,14 +8,17 @@ if len(sys.argv)<2:
     logger.Fatal("No ROOT file given")
 
 
-runDat=sys.argv[1]
+runDat = sys.argv[1]
 
-print "Processing file:",runDat
+print "\nProcessing file:",runDat
 
+gROOT.SetBatch()
 gROOT.ProcessLine(".L TBEvent.cc+")
 gROOT.ProcessLine(".L dqm/dqmPlots.C+")
 
-dqmDisplay(runDat)
-displayAllBigPeaks(runDat)
+if len(sys.argv) < 3:
+    dqmDisplay(runDat)
+    displayAllBigPeaks(runDat)
+else:
+    dqmDisplay(runDat, int(sys.argv[2]))
 
-hit_continue('Hit any key to exit')

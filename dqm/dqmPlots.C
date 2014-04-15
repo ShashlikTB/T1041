@@ -22,28 +22,28 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
 
   Mapper * mapper = Mapper::Instance();
 
-  TH2F * hModU = (TH2F*)moduleHistogram(true, "RO", threshold, 2500);
-  TH2F * hModD = (TH2F*)moduleHistogram(false, "RO", threshold, 2500);
-  TH2F * hChanU = (TH2F*)channelHistogram(true, "RO", threshold, 2500);
-  TH2F * hChanD = (TH2F*)channelHistogram(false, "RO", threshold, 2500);
+  TH2F * hModU = (TH2F*)moduleHistogram(true, "RO", threshold, 2500, singleEvent);
+  TH2F * hModD = (TH2F*)moduleHistogram(false, "RO", threshold, 2500, singleEvent);
+  TH2F * hChanU = (TH2F*)channelHistogram(true, "RO", threshold, 2500, singleEvent);
+  TH2F * hChanD = (TH2F*)channelHistogram(false, "RO", threshold, 2500, singleEvent);
 
-  TH2F * hModU_time = (TH2F*)moduleHistogram(true, "Timing", 0, -1);
-  TH2F * hModD_time = (TH2F*)moduleHistogram(false, "Timing", 0, -1);
-  TH2F * hChanU_time = (TH2F*)channelHistogram(true, "Timing", 0, -1);
-  TH2F * hChanD_time = (TH2F*)channelHistogram(false, "Timing", 0, -1);
+  TH2F * hModU_time = (TH2F*)moduleHistogram(true, "Timing", 0, -1, singleEvent);
+  TH2F * hModD_time = (TH2F*)moduleHistogram(false, "Timing", 0, -1, singleEvent);
+  TH2F * hChanU_time = (TH2F*)channelHistogram(true, "Timing", 0, -1, singleEvent);
+  TH2F * hChanD_time = (TH2F*)channelHistogram(false, "Timing", 0, -1, singleEvent);
 
   int nPerMod = t1041->GetEntries() / 64;
   int nPerFiber = t1041->GetEntries() / 128;
 
-  TH2F * hModU_nhits = (TH2F*)moduleHistogram(true, "nHits", nPerMod * .85, nPerMod * 1.1);
-  TH2F * hModD_nhits = (TH2F*)moduleHistogram(false, "nHits", nPerMod * .85, nPerMod * 1.1);
-  TH2F * hChanU_nhits = (TH2F*)channelHistogram(true, "nHits", nPerFiber * .25, nPerFiber * 1.1);
-  TH2F * hChanD_nhits = (TH2F*)channelHistogram(false, "nHits", nPerFiber * .25, nPerFiber * 1.1);
+  TH2F * hModU_nhits = (TH2F*)moduleHistogram(true, "nHits", nPerMod * .85, nPerMod * 1.1, singleEvent);
+  TH2F * hModD_nhits = (TH2F*)moduleHistogram(false, "nHits", nPerMod * .85, nPerMod * 1.1, singleEvent);
+  TH2F * hChanU_nhits = (TH2F*)channelHistogram(true, "nHits", nPerFiber * .25, nPerFiber * 1.1, singleEvent);
+  TH2F * hChanD_nhits = (TH2F*)channelHistogram(false, "nHits", nPerFiber * .25, nPerFiber * 1.1, singleEvent);
 
-  TH2F * hModU_ntriggers = (TH2F*)moduleHistogram(true, "nTriggers", nPerMod * .95, nPerMod * 1.3);
-  TH2F * hModD_ntriggers = (TH2F*)moduleHistogram(false, "nTriggers", nPerMod * .95, nPerMod * 1.3);
-  TH2F * hChanU_ntriggers = (TH2F*)channelHistogram(true, "nTriggers", nPerFiber * .95, nPerFiber * 1.3);
-  TH2F * hChanD_ntriggers = (TH2F*)channelHistogram(false, "nTriggers", nPerFiber * .95, nPerFiber * 1.3);
+  TH2F * hModU_ntriggers = (TH2F*)moduleHistogram(true, "nTriggers", nPerMod * .95, nPerMod * 1.3, singleEvent);
+  TH2F * hModD_ntriggers = (TH2F*)moduleHistogram(false, "nTriggers", nPerMod * .95, nPerMod * 1.3, singleEvent);
+  TH2F * hChanU_ntriggers = (TH2F*)channelHistogram(true, "nTriggers", nPerFiber * .95, nPerFiber * 1.3, singleEvent);
+  TH2F * hChanD_ntriggers = (TH2F*)channelHistogram(false, "nTriggers", nPerFiber * .95, nPerFiber * 1.3, singleEvent);
 
   Int_t start = 0; 
   Int_t end = t1041->GetEntries();

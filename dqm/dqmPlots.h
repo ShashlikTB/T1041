@@ -12,28 +12,40 @@
 
 const int MAXADC=4095;
 
-TH2F * moduleHistogram(bool isUpstream, TString title, int zmin, int zmax) {
+TH2F * moduleHistogram(bool isUpstream, TString title, int zmin, int zmax, bool singleEvent) {
 
   TString hName = isUpstream ? "hModU_"+title : "hModD_"+title;
   TString hTitle = isUpstream ? "Modules Upstream "+title : "Modules Downstream "+title;
 
   TH2F * h = new TH2F(hName, hTitle, 4, 0.5, 4.5, 4, 0.5, 4.5);
-
-  if(zmin >= 0) h->SetMinimum(zmin);
-  if(zmax >= 0) h->SetMaximum(zmax);
+  
+  if(singleEvent) {
+    h->SetMinimum(0);
+    h->SetMaximum(2);
+  }
+  else {
+    if(zmin >= 0) h->SetMinimum(zmin);
+    if(zmax >= 0) h->SetMaximum(zmax);
+  }
 
   return h;
 }
 
-TH2F * channelHistogram(bool isUpstream, TString title, int zmin, int zmax) {
+TH2F * channelHistogram(bool isUpstream, TString title, int zmin, int zmax, bool singleEvent) {
 
   TString hName = isUpstream ? "hChanU_"+title : "hChanD_"+title;
   TString hTitle = isUpstream ? "Channels Upstream "+title : "Channels Downstream "+title;
 
   TH2F * h = new TH2F(hName, hTitle, 8, 0.5, 4.5, 8, 0.5, 4.5);
 
-  if(zmin >= 0) h->SetMinimum(zmin);
-  if(zmax >= 0) h->SetMaximum(zmax);
+  if(singleEvent) {
+    h->SetMinimum(0);
+    h->SetMaximum(2);
+  }
+  else {
+    if(zmin >= 0) h->SetMinimum(zmin);
+    if(zmax >= 0) h->SetMaximum(zmax);
+  }
 
   return h;
 }
