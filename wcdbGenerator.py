@@ -78,7 +78,7 @@ parser.add_argument('-x', metavar='extension', type=str, nargs=1,
                     default = ['*.bz2'],
                     help="Filename extension to use")
 parser.add_argument('-output', metavar='o', type=str, nargs=1, 
-                    default = ['wcdb.csv'],
+                    default = ['wcdb.txt'],
                     help="Filename of output database")
 
 

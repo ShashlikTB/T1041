@@ -44,7 +44,7 @@ class Logger():
 
 #WC Database lookup
 #Simple, Naive version 
-def wcLookup(filename, unixtime):
+def wcLookup(unixtime, filename):
     if type(unixtime) is 'float':
         unixtime = str(unixtime)
 
