@@ -46,8 +46,8 @@ void calDisplay(TString fdat, int ndisplay=0){
   Int_t end = t1041->GetEntries();
 
   if (singleEvent) {
-    start=ndisplay;
-    end=ndisplay + 1;
+    start = ndisplay;
+    end = ndisplay + 1;
   }
 
   for (Int_t i=start; i<end; i++) {
@@ -276,21 +276,23 @@ void displayAllBigPeaks(TString fdat) {
   TH1F * wave = new TH1F("wave", "wave", 120, 0, 120);
 
   int nplots = 0;
-  t1041->GetEntry(display);
 
-  for(int i = 0; i < event->NPadeChan(); i++) {
-    PadeChannel pch = event->GetPadeChan(i);
-
-    pch.GetHist(wave);
-
-    if(wave->GetMaximum() < threshold) continue;
-
-    nplots++;
-    TH1F * wavecopy = (TH1F*)wave->Clone("wave_"+TString(Form("%d", nplots)));
-    waves.push_back(wavecopy);
+  for (Int_t i = 0; i < t1041->GetEntries(); i++) {
+    t1041->GetEntry(i);
+    
+    for (int j = 0; j < event->NPadeChan(); j++){
+      PadeChannel pch = event->GetPadeChan(j);
+      
+      pch.GetHist(wave);
+      
+      nplots++;
+      TH1F * wavecopy = (TH1F*)wave->Clone("wave_"+TString(Form("%d", nplots)));
+      waves.push_back(wavecopy);
+      
+    }
     
   }
-    
+
   int nBigPeaks = 0;
   for(unsigned int ui = 0; ui < waves.size(); ui++) {
     waves[ui]->SetLineColor(nBigPeaks+2);
