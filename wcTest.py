@@ -5,7 +5,7 @@ from operator import itemgetter, attrgetter
 
 p = wcParser('wc.dat')
 spills = p.spills
-spills = sorted(spills, key=itemgetter('id'))
+#spills = sorted(spills, key=itemgetter('id'))
 for spill in spills:
     print "Spill %s has %s events." % (spill['id'], len(spill['events']))
     events = spill['events']
@@ -18,5 +18,7 @@ for spill in spills:
         print 'Modules %s' % event['modules'].keys()
     for event in events:
         print "Event %s, Start Time: %s" % (event['id'], event['time'][1])
+
+
 
         
