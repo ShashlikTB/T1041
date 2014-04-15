@@ -284,6 +284,8 @@ void displayAllBigPeaks(TString fdat) {
       PadeChannel pch = event->GetPadeChan(j);
       
       pch.GetHist(wave);
+
+      if(wave->GetMaximum() < 800) continue;
       
       nplots++;
       TH1F * wavecopy = (TH1F*)wave->Clone("wave_"+TString(Form("%d", nplots)));
@@ -293,12 +295,8 @@ void displayAllBigPeaks(TString fdat) {
     
   }
 
-  int nBigPeaks = 0;
-  for(unsigned int ui = 0; ui < waves.size(); ui++) {
-    waves[ui]->SetLineColor(nBigPeaks+2);
-    nBigPeaks++;
-
-    waves[ui]->Draw("same");
-  }
+  for(unsigned int ui = 0; ui < waves.size(); ui++) waves[ui]->Draw("same");
+  
+  canv->SaveAs("AllBigPeaks.gif");
   
 }
