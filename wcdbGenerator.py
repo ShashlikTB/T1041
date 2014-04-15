@@ -4,6 +4,8 @@ import re
 import glob
 import os 
 import os.path
+import datetime
+import time
 from TBUtils import * 
 logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 
@@ -27,10 +29,13 @@ def generateSpillDB(wcHandle, dbHandle):
 
             if data[0] == 'SPILL': 
                 if currentSpill: 
+                    tstring = time.strptime(' '.join([currentSpill['date'], currentSpill['time']]) , "%d-%m-%y %H:%M:%S")
+                    currentSpill['unixtime'] = time.mktime(tstring)
                     spills.append(currentSpill)
                 print "New Spill position: %s" % (pos - len(line))
                 currentSpill  =  {
                     'pos': pos-len(line), 
+                    'unixtime':None,
                     'date': None,
                     'time': None,
                     }
@@ -52,12 +57,15 @@ def generateSpillDB(wcHandle, dbHandle):
                     t = ':'.join(data[1:])
                 currentSpill['time'] = t
 
+
+        
         if currentSpill:
+            tstring = time.strptime(' '.join([currentSpill['date'], currentSpill['time']]) , "%d-%m-%y %H:%M:%S")
+            currentSpill['unixtime'] = time.mktime(tstring)
             spills.append(currentSpill)
 
-        print len(spills)
-        for spill in spills: 
-            outputLine = "%s %s, %s, %s\r\n" % (spill['date'], spill['time'], filename, spill['pos'])
+        for spill in spills:
+            outputLine = "%s    %s    %s    %s    %s\r\n" % (spill['unixtime'], spill['date'], spill['time'], os.path.abspath(filename), spill['pos'])
             dbHandle.write(outputLine)
 
 

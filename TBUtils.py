@@ -1,4 +1,5 @@
 import sys
+import re 
 from commands import getoutput,getstatusoutput
 
 #def INFO(*arg):
@@ -39,3 +40,22 @@ class Logger():
         print "="*40
         print " WARNING Summary (end)"
         print "="*40        
+
+
+#WC Database lookup
+#Simple, Naive version 
+def wcLookup(filename, unixtime):
+    if type(unixtime) is 'float':
+        unixtime = str(unixtime)
+
+    try:
+        handle = open(filename, 'r')
+        for line in handle:
+            split = re.split(' +', line.strip())
+            if split[0] == unixtime:
+                print "matched time! spill at byte offset: %s" % split[-1:][0]
+
+    except IOError as e:
+        print "Failed to open file %s due to %s" % (filename, e)
+            
+
