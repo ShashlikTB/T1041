@@ -170,6 +170,7 @@ while 1:
     if newMasterEvent:
         nEventsTot=nEventsTot+1
         nEventsInSpill=nEventsInSpill+1
+
         if eventNumber%100==0:
             print "Event in spill",the_spill_number,"(",eventNumber,")  / total", nEventsTot
 
@@ -182,6 +183,7 @@ while 1:
 
         # read WC data (hack for now)
         foundWC=False;
+
         if haveWC:
             # read one WC event 
             endOfEvent=0

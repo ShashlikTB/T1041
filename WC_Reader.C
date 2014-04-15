@@ -168,7 +168,7 @@ void WC_Reader(TString filename="outputNtuple.root"){
     BeamData->GetEntry(i);
     for(int j = 0; j < event->GetWCHits(); j++){
       Int_t module        = event->GetWCChan(j).GetTDCNum();
-      Int_t channelNumber = event->GetWCChan(j).GetWire();
+      //Int_t channelNumber = event->GetWCChan(j).GetWire();
       Int_t channelCount  = event->GetWCChan(j).GetCount();   
       for(Int_t moduleNo=0;moduleNo<16;moduleNo++){
         if(module == moduleNo+1){
@@ -179,7 +179,7 @@ void WC_Reader(TString filename="outputNtuple.root"){
       }
     }
   }
-  
+
   /// FIT TIMING PEAKS TO GAUSSIAN ///
   int mean[16]={0};
   for(Int_t drawG=0; drawG<16; ++drawG){  
@@ -348,6 +348,8 @@ void WC_Reader(TString filename="outputNtuple.root"){
     }
   }// Event loop ends
   
+  C->SaveAs("TDC_timing.gif");
+
   /// DRAW ALL EVENT DISPLAY PLOTS ///
   // Scatter plot for only one hit in WC1 and WC2
   TCanvas *Q = new TCanvas("Q","WC Scatter Plot for WC1 and WC2",1200,900);
@@ -358,6 +360,9 @@ void WC_Reader(TString filename="outputNtuple.root"){
   Q->cd(2);
   WC2_Beam->SetMarkerColor(4);
   WC2_Beam->Draw();
+
+  Q->SaveAs("wc_scatterPlot.gif");
+
   // Timing plots
   TCanvas *R = new TCanvas("R","WC timing counts for WC1 and WC2",1200,900);
   R->Divide(2,1);
@@ -365,6 +370,9 @@ void WC_Reader(TString filename="outputNtuple.root"){
     R->cd(k+1);
     WC_Timing[k]->Draw("COLZ");
   }
+
+  R->SaveAs("wc_timingCounts.gif");
+
   // Superposition of In Time and Out of Time
   TCanvas *J = new TCanvas("J","WC Scatter Plot - Superposition",1200,900);
   J->Divide(2,2);
@@ -383,6 +391,11 @@ void WC_Reader(TString filename="outputNtuple.root"){
     WCO[j]->Draw();
     WC[j]->Draw("same");
   }
+
+  J->SaveAs("wc_scatterPlot_superposition.gif");
+  D->SaveAs("wc_scatterPlot_inTime.gif");
+  G->SaveAs("wc_scatterPlot_outOfTime.gif");
+
   // Timing difference plots
   TCanvas *T = new TCanvas("T","WC timing difference plots",1200,900);
   T->Divide(2,2);
@@ -398,6 +411,9 @@ void WC_Reader(TString filename="outputNtuple.root"){
   T->cd(4);
   WC_TimDiff_YX->SetLineColor(4);
   WC_TimDiff_YX->Draw();
+
+  T->SaveAs("wc_timingDifference.gif");
+
   // Shashlik face and Scinitllator plots
   TCanvas *W = new TCanvas("W","Beam Tracks",1200,900);
   W->Divide(2,2);
@@ -420,6 +436,8 @@ void WC_Reader(TString filename="outputNtuple.root"){
   gStyle->SetOptStat("");
   WC1_Beam->SetMarkerColor(4);
   WC1_Beam->Draw("COLZ");
+
+  W->SaveAs("beamTracks.gif");
 
   f->Close(); 
   A->cd();

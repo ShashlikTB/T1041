@@ -16,16 +16,11 @@ root -l testChannelMap.C+
 Simple event display
 ====================
 
-python calDisplay.py filename.root  # makes integrated display of hits
+# Make plots averaged over all events -- saves .gif files
+python dqmPlots.py filename.root
 
-$ root -l 
-.L TBEvent.cc+
-.L calDisplay.cc+
-// make integrated display
-calDisplay("rec_capture_20140413_003028.root")
-// display a paticule event in the tree
-calDisplay("rec_capture_20140413_003028.root",4)
-
+# Make plots for a single event -- saves .gif files
+python dqmPlots.py filename.root eventNumber
 
 Simple wave fom scanner
 =======================
