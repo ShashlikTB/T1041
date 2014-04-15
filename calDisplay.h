@@ -12,28 +12,28 @@
 
 const int MAXADC=4095;
 
-TH2F * moduleHistogram(bool isUpstream, TString title, UShort_t zmin, UShort_t zmax) {
+TH2F * moduleHistogram(bool isUpstream, TString title, int zmin, int zmax) {
 
   TString hName = isUpstream ? "hModU_"+title : "hModD_"+title;
   TString hTitle = isUpstream ? "Modules Upstream "+title : "Modules Downstream "+title;
 
   TH2F * h = new TH2F(hName, hTitle, 4, 0.5, 4.5, 4, 0.5, 4.5);
 
-  if(zmin > 0) h->SetMinimum(zmin);
-  if(zmax > 0) h->SetMaximum(zmax);
+  if(zmin >= 0) h->SetMinimum(zmin);
+  if(zmax >= 0) h->SetMaximum(zmax);
 
   return h;
 }
 
-TH2F * channelHistogram(bool isUpstream, TString title, UShort_t zmin, UShort_t zmax) {
+TH2F * channelHistogram(bool isUpstream, TString title, int zmin, int zmax) {
 
   TString hName = isUpstream ? "hChanU_"+title : "hChanD_"+title;
   TString hTitle = isUpstream ? "Channels Upstream "+title : "Channels Downstream "+title;
 
   TH2F * h = new TH2F(hName, hTitle, 8, 0.5, 4.5, 8, 0.5, 4.5);
 
-  if(zmin > 0) h->SetMinimum(zmin);
-  if(zmax > 0) h->SetMaximum(zmax);
+  if(zmin >= 0) h->SetMinimum(zmin);
+  if(zmax >= 0) h->SetMaximum(zmax);
 
   return h;
 }
@@ -86,7 +86,7 @@ void drawChannelMap(TCanvas*& can) {
 
 void drawCalorimeterPlot(TString name, TH2F * hModU, TH2F * hModD, TH2F * hChanU, TH2F * hChanD) {
 
-  TCanvas * canv =new TCanvas("canv_"+name, name, 800, 800);
+  TCanvas * canv =new TCanvas("canv_"+name, name, 2000, 2000);
   canv->Divide(2,2);
 
   canv->cd(1);

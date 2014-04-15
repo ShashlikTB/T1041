@@ -3,7 +3,7 @@
 const UShort_t threshold = 200;
 
 // inputs data file and event in file to display (default is to integrate all)
-void calDisplay(TString fdat, int ndisplay=0){
+void calDisplay(TString fdat, int ndisplay = -1){
 
   gStyle->SetOptStat(0);
 
@@ -22,25 +22,25 @@ void calDisplay(TString fdat, int ndisplay=0){
 
   Mapper * mapper = Mapper::Instance();
 
-  TH2F * hModU = (TH2F*)moduleHistogram(true, "RO", threshold, MAXADC);
-  TH2F * hModD = (TH2F*)moduleHistogram(false, "RO", threshold, MAXADC);
-  TH2F * hChanU = (TH2F*)channelHistogram(true, "RO", threshold, MAXADC);
-  TH2F * hChanD = (TH2F*)channelHistogram(false, "RO", threshold, MAXADC);
+  TH2F * hModU = (TH2F*)moduleHistogram(true, "RO", threshold, 2500);
+  TH2F * hModD = (TH2F*)moduleHistogram(false, "RO", threshold, 2500);
+  TH2F * hChanU = (TH2F*)channelHistogram(true, "RO", threshold, 2500);
+  TH2F * hChanD = (TH2F*)channelHistogram(false, "RO", threshold, 2500);
 
   TH2F * hModU_time = (TH2F*)moduleHistogram(true, "Timing", 0, -1);
   TH2F * hModD_time = (TH2F*)moduleHistogram(false, "Timing", 0, -1);
   TH2F * hChanU_time = (TH2F*)channelHistogram(true, "Timing", 0, -1);
   TH2F * hChanD_time = (TH2F*)channelHistogram(false, "Timing", 0, -1);
 
-  TH2F * hModU_nhits = (TH2F*)moduleHistogram(true, "nHits", -1, t1041->GetEntries() / 16);
-  TH2F * hModD_nhits = (TH2F*)moduleHistogram(false, "nHits", -1, t1041->GetEntries() / 16);
-  TH2F * hChanU_nhits = (TH2F*)channelHistogram(true, "nHits", -1, t1041->GetEntries() / 64);
-  TH2F * hChanD_nhits = (TH2F*)channelHistogram(false, "nHits", -1, t1041->GetEntries() / 64);
+  TH2F * hModU_nhits = (TH2F*)moduleHistogram(true, "nHits", 0, t1041->GetEntries() / 64);
+  TH2F * hModD_nhits = (TH2F*)moduleHistogram(false, "nHits", 0, t1041->GetEntries() / 64);
+  TH2F * hChanU_nhits = (TH2F*)channelHistogram(true, "nHits", 0, t1041->GetEntries() / 128);
+  TH2F * hChanD_nhits = (TH2F*)channelHistogram(false, "nHits", 0, t1041->GetEntries() / 128);
 
-  TH2F * hModU_ntriggers = (TH2F*)moduleHistogram(true, "nTriggers", -1, t1041->GetEntries() * 4);
-  TH2F * hModD_ntriggers = (TH2F*)moduleHistogram(false, "nTriggers", -1, t1041->GetEntries() * 4);
-  TH2F * hChanU_ntriggers = (TH2F*)channelHistogram(true, "nTriggers", -1, t1041->GetEntries());
-  TH2F * hChanD_ntriggers = (TH2F*)channelHistogram(false, "nTriggers", -1, t1041->GetEntries());
+  TH2F * hModU_ntriggers = (TH2F*)moduleHistogram(true, "nTriggers", 0, t1041->GetEntries() / 64);
+  TH2F * hModD_ntriggers = (TH2F*)moduleHistogram(false, "nTriggers", 0, t1041->GetEntries() / 64);
+  TH2F * hChanU_ntriggers = (TH2F*)channelHistogram(true, "nTriggers", 0, t1041->GetEntries() / 128);
+  TH2F * hChanD_ntriggers = (TH2F*)channelHistogram(false, "nTriggers", 0, t1041->GetEntries() / 128);
 
   Int_t start = 0; 
   Int_t end = t1041->GetEntries();
@@ -68,12 +68,15 @@ void calDisplay(TString fdat, int ndisplay=0){
 	  overMax = true;
 	  break;
 	}
-	if (wform[k] > threshold && wform[k] > max) {
+	if (wform[k] > max) {
 	  max = wform[k];
 	  maxTime = k;
 	  nMaximumsFound++;
 	}
       }
+
+      if(overMax) continue;
+      if(nMaximumsFound == 120) continue;
 
       ///////////////////////////////////////////////////////////////
       int module,fiber;
@@ -94,11 +97,9 @@ void calDisplay(TString fdat, int ndisplay=0){
 	hChanD_ntriggers->Fill(xf, yf);
       }
 
-      if(overMax) continue;
-      if(nMaximumsFound == 120) continue;
       if(max <= threshold) continue;
 
-      if (module<0) {
+      if (module < 0) {
 	hModU->Fill(xm, ym, max);
 	hModU_time->Fill(xm, ym, maxTime);
 	hModU_nhits->Fill(xm, ym);
@@ -155,7 +156,7 @@ void displaySingleChannel(TString fdat, int board, int channel) {
   TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
 
-  TCanvas * canv = new TCanvas("canv", "canv", 800, 800);
+  TCanvas * canv = new TCanvas("canv", "canv", 2000, 2000);
   canv->cd();
 
   TH1F * dummy = new TH1F("dummy", "dummy", 120, 0, 120);
@@ -212,7 +213,7 @@ void displaySingleEvent(TString fdat, int display) {
   TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
 
-  TCanvas * canv = new TCanvas("canv", "canv", 800, 800);
+  TCanvas * canv = new TCanvas("canv", "canv", 2000, 2000);
   canv->cd();
 
   TH1F * dummy = new TH1F("dummy", "dummy", 120, 0, 120);
@@ -264,14 +265,7 @@ void displayAllBigPeaks(TString fdat) {
   TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
 
-  TCanvas * canv = new TCanvas("canv", "canv", 800, 800);
-  canv->cd();
-
-  TH1F * dummy = new TH1F("dummy", "dummy", 120, 0, 120);
-  dummy->GetYaxis()->SetRangeUser(0, 2500);
-  dummy->Draw();
-        
-  vector<TH1F*> waves;
+  vector<TH1F*> waves_112, waves_113, waves_115, waves_116;
 
   TH1F * wave = new TH1F("wave", "wave", 120, 0, 120);
 
@@ -289,28 +283,97 @@ void displayAllBigPeaks(TString fdat) {
       
       nplots++;
       TH1F * wavecopy = (TH1F*)wave->Clone("wave_"+TString(Form("%d", nplots)));
-      waves.push_back(wavecopy);
+
+      int board = (int)pch.GetBoardID();
+
+      if(board == 112) waves_112.push_back(wavecopy);
+      else if(board == 113) waves_113.push_back(wavecopy);
+      else if(board == 115) waves_115.push_back(wavecopy);
+      else if(board == 116) waves_116.push_back(wavecopy);
       
     }
     
   }
 
-  int nBigPeaks = 0;
-  for(unsigned int ui = 0; ui < waves.size(); ui++) {
+  TCanvas * canv = new TCanvas("canv", "canv", 2000, 2000);
+  canv->Divide(2,2);
 
-    if(waves[ui]->GetMaximum() > 1500) {
-      waves[ui]->SetLineColor(nBigPeaks+2);
-      waves[ui]->SetLineWidth(3);
-      nBigPeaks++;
+  canv->cd(1);
+  
+  TH1F * dummy_112 = new TH1F("dummy_112", "Board 112", 120, 0, 120);
+  dummy_112->GetYaxis()->SetRangeUser(90, 2200);
+  dummy_112->Draw();
+
+  for(unsigned int ui = 0; ui < waves_112.size(); ui++) {
+
+    if(waves_112[ui]->GetMaximum() > 1500) {
+      waves_112[ui]->SetLineColor(kRed);
+      //waves_112[ui]->SetLineWidth(3);
     }
     else {
-      waves[ui]->SetLineColor(kBlack);
-      waves[ui]->SetLineStyle(3);
+      waves_112[ui]->SetLineColor(kBlack);
     }
 
-    waves[ui]->Draw("same");
+    waves_112[ui]->Draw("same");
+  }
+
+  canv->cd(2);
+
+  TH1F * dummy_113 = new TH1F("dummy_113", "Board 113", 120, 0, 120);
+  dummy_113->GetYaxis()->SetRangeUser(90, 2200);
+  dummy_113->Draw();
+
+  for(unsigned int ui = 0; ui < waves_113.size(); ui++) {
+
+    if(waves_113[ui]->GetMaximum() > 1500) {
+      waves_113[ui]->SetLineColor(kRed);
+      //waves_113[ui]->SetLineWidth(3);
+    }
+    else {
+      waves_113[ui]->SetLineColor(kBlack);
+    }
+
+    waves_113[ui]->Draw("same");
+  }
+
+  canv->cd(3);
+
+  TH1F * dummy_115 = new TH1F("dummy_115", "Board 115", 120, 0, 120);
+  dummy_115->GetYaxis()->SetRangeUser(90, 2200);
+  dummy_115->Draw();
+
+  for(unsigned int ui = 0; ui < waves_115.size(); ui++) {
+
+    if(waves_115[ui]->GetMaximum() > 1500) {
+      waves_115[ui]->SetLineColor(kRed);
+      //waves_115[ui]->SetLineWidth(3);
+    }
+    else {
+      waves_115[ui]->SetLineColor(kBlack);
+    }
+
+    waves_115[ui]->Draw("same");
   }
   
+  canv->cd(4);
+
+  TH1F * dummy_116 = new TH1F("dummy_116", "Board 116", 120, 0, 120);
+  dummy_116->GetYaxis()->SetRangeUser(90, 2200);
+  dummy_116->Draw();
+
+  for(unsigned int ui = 0; ui < waves_116.size(); ui++) {
+
+    if(waves_116[ui]->GetMaximum() > 1500) {
+      waves_116[ui]->SetLineColor(kRed);
+      //waves_116[ui]->SetLineWidth(3);
+    }
+    else {
+      waves_116[ui]->SetLineColor(kBlack);
+    }
+
+    waves_116[ui]->Draw("same");
+  }
+
   canv->SaveAs("AllBigPeaks.gif");
   
 }
