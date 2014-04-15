@@ -1,9 +1,3 @@
-# display integrated hits data for Shashlik calorimeter
-# this is just a wrapper for the ROOT C++ code
-# will replace w/ a simple GUI
-
-# Created 4/12/2014 B.Hirosky: Initial release
-
 import os, re, glob, sys, array
 from ROOT import *
 from TBUtils import *
@@ -19,7 +13,7 @@ runDat=sys.argv[1]
 print "Processing file:",runDat
 
 gROOT.ProcessLine(".L TBEvent.cc+")
-gROOT.ProcessLine(".L dqm/dqmPlots.cc+")
+gROOT.ProcessLine(".L dqm/dqmPlots.C+")
 
 dqmDisplay(runDat)
 displayAllBigPeaks(runDat)
