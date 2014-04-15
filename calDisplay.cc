@@ -295,7 +295,16 @@ void displayAllBigPeaks(TString fdat) {
     
   }
 
-  for(unsigned int ui = 0; ui < waves.size(); ui++) waves[ui]->Draw("same");
+  int nBigPeaks = 0;
+  for(unsigned int ui = 0; ui < waves.size(); ui++) {
+
+    if(waves[ui]->GetMaximum() > 1500) {
+      waves[ui]->SetLineColor(nBigPeaks+2);
+      nBigPeaks++;
+    }
+
+    waves[ui]->Draw("same");
+  }
   
   canv->SaveAs("AllBigPeaks.gif");
   
