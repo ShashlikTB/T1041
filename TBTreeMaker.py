@@ -203,7 +203,7 @@ while 1:
                  if "Channel" in wcline[0]: 
                      wire=int(wcline[1])
                      tdcCount=int(wcline[2])
-                     eventDict[eventNumber].AddWCHit(tdcNum,wire,tdcCount)
+                     eventDict[padeEvent].AddWCHit(tdcNum,wire,tdcCount)
                      endOfEvent=fWC.tell()
                      if DEBUG_LEVEL>1: event.GetWCChan(nhits).Dump()
                      nhits=nhits+1
