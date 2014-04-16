@@ -32,8 +32,8 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
   TH2F * hChanU_time = (TH2F*)channelHistogram(true, "Timing", 0, -1, singleEvent);
   TH2F * hChanD_time = (TH2F*)channelHistogram(false, "Timing", 0, -1, singleEvent);
 
-  int nPerMod = t1041->GetEntries() / 64;
-  int nPerFiber = t1041->GetEntries() / 128;
+  int nPerMod = t1041->GetEntries() / 16;
+  int nPerFiber = t1041->GetEntries() / 64;
 
   TH2F * hModU_nhits = (TH2F*)moduleHistogram(true, "nHits", nPerMod * .85, nPerMod * 1.1, singleEvent);
   TH2F * hModD_nhits = (TH2F*)moduleHistogram(false, "nHits", nPerMod * .85, nPerMod * 1.1, singleEvent);
@@ -53,8 +53,10 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
     end = ndisplay + 1;
   }
 
-  for (Int_t i=start; i<end; i++) {
+  for (Int_t i=start; i < end; i++) {
     t1041->GetEntry(i);
+
+    int nOverThreshold = 0;
 
     for (Int_t j = 0; j < event->NPadeChan(); j++){
       PadeChannel pch = event->GetPadeChan(j);
@@ -102,6 +104,8 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
 
       if(max <= threshold) continue;
 
+      nOverThreshold++;
+
       if (module < 0) {
 	hModU->Fill(xm, ym, max);
 	hModU_time->Fill(xm, ym, maxTime);
@@ -122,6 +126,9 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
       }
       
     }
+
+    //if(nOverThreshold > 0) cout << "For event " << i << ", found " << nOverThreshold << " channels over threshold" << endl;
+
   }
 
   hModD->Divide(hModD_nhits);
@@ -136,19 +143,19 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
 
   drawCalorimeterPlot("AvgPeakHeight", 
 		      hModU, hModD, hChanU, hChanD,
-		      t1041->GetEntries() / 128, ndisplay);
+		      t1041->GetEntries(), ndisplay);
 
   drawCalorimeterPlot("AvgPeakTiming",
 		      hModU_time, hModD_time, hChanU_time, hChanD_time,
-		      t1041->GetEntries() / 128, ndisplay);
+		      t1041->GetEntries(), ndisplay);
 
   drawCalorimeterPlot("NHits", 
 		      hModU_nhits, hModD_nhits, hChanU_nhits, hChanD_nhits,
-		      t1041->GetEntries() / 128, ndisplay);
+		      t1041->GetEntries(), ndisplay);
 
   drawCalorimeterPlot("NTriggers",
 		      hModU_ntriggers, hModD_ntriggers, hChanU_ntriggers, hChanD_ntriggers,
-		      t1041->GetEntries() / 128, ndisplay);
+		      t1041->GetEntries(), ndisplay);
 
 }
 
