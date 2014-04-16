@@ -44,18 +44,33 @@ class Logger():
 
 #WC Database lookup
 #Simple, Naive version 
-def wcLookup(unixtime, filename):
-    if type(unixtime) is float:
-
-        unixtime = str(unixtime)
-
+def wcLookup(unixtime, bound, filename):
     try:
         handle = open(filename, 'r')
+        
+        withinBound = []
         for line in handle:
             split = re.split(' +', line.strip())
-            if split[0] == unixtime:
-                print "matched time! spill at byte offset: %s" % split[-1:][0]
+            eTime = int(float(split[0]))
+            diff = int(unixtime)-eTime
+
+            if abs(diff) < bound: 
+                withinBound.append((eTime, split[3], split[4]))
+            elif split[0] == str(unixtime):
                 return (split[3], int(split[4]))
+            elif (eTime-unixtime) > bound:
+                #Moved past the event in the db file
+                break
+        bestMatch = None 
+        best = 999999
+        for entry in withinBound:
+            # find the closest match, in the case of a tie lowest first wins
+            diff = abs(entry[0]-int(unixtime))
+            if diff < best: 
+                bestMatch = entry
+                best = diff
+
+        return bestMatch
 
 
 
