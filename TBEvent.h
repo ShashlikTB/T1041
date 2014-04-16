@@ -96,7 +96,7 @@ public:
 
   // setters
   void SetSpill(Int_t s) {spillNumber=s;}
-  void SetEventNumber(Int_t n) {eventNumber=n;}
+  void SetNtrigWC(Int_t n) {nTrigWC=n;}
   void SetPadeChannel(const PadeChannel p, Int_t i) {padeChannel[i]=p;}
   void FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 		       UShort_t  board_id, UInt_t hw_counter, 
@@ -105,7 +105,7 @@ public:
 
 private:
   Int_t         spillNumber;
-  Int_t         eventNumber;              // from pade
+  Int_t         nTrigWC;
   vector<PadeChannel> padeChannel;
   vector<WCChannel> wc; 
 };

@@ -86,6 +86,10 @@ void calDisplay(TString fdat, int ndisplay=0){
   Int_t start=0; Int_t end=t1041->GetEntries();
   if (singleEvent) {
     start=ndisplay-1;
+    if (start>end-1) {
+      cout << "Only " << end << " events in file" << endl;
+      return;
+    }
     end=ndisplay;
   }
   for (Int_t i=start; i<end; i++) {
@@ -99,6 +103,7 @@ void calDisplay(TString fdat, int ndisplay=0){
        for (Int_t k=0; k<event->GetPadeChan(j).__SAMPLES(); k++){
 	if (wform[k]>200 && wform[k]>max) max=wform[k];
       }
+
       ///////////////////////////////////////////////////////////////
       int module,fiber;
       mapper->Pade2Fiber(pch.GetBoardID(), pch.GetChannelID(), module, fiber);
@@ -112,7 +117,11 @@ void calDisplay(TString fdat, int ndisplay=0){
       mapper->FiberXY(fiberID, xf, yf);
       if (module<0) hChanU->Fill(xf,yf,max);
       else hChanD->Fill(xf,yf,max);
-
+      if (max>0) {
+	pch.Dump();
+	cout << "module " << module << " " << xf << " " << yf << " " 
+	     << (hex) << max << (dec) << " " << max << endl;
+      }
     }
   }
   TCanvas *c1=new TCanvas("c","c",800,800);

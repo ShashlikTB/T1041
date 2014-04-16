@@ -73,14 +73,22 @@ def ParsePadeData(padeline):
             pade_hw_counter,pade_ch_number,eventNumber,waveform)
 
 def ParsePadeSpillHeader(padeline):
-#    if "WC" in padeline:
-#        timestr=padeline[padeline.index('at')+3:padeline.index('WC')].strip()
-#    else: timestr=padeline[padeline.index('at')+3:-1].strip()
-    timestr=padeline[padeline.index('at')+3:padeline.index('WC')].strip()
-    the_spill_pctime = time.mktime(time.strptime(timestr, "%m/%d/%Y %H:%M:%S %p"))  # time on PC
-    the_spill_ts =  the_spill_pctime          # time on WC controller (temporary)  UPDATE ME!
-    the_spill_number = int(padeline[padeline.index('num')+4:padeline.index('at')-5])
-    return(timestr,the_spill_pctime,the_spill_ts,the_spill_number)
+    spill = { 'number':0, 'pctime':0, 'nTrigWC':0, 'wcTime':0 }
+ # check for fake run or # WC time stamp missing
+    haveWCtime = True
+    if padeline.endswith("time =") or padeline.endswith("time unknown"): haveWCtime=False
+    padeline=padeline.split()    
+    spill['number']=int(padeline[4])
+    pcTime=padeline[7]+" "+padeline[8]+" "+padeline[9]
+    spill['pcTime']=time.mktime(time.strptime(pcTime, "%m/%d/%Y %H:%M:%S %p"))
+    spill['nTrigWC']=wcTiggers=int(padeline[14],16)
+    # check for fake run or # WC time stamp missing
+    if haveWCtime: 
+        wcTime=padeline[17]+" 20"+padeline[18]  # fix format to 4-digit year
+        spill['wcTime']=time.mktime(time.strptime(wcTime, "%H:%M:%S %Y/%m/%d"))
+    else:
+        spill['wcTime']=0
+    return spill
 
 
 def ParsePadeHeader(padeline):
@@ -153,3 +161,18 @@ def getWCspills(fWC):
             nhits=nhits+1
 
 
+#WC Database lookup
+def wcLookup(unixtime, filename="wcdb.txt"):
+    if type(unixtime) is float:
+        unixtime = str(unixtime)
+    try:
+        handle = open(filename, 'r')
+        for line in handle:
+            split = re.split(' +', line.strip())
+            if split[0] == unixtime:
+                print "matched time! spill at byte offset: %s" % split[-1:][0]
+                return (split[3], int(split[4]))
+    except IOError as e:
+        print "Failed to open file %s due to %s" % (filename, e)
+            
+    return None 

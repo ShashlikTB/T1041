@@ -38,7 +38,7 @@ void TBEvent::AddWCHit(UChar_t num, UChar_t wire, UShort_t count){
 
 void TBEvent::cp(const TBEvent &e){
   spillNumber = e.spillNumber;
-  eventNumber = e.eventNumber;
+  nTrigWC = e.nTrigWC;
   padeChannel = e.padeChannel;
   wc = e.wc;
 }
