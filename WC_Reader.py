@@ -19,7 +19,7 @@ runDat=sys.argv[1]
 print "Processing file:",runDat
 
 gROOT.ProcessLine(".L TBEvent.cc+")
-gROOT.ProcessLine(".L dqm/dqmPlots.C")
+gROOT.ProcessLine(".L dqm/dqmPlots.C+")
 gROOT.ProcessLine(".L WC_Reader.C+")
 
 WC_Reader(runDat)
