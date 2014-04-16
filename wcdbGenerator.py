@@ -5,6 +5,7 @@ import glob
 import os 
 import os.path
 import datetime
+from operator import itemgetter
 import time
 from TBUtils import * 
 logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
@@ -112,8 +113,16 @@ if os.path.isfile(location):
 elif os.path.isdir(location): 
     absPath =  os.path.abspath(location)
     joinedPath = os.path.join(absPath, args.x[0])
-
-    for filename in glob.glob(joinedPath):
+    files = glob.glob(joinedPath)
+    
+    #Generate a list of tuples containing the filename and file modification time 
+    sortedFiles = []
+    for f in files:
+	    sortedFiles.append((f,os.path.getmtime(f)))
+    
+    #Sort the files by the file modification time 
+    sortedFiles = sorted(sortedFiles, key=itemgetter(1))
+    for filename,mtime in sortedFiles:
         if filename.endswith(".bz2"):
             try:
                 wcHandle = bz2.BZ2File(filename, "r")
