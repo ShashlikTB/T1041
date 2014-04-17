@@ -147,14 +147,21 @@ while 1:
         isSaturated = "FFF" in waveform
         if (isSaturated):
             logger.Warn("ADC shows saturation. Board:",pade_board_id,"channel:",pade_ch_number)
-        for i in range(nsamples): samples[i]=int(waveform[i],16)
+        for i in range(nsamples): 
+            samples[i]=int(waveform[i],16)
+            if (samples[i]>4095):
+                logger.Warn("Invalid ADC reading > 0xFFF",
+                            pade_board_id,"channel:",pade_ch_number)
             
-    # check for special channel conditions
+    # check for master channel, event sequence
     newEvent = (padeEvent!=lastEvent)
     newMasterEvent = (newEvent and pade_board_id==MASTERID)
-    lastEvent = padeEvent
+    if newEvent and (padeEvent-lastEvent)!=1:
+        logger.Warn("Nonsequential event increment=",eventNumber-lastEvent,
+                    " Board:",pade_board_id,"channel:",pade_ch_number)
+    lastEvent=padeEvent
     
-    # condition to reset packet counter
+    # condition to reset packet counter checking
     if pade_board_id != lastBoardID or newEvent:
         lastPacket=pade_hw_counter
     elif (pade_hw_counter-lastPacket) != 1:

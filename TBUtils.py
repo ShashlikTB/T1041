@@ -1,6 +1,6 @@
 # Created 4/12/2014 B.Hirosky: Initial release
 
-import sys, bz2, inspect, re, time
+import sys, bz2, inspect, re, time, collections
 from commands import getoutput,getstatusoutput
 
 def hit_continue(msg='Hit any key to continue'):
@@ -48,7 +48,8 @@ class Logger():
         print 
         if len(self.warnings)==0: print "No Warnings reported"
         else:
-            for a in self.warnings: print "(%5d) %s" % (self.warnings[a],a)
+            owarn = collections.OrderedDict(sorted(self.warnings.items()))
+            for a in owarn: print "(%5d) %s" % (owarn[a],a)
         print "="*40
         print " WARNING Summary (end)"
         print "="*40        
