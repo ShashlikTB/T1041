@@ -19,6 +19,7 @@ from TBUtils import *
 DEBUG_LEVEL = 0
 NEventLimit = 1000000
 MASTERID = 112
+MAXPERSPILL=126
 
 def usage():
     print
@@ -76,26 +77,31 @@ eventDict={} # dictionary holds event data for a spill, use event # as key
 padeDict={}  # dictionary holds PADE header data for a spill, use PADE ID as key
 
 def fillTree():
-    for ievt in range(len(eventDict)):
+    if len(eventDict)==0: return
+    nfill=min(len(eventDict),MAXPERSPILL)
+    for ievt in range(nfill):
         if ievt in eventDict:
             tbevent.cp(eventDict[ievt])     
             BeamTree.Fill()
-        else: logger.Warn("Skip write of event in master",ievt,"of",len(eventDict))
+        else: logger.Warn("Skip write of missing event in master",ievt,"of",len(eventDict))
 
+lastBoardID=-1
 lastEvent=-1
 nSpills=0
 nEventsInSpill=0
 nEventsTot=0
-lastBoardID=-1
+skipToNextSpill=False
+skipToNextBoard=False
 
 fakeSpillData=False
+
+writevent=True
 
 # read PADE data file
 while 1:
     padeline=fPade.readline().rstrip()
-    if not padeline:           # end of file
-        if len(eventDict)>0:   # fill events from last spill into Tree
-            fillTree()
+    if not padeline: 
+        fillTree()          # end of file
         break
 
     ###########################################################
@@ -107,14 +113,16 @@ while 1:
         continue
 
     if "starting spill" in padeline:   # new spill condition
-        if len(eventDict)>0:   # fill events from last spill into Tree
-            fillTree()
-            if (nEventsTot>=NEventLimit): break
+        fillTree()
+        if (nEventsTot>=NEventLimit): break
         logger.Info(padeline)
         eventDict={}           # clear dictionary containing events in spill
         boardHeaders={}
+        lastBoardID=-1
         lastEvent=-1
         newEvent=False
+        skipToNextSpill=False
+        skipToNextBoard=False
         nEventsInSpill=0
 
         if padeline.endswith("time ="):
@@ -122,12 +130,13 @@ while 1:
 
         padeSpill=ParsePadeSpillHeader(padeline)
         nSpills=nSpills+1;
-        continue # read next line in PADE file
+        continue                     # read next line in PADE file
+    if skipToNextSpill: continue     # begin reading at next spill header (trigger by certain errors)
 
-    if "spill status" in padeline:     # spill header for a PADE card
-        (master,boardID,status,trgStatus,
+    if "spill status" in padeline:   # spill header for a PADE card
+        (isMaster,boardID,status,trgStatus,
          events,memReg,trigPtr,pTemp,sTemp) = ParsePadeHeader(padeline)
-        boardHeaders[boardID]=PadeBoard(master,boardID,status,trgStatus,
+        boardHeaders[boardID]=PadeBoard(isMaster,boardID,status,trgStatus,
                                         events,memReg,trigPtr,pTemp,sTemp)
         continue
 
@@ -138,11 +147,53 @@ while 1:
     (pade_ts,pade_transfer_size,pade_board_id,
      pade_hw_counter,pade_ch_number,padeEvent,waveform)=ParsePadeData(padeline)
 
+
+    # new board/event conditions
+    newBoard =  (pade_board_id != lastBoardID)
+    newEvent = (padeEvent!=lastEvent)
+    newMasterEvent = (pade_board_id==MASTERID and newEvent)
+
+    if newBoard: 
+        lastBoardID=pade_board_id
+        lastEvent=-1
+        skipToNextBoard=False
+    if skipToNextBoard: continue
+
+    # check for event overflows
+    if padeEvent>MAXPERSPILL:
+        logger.Warn("Event count overflow in spill, reading 1st",MAXPERSPILL,"events")
+        skipToNextBoard=True
+        continue
+
+    # check for sequential events
+    if newEvent and (padeEvent-lastEvent)!=1:
+        logger.Warn("Nonsequential event #:",eventNumber,"Expected",lastEvent+1,
+                    " Board:",pade_board_id,"channel:",pade_ch_number,"Clearing events in dictionary")
+        skipToNextBoard=True     # give up on remainder of this spill
+        for ievt in range(lastEvent,len(eventDict)):
+            if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
+        continue
+    lastEvent=padeEvent
+
+    # check packet counter
+    goodPacketCount = (newBoard or newEvent) or (pade_hw_counter-lastPacket)==1
+    if not goodPacketCount:
+        logger.Warn("Packet counter increment error, delta=",
+                    pade_hw_counter-lastPacket," Board:",pade_board_id,"channel:",pade_ch_number,
+                    "Clearing events in dictionary")
+        for ievt in range(lastEvent,len(eventDict)):
+            if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
+        skipToNextBoard=True
+        continue
+    lastPacket=pade_hw_counter
+
+    # fetch ADC samples (to do clear event from here on error)
     samples=array("i",[0xFFF]*padeChannel.__SAMPLES())
     nsamples=len(waveform)
     if nsamples != padeChannel.__SAMPLES():
         logger.Warn("Incorrect number of ADC samples, expected",
                     padeChannel.__SAMPLES(),"found:",nsamples,"Board:", pade_board_id)
+        continue
     else:
         isSaturated = "FFF" in waveform
         if (isSaturated):
@@ -150,26 +201,11 @@ while 1:
         for i in range(nsamples): 
             samples[i]=int(waveform[i],16)
             if (samples[i]>4095):
-                logger.Warn("Invalid ADC reading > 0xFFF",
-                            pade_board_id,"channel:",pade_ch_number)
-            
-    # check for master channel, event sequence
-    newEvent = (padeEvent!=lastEvent)
-    newMasterEvent = (newEvent and pade_board_id==MASTERID)
-    if newEvent and (padeEvent-lastEvent)!=1:
-        logger.Warn("Nonsequential event increment=",eventNumber-lastEvent,
-                    " Board:",pade_board_id,"channel:",pade_ch_number)
-    lastEvent=padeEvent
-    
-    # condition to reset packet counter checking
-    if pade_board_id != lastBoardID or newEvent:
-        lastPacket=pade_hw_counter
-    elif (pade_hw_counter-lastPacket) != 1:
-        logger.Warn("Packet counter increment error, delta=",
-                    pade_hw_counter-lastPacket," Board:",pade_board_id)
-    lastPacket=pade_hw_counter
+                logger.Warn("Invalid ADC reading > 0xFFF", pade_board_id,"channel:",pade_ch_number)
 
-    writeChan=True     # assume channel is good to write, until proven guilty
+    
+
+    writeChan=True     # now assume channel is good to write, until proven guilty
     # new event condition in master
     if newMasterEvent:
         nEventsTot=nEventsTot+1
@@ -216,22 +252,19 @@ while 1:
                      nhits=nhits+1
 
     else: # new event in a slave
-        if not eventNumber in eventDict:
+        if not padeEvent in eventDict:
             logger.Warn("Event count mismatch. Slave:",
-                        pade_board_id,"reports event",eventNumber,"not present in master.",
+                        pade_board_id,"reports event",padeEvent,"not present in master.",
                         "Total events in master:",nEventsInSpill)
             writeChan=False
+            skipToNextBoard=True
+
     if writeChan:
         eventDict[padeEvent].FillPadeChannel(pade_ts, pade_transfer_size, pade_board_id, 
                                                pade_hw_counter, pade_ch_number, 
                                                padeEvent, samples)
         if DEBUG_LEVEL>1: eventDict[padeEvent].GetLastPadeChan().Dump()
-    pade_ts=0
-    pade_transfer_size=0
-    pade_board_id=0
-    pade_hw_counter=0 
-    pade_ch_number=0
-    eventNumber=0
+
 
             
 #=======================================================================# 
@@ -251,6 +284,6 @@ print
 logger.Info("Summary: nSpills processed= "+str(nSpills)+" Total Events= "+str(nEventsTot))
 
 logger.Summary()
-logger.Info("Fake spill data")
+if fakeSpillData: logger.Info("Fake spill data")
 print "Exiting" 
 exit(0)
