@@ -12,6 +12,17 @@ from TBUtils import *
 logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 
 
+
+#generate a set of previously read files
+def findPrevReadFiles(handle): 
+	files = set()
+	for line in handle: 
+		l = re.split(' +', line.strip())
+		files.add(l[-2])
+		
+	return files
+		
+
 def generateSpillDB(wcHandle, dbHandle, filename): 
         logger.Info("Generating Spill DB")
         currentSpill = None 
@@ -83,13 +94,28 @@ def main():
 	parser.add_argument('-x', metavar='extension', type=str, nargs=1, 
 			    default = ['*.bz2'],
 			    help="Filename extension to use")
+	parser.add_argument('--force', action = 'store_true',
+			    help="force regenerating the database")
 	parser.add_argument('-output', metavar='o', type=str, nargs=1, 
 			    default = ['wcdb.txt'],
 			    help="Filename of output database")
 
 
 	args = parser.parse_args()
-	dbHandle = open(args.output[0], 'w')
+	dbHandle = None 
+	prevReadFiles = None 
+	if args.force:
+		dbHandle = open(args.output[0], 'w')
+	else: 
+		try:
+			handle = open(args.output[0], 'r')
+			prevReadFiles = findPrevReadFiles(handle)
+			dbHandle = open(args.output[0], 'a')
+		except IOError: 
+			print "Couldn't open db file %s, regenerating" % args.output[0]
+			dbHandle = open(args.output[0], 'w')
+
+
 
 	if args.f is None: 
 		location = os.path.curdir
@@ -122,20 +148,21 @@ def main():
 	    #Sort the files by the file modification time 
 	    sortedFiles = sorted(sortedFiles, key=itemgetter(1))
 	    for filename,mtime in sortedFiles:
-		if filename.endswith(".bz2"):
-		    try:
-			wcHandle = bz2.BZ2File(filename, "r")
-			logger.Info("Processing %s" % filename)
-			generateSpillDB(wcHandle, dbHandle, filename)
-		    except IOError as e:
-			logger.Warn("Unable to open %s, %s" % (filename, e))
-		else: 
-		    try:
-			wcHandle = open(filename, "r")
-			logger.Info("Processing %s" % filename)
-			generateSpillDB(wcHandle, dbHandle, filename)
-		    except IOError as e:
-			logger.Warn("Unable to open %s, %s" % (filename, e))
+                if args.force or not prevReadFiles or (prevReadFiles and filename not in prevReadFiles):
+			if filename.endswith(".bz2"):
+				try:
+					wcHandle = bz2.BZ2File(filename, "r")
+					logger.Info("Processing %s" % filename)
+					generateSpillDB(wcHandle, dbHandle, filename)
+				except IOError as e:
+					logger.Warn("Unable to open %s, %s" % (filename, e))
+			else: 
+				try:
+					wcHandle = open(filename, "r")
+					logger.Info("Processing %s" % filename)
+					generateSpillDB(wcHandle, dbHandle, filename)
+				except IOError as e:
+					logger.Warn("Unable to open %s, %s" % (filename, e))
 
 
 
