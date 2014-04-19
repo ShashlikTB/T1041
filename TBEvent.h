@@ -80,6 +80,29 @@ class WCChannel : public TObject{
 };
 
 
+class TBSpill : public TObject {
+  ClassDef(TBSpill,1);  // Spill header info
+public:
+ TBSpill(Int_t spillNumber=0, ULong64_t pcTime=0, ULong64_t wcReadTime=0, ULong64_t spillTime=0) : 
+  _spillNumber(spillNumber), _pcTime(pcTime), _wcReadTime(wcReadTime), _spillTime(spillTime) {;}
+  Int_t GetSpillNumber() const {return _spillNumber;}
+  ULong64_t GetPCTime() const {return _pcTime;}
+  ULong64_t GetWCReadTime() const {return _wcReadTime;}
+  ULong64_t GetSpillTime() const {return _spillTime;}
+  // setters
+  void SetSpill(Int_t s) {_spillNumber=s;}
+  void SetPCTime(ULong64_t t) {_pcTime=t;}
+  void SetWCReadTime(ULong64_t t) {_wcReadTime=t;}
+  void SetSpillTime(ULong64_t t) {_spillTime=t;}
+private:
+  Int_t         _spillNumber;
+  ULong64_t     _pcTime;                   // spill time stamp from PC
+  ULong64_t     _wcReadTime;               // WC time read by PADE PC  
+  ULong64_t     _spillTime;                // spill time stamp from WC controller
+  vector<PadeBoard> _padeBoard;
+};
+
+
 class TBEvent : public TObject {
   ClassDef(TBEvent,1);  //Event structure
 public:
@@ -93,6 +116,7 @@ public:
   Int_t GetSpillNumber() const {return spillNumber;}
   WCChannel GetWCChan(const int idx) {return wc[idx];}
   Int_t GetWCHits() const {return wc.size();}
+  TBSpill GetHeader() const {return header;}
 
   // setters
   void SetSpill(Int_t s) {spillNumber=s;}
@@ -102,29 +126,14 @@ public:
 		       UShort_t  board_id, UInt_t hw_counter, 
 		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform);
   void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
+  void SetHeader(TBSpill hdr) {header=hdr;}
 
 private:
   Int_t         spillNumber;
   Int_t         nTrigWC;
   vector<PadeChannel> padeChannel;
   vector<WCChannel> wc; 
-};
-
-class TBSpill : public TObject {
-  ClassDef(TBSpill,1);  // Spill header info
-public:
-  Int_t GetSpillNumber() const {return spillNumber;}
-  ULong64_t GetPCTime() const {return pcTime;}
-  ULong64_t GetSpillTime() const {return spillTime;}
-  // setters
-  void SetSpill(Int_t s) {spillNumber=s;}
-  void SetPCTime(ULong64_t t) {pcTime=t;}
-  void SetSpillTime(ULong64_t t) {spillTime=t;}
-private:
-  Int_t         spillNumber;
-  ULong64_t     pcTime;                   // spill time stamp from PC
-  ULong64_t     spillTime;                // spill time stamp from WC controller
-  vector<PadeBoard> padeBoard;
+  TBSpill       header;
 };
 
 

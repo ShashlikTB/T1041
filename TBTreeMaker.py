@@ -167,7 +167,7 @@ while 1:
 
     # check for sequential events
     if newEvent and (padeEvent-lastEvent)!=1:
-        logger.Warn("Nonsequential event #:",eventNumber,"Expected",lastEvent+1,
+        logger.Warn("Nonsequential event #:",padeEvent,"Expected",lastEvent+1,
                     " Board:",pade_board_id,"channel:",pade_ch_number,"Clearing events in dictionary")
         skipToNextBoard=True     # give up on remainder of this spill
         for ievt in range(lastEvent,len(eventDict)):
@@ -214,9 +214,9 @@ while 1:
             print "Event in spill",padeSpill['number'],"(",padeEvent,")  / total", nEventsTot
 
         eventDict[padeEvent]=TBEvent()
-
         eventDict[padeEvent].SetSpill(padeSpill['number'])
         eventDict[padeEvent].SetNtrigWC(padeSpill['nTrigWC'])
+        
 
         # search for WC spill info
         
@@ -275,7 +275,7 @@ print "Finished processing"
 BeamTree.Print()
 print "writing file:",outFile
 BeamTree.Write()
-fout.Close() 
+fout.Close()
 
 # for convinence when working interactively
 print commands.getoutput(ccat('ln -sf',outFile,' latest.root'))

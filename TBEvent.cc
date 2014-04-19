@@ -25,7 +25,7 @@ void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size,
     cerr << "Warning: channel ID error, board:channel " 
 	 << board_id << ":" << ch_number << endl;
   }
-  PadeChannel pc;  // todo make consructor w/ fill inputs
+  PadeChannel pc;  // todo make constructor w/ fill inputs
   pc.Fill(ts, transfer_size, board_id, hw_counter, ch_number, eventnum, wform);
   padeChannel.push_back(pc);
 }
