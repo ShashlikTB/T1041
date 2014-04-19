@@ -85,7 +85,7 @@ def ParsePadeSpillHeader(padeline):
         spill['status']=-1 #error type 1
         return spill
     if len(padeline)==14:
-        spill['status']=-2 #error type 1
+        spill['status']=-2 #error type 2
         return spill
 
     spill['number']=int(padeline[4])

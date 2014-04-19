@@ -57,8 +57,8 @@ else:
 #=======================================================================# 
 #  Declare data containers                                              #
 #=======================================================================#
-#gROOT.ProcessLine(".L TBEvent.cc+")
-gSystem.Load("./TBEvent.so")
+gROOT.ProcessLine(".L TBEvent.cc+")
+#gSystem.Load("./TBEvent.so")   # for use w/ Makefile
 
 #=======================================================================# 
 #  Declare an element of the event class for our event                  #
