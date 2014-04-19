@@ -6,7 +6,7 @@ Analysis code for T1041 test beam run
 Make TTrees from TB data 
 ========================
 Usage:  
-python TBNtupleMaker [OPTION] PADE_FILE [WC_FILE]  
+python TBNtupleMaker [OPTION] PADE_FILE 
        Options  
        -n max_events  : Maximum number of events to read"  
 Produces an output file with the same basename as the PADE_FILE, replacing .txt(.bz2) with .root
