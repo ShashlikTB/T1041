@@ -11,6 +11,13 @@ python TBNtupleMaker [OPTION] PADE_FILE [WC_FILE]
        -n max_events  : Maximum number of events to read"  
 Produces an output file with the same basename as the PADE_FILE, replacing .txt(.bz2) with .root
 
+
+To allow association of WC tracks, first run wcdbGenerator.py.  This will 
+process all the WC data files and produse a database of spill times "wcdb.txt".
+The TBNtupleMaker will use this database to find the corresponding WC hits for
+each event witten by the PADEs. 
+ 
+
 Display channel mapping  
 ======================  
 root -l testChannelMap.C+

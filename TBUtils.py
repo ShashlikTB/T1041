@@ -172,17 +172,37 @@ def getWCspills(fWC):
 
 
 #WC Database lookup
-def wcLookup(unixtime, filename="wcdb.txt"):
-    if type(unixtime) is float:
-        unixtime = str(unixtime)
+# match WC spills w/in 15 seconds of timestamp given by PADE
+def wcLookup(tgttime, bound=15, filename="wcdb.txt"):
+    tgttime=float(tgttime)
     try:
         handle = open(filename, 'r')
-        for line in handle:
+        
+        withinBound = []
+        for line in handle:                       # todo: replace with binary search!
             split = re.split(' +', line.strip())
-            if split[0] == unixtime:
-                print "matched time! spill at byte offset: %s" % split[-1:][0]
-                return (split[3], int(split[4]))
+            sTime = float(split[0])
+            diff = sTime-tgttime
+
+            if abs(diff) <= bound:   # fuzzy time match
+                return( int(split[4]),split[3] )  # byte offset and filename
+            elif (diff>bound):       # Moved past the spill in the db file
+                return (-1, None)
+
     except IOError as e:
         print "Failed to open file %s due to %s" % (filename, e)
-            
-    return None 
+
+    return (-1,None)
+
+# find matching WC event number
+def findWCEvent(fd,tgtevent):
+    wcline=fd.readline()  # remove 1st line constaining SPILL number
+    while(1):
+        wcline=fd.readline()
+        if not wcline or "SPILL" in wcline: return -1
+        if "EVENT" in wcline:
+            thisevent=int(wcline.split()[2])
+            if thisevent==tgtevent: return fd.tell()
+            elif thisevent>tgtevent: return -1  # past the event number
+        
+        

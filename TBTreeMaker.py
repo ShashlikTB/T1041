@@ -127,15 +127,25 @@ while 1:
         nEventsInSpill=0
 
         if padeline.endswith("time ="):
-            logger.Warn("WC time stamp missing, no WC lookup attempted")
+            logger.Warn("Spill header error detected: WC time stamp missing")
 
         padeSpill=ParsePadeSpillHeader(padeline)
         nSpills=nSpills+1;
         if padeSpill['status']<0:
             skipToNextSpill=True
-            logger.Warn("Spill header error detected:",padeSpill['status'],"Skipping this spill\n",
-                        padeline)
-        continue                     # read next line in PADE file
+            logger.Warn("Spill header error detected: Invalid WC time stamp")
+            continue
+        
+        # find associated spill in WC data
+        wcSpill=wcLookup(padeSpill['wcTime'])
+        if (wcSpill[0]>=0):
+            logger.Info("WC data from file:",wcSpill[1])
+        else:
+            logger.Warn("No corresponding WC data found for spill")
+
+        continue                     # finished spill header read next line in PADE file
+    
+
     if skipToNextSpill: continue     # begin reading at next spill header (trigger by certain errors)
 
     if "spill status" in padeline:   # spill header for a PADE card
@@ -172,8 +182,10 @@ while 1:
 
     # check for sequential events
     if newEvent and (padeEvent-lastEvent)!=1:
-        logger.Warn("Nonsequential event #:",padeEvent,"Expected",lastEvent+1,
-                    " Board:",pade_board_id,"channel:",pade_ch_number,"Clearing events in dictionary")
+        #logger.Warn("Nonsequential event #:",padeEvent,"Expected",lastEvent+1,
+        #            " Board:",pade_board_id,"channel:",pade_ch_number,"Clearing events in dictionary")
+        logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
+                    " Board:",pade_board_id,"channel:",pade_ch_number," Clearing events in dictionary")
         skipToNextBoard=True     # give up on remainder of this spill
         for ievt in range(lastEvent,len(eventDict)):
             if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
@@ -224,43 +236,34 @@ while 1:
         
 
         # search for WC spill info
-        
+        if wcSpill[0]>=0:
+            fWC = TBOpen(wcSpill[1])
+            fWC.seek(int(wcSpill[0]))
+#            wcline=fWC.readline()  # remove 1st line constaining SPILL number
 
-        # read WC data (hack for now)
-        foundWC=False;
-        if haveWC:
-            # read one WC event 
-            endOfEvent=0
-            nhits=0;
-            while 1:
-                 wcline=fWC.readline()
-                 if not wcline: break
-                 if "SPILL" in wcline: continue
-                 wcline=wcline.split()
-                 if not foundWC and "EVENT" in wcline[0]:  # found new event
-                     trigWCrun=wcline[1]
-                     trigWCspill=wcline[2]
-                     foundWC=true
-                     continue
-                 elif "EVENT" in wcline[0]: 
-                     fWC.seek(endOfEvent)
-                     break
-                 if "Module" in wcline[0]: 
-                     tdcNum=int(wcline[1])
-                     endOfEvent=fWC.tell()
-                 if "Channel" in wcline[0]: 
-                     wire=int(wcline[1])
-                     tdcCount=int(wcline[2])
-                     eventDict[padeEvent].AddWCHit(tdcNum,wire,tdcCount)
-                     endOfEvent=fWC.tell()
-                     if DEBUG_LEVEL>1: event.GetWCChan(nhits).Dump()
-                     nhits=nhits+1
+            wcStart=findWCEvent(fWC,padeEvent)  # advance file pointer and return location of event 
+            if wcStart>0:                       # matching event found in WC data
+                fWC.seek(wcStart)
+                etime=fWC.readline()            # discard ETIME line
+                while 1:
+                    wcline=fWC.readline().split()
+                    if "Module" in wcline[0]: tdcNum=int(wcline[1])
+                    elif "Channel" in wcline[0]:
+                        wire=int(wcline[1])
+                        tdcCount=int(wcline[2])
+                        eventDict[padeEvent].AddWCHit(tdcNum,wire,tdcCount)
+                    else: break
+            else:
+                logger.Warn("No matching event in WC")
+            fWC.close()
 
     else: # new event in a slave
         if not padeEvent in eventDict:
+#            logger.Warn("Event count mismatch. Slave:",
+#                        pade_board_id,"reports event",padeEvent,"not present in master.",
+#                        "Total events in master:",nEventsInSpill)
             logger.Warn("Event count mismatch. Slave:",
-                        pade_board_id,"reports event",padeEvent,"not present in master.",
-                        "Total events in master:",nEventsInSpill)
+                        pade_board_id,"reports event not present in master.")
             writeChan=False
             skipToNextBoard=True
 
@@ -278,6 +281,7 @@ while 1:
 print
 print "Finished processing"
 BeamTree.Print()
+eventsInTree=BeamTree.GetEntries()
 print "writing file:",outFile
 BeamTree.Write()
 fout.Close()
@@ -286,7 +290,8 @@ fout.Close()
 print commands.getoutput(ccat('ln -sf',outFile,' latest.root'))
 
 print
-logger.Info("Summary: nSpills processed= "+str(nSpills)+" Total Events= "+str(nEventsTot))
+logger.Info("Summary: nSpills processed= ",nSpills," Total Events Processed= ",nEventsTot)
+logger.Info("Fraction of events kept:",float(eventsInTree)/nEventsTot*100)
 
 logger.Summary()
 if fakeSpillData: logger.Info("Fake spill data")

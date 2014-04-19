@@ -8,12 +8,11 @@ import datetime
 from operator import itemgetter
 import time
 from TBUtils import * 
+
 logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 
 
-
-
-def generateSpillDB(wcHandle, dbHandle): 
+def generateSpillDB(wcHandle, dbHandle, filename): 
         logger.Info("Generating Spill DB")
         currentSpill = None 
         spills = []
@@ -75,70 +74,72 @@ def generateSpillDB(wcHandle, dbHandle):
 		outputLine = "%s    %s    %s    %s    %s\r\n" % (spill['unixtime'], spill['date'], spill['time'], os.path.abspath(filename), spill['pos'])
 		dbHandle.write(outputLine)
 
+def main():
+	# Argparse Definitions 
 
-# Argparse Definitions 
-
-parser = argparse.ArgumentParser(description='Test Beam Wire Chamber DB Generator')
-parser.add_argument('-f', metavar='-f', type=str, nargs=1, default=None,
-                    help="Filename or Pathname to process")
-parser.add_argument('-x', metavar='extension', type=str, nargs=1, 
-                    default = ['*.bz2'],
-                    help="Filename extension to use")
-parser.add_argument('-output', metavar='o', type=str, nargs=1, 
-                    default = ['wcdb.txt'],
-                    help="Filename of output database")
-
-
-args = parser.parse_args()
-dbHandle = open(args.output[0], 'w')
-
-if args.f is None: 
-	location = os.path.curdir
-else:
-	location = args.f[0]
-
-if os.path.isfile(location):
-    filename = location
-    try:
-        if filename.endswith(".txt") or filename.endswith(".dat"):
-            wcHandle = open(filename, "r")
-        elif filename.endswith(".bz2"):
-            wcHandle = bz2.BZ2File(filename, "r")
-        else:
-            logger.Warn('Unrecognized filename extension')
-
-    except IOError as e:
-        logger.Warn("Unable to open %s, %s" % (filename, e))
-    generateSpillDB(wcHandle, dbHandle)
-elif os.path.isdir(location): 
-    absPath =  os.path.abspath(location)
-    joinedPath = os.path.join(absPath, args.x[0])
-    files = glob.glob(joinedPath)
-    
-    #Generate a list of tuples containing the filename and file modification time 
-    sortedFiles = []
-    for f in files:
-	    sortedFiles.append((f,os.path.getmtime(f)))
-    
-    #Sort the files by the file modification time 
-    sortedFiles = sorted(sortedFiles, key=itemgetter(1))
-    for filename,mtime in sortedFiles:
-        if filename.endswith(".bz2"):
-            try:
-                wcHandle = bz2.BZ2File(filename, "r")
-                logger.Info("Processing %s" % filename)
-                generateSpillDB(wcHandle, dbHandle)
-            except IOError as e:
-                logger.Warn("Unable to open %s, %s" % (filename, e))
-        else: 
-            try:
-                wcHandle = open(filename, "r")
-                logger.Info("Processing %s" % filename)
-                generateSpillDB(wcHandle, dbHandle)
-            except IOError as e:
-                logger.Warn("Unable to open %s, %s" % (filename, e))
+	parser = argparse.ArgumentParser(description='Test Beam Wire Chamber DB Generator')
+	parser.add_argument('-f', metavar='-f', type=str, nargs=1, default=None,
+			    help="Filename or Pathname to process")
+	parser.add_argument('-x', metavar='extension', type=str, nargs=1, 
+			    default = ['*.bz2'],
+			    help="Filename extension to use")
+	parser.add_argument('-output', metavar='o', type=str, nargs=1, 
+			    default = ['wcdb.txt'],
+			    help="Filename of output database")
 
 
+	args = parser.parse_args()
+	dbHandle = open(args.output[0], 'w')
 
+	if args.f is None: 
+		location = os.path.curdir
+	else:
+		location = args.f[0]
+
+	if os.path.isfile(location):
+	    filename = location
+	    try:
+		if filename.endswith(".txt") or filename.endswith(".dat"):
+		    wcHandle = open(filename, "r")
+		elif filename.endswith(".bz2"):
+		    wcHandle = bz2.BZ2File(filename, "r")
+		else:
+		    logger.Warn('Unrecognized filename extension')
+
+	    except IOError as e:
+		logger.Warn("Unable to open %s, %s" % (filename, e))
+	    generateSpillDB(wcHandle, dbHandle)
+	elif os.path.isdir(location): 
+	    absPath =  os.path.abspath(location)
+	    joinedPath = os.path.join(absPath, args.x[0])
+	    files = glob.glob(joinedPath)
+
+	    #Generate a list of tuples containing the filename and file modification time 
+	    sortedFiles = []
+	    for f in files:
+		    sortedFiles.append((f,os.path.getmtime(f)))
+
+	    #Sort the files by the file modification time 
+	    sortedFiles = sorted(sortedFiles, key=itemgetter(1))
+	    for filename,mtime in sortedFiles:
+		if filename.endswith(".bz2"):
+		    try:
+			wcHandle = bz2.BZ2File(filename, "r")
+			logger.Info("Processing %s" % filename)
+			generateSpillDB(wcHandle, dbHandle, filename)
+		    except IOError as e:
+			logger.Warn("Unable to open %s, %s" % (filename, e))
+		else: 
+		    try:
+			wcHandle = open(filename, "r")
+			logger.Info("Processing %s" % filename)
+			generateSpillDB(wcHandle, dbHandle, filename)
+		    except IOError as e:
+			logger.Warn("Unable to open %s, %s" % (filename, e))
+
+
+
+if __name__ == "__main__":
+    main()
 
 
