@@ -149,6 +149,7 @@ def main():
 	    sortedFiles = sorted(sortedFiles, key=itemgetter(1))
 	    for filename,mtime in sortedFiles:
                 if args.force or not prevReadFiles or (prevReadFiles and filename not in prevReadFiles):
+			if not "t1041_" in filename: continue  # not a WC file
 			if filename.endswith(".bz2"):
 				try:
 					wcHandle = bz2.BZ2File(filename, "r")
