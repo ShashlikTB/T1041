@@ -212,7 +212,7 @@ while 1:
             samples[i]=int(waveform[i],16)
             if (samples[i]>4095):
                 logger.Warn("Invalid ADC reading > 0xFFF", pade_board_id,"channel:",pade_ch_number)
-
+                
     
 
     writeChan=True     # now assume channel is good to write, until proven guilty

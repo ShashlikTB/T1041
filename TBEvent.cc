@@ -63,7 +63,11 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   _hw_counter = hw_counter;
   _ch_number = ch_number;
   _eventnum = eventnum;
-  for (int i=0; i<N_PADE_SAMPLES; i++) _wform[i]=wform[i];
+  _max=0;
+  for (int i=0; i<N_PADE_SAMPLES; i++) {
+    _wform[i]=wform[i];
+    if ((unsigned)wform[i]>_max) _max=wform[i];
+  }
   _flag = 0;
 }
 

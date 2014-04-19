@@ -22,6 +22,7 @@ class PadeChannel : public TObject {
   UInt_t GetBoardID() {return _board_id;}
   UInt_t GetChannelID() {return _ch_number;}
   UShort_t* GetWform() {return _wform;}
+  UInt_t GetMax() {return _max;}
   Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
   Int_t GetModule();
   Int_t GetFiber();
@@ -35,6 +36,7 @@ class PadeChannel : public TObject {
   UInt_t        _ch_number;
   UInt_t        _eventnum;
   UShort_t      _wform[N_PADE_SAMPLES];
+  UInt_t        _max;
   Int_t         _flag;
 };
 
