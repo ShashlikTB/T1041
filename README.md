@@ -11,12 +11,35 @@ python TBNtupleMaker [OPTION] PADE_FILE [WC_FILE]
        -n max_events  : Maximum number of events to read"  
 Produces an output file with the same basename as the PADE_FILE, replacing .txt(.bz2) with .root
 
+Display channel mapping  
+======================  
+root -l testChannelMap.C+
+
+
+Simple event display  
+====================  
+# Make plots averaged over all events -- saves .gif files  
+python dqmPlots.py filename.root  
+
+# Make plots for a single event -- saves .gif files  
+python dqmPlots.py filename.root eventNumber  
+
+Simple wave fom scanner  
+=======================  
+python waveViewer.py rec_capture_20140413_003028.root
+
+
 
 Make png plots and html page from a root file
 =============================================
 python root2html.py file.root  
   png files and an index.html file are produced in directory called "file", 
 the root file name w/o the .root
+
+
+Run Jordan's WC display  
+=======================  
+python WC_Reader.py file.root
 
 
 git cheatsheet
