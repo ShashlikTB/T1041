@@ -16,6 +16,10 @@ To allow association of WC tracks, first run wcdbGenerator.py.  This will
 process all the WC data files and produse a database of spill times "wcdb.txt".
 The TBNtupleMaker will use this database to find the corresponding WC hits for
 each event witten by the PADEs. 
+
+python wcdbGenerator.py    # generates wcdb, adding only newer files if wcdb exists  
+python wcdbGenerator.py --force    # forces full regeneration of wcdb
+
  
 
 Display channel mapping  

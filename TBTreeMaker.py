@@ -45,13 +45,6 @@ padeDat=args[0]
 outFile=padeDat.replace(".bz2","").replace(".txt",".root")
 fPade=TBOpen(padeDat)                   # open the PADE data file
 
-haveWC=False
-if len(args)>1: 
-    wcDat=args[1]
-    fWC = TBOpen(wcDat)
-    haveWC=True
-else:
-    logger.Info("No WC file provided")
 
 
 #=======================================================================# 
@@ -246,9 +239,12 @@ while 1:
                 fWC.seek(wcStart)
                 etime=fWC.readline()            # discard ETIME line
                 while 1:
-                    wcline=fWC.readline().split()
-                    if "Module" in wcline[0]: tdcNum=int(wcline[1])
-                    elif "Channel" in wcline[0]:
+                    wcline=fWC.readline()
+                    if not wcline : break   # EOF 
+                    wcline=wcline.split()
+                    if len(wcline)<2: print "====>>>",wcline
+                    if "Module" in wcline: tdcNum=int(wcline[1])
+                    elif "Channel" in wcline:
                         wire=int(wcline[1])
                         tdcCount=int(wcline[2])
                         eventDict[padeEvent].AddWCHit(tdcNum,wire,tdcCount)
