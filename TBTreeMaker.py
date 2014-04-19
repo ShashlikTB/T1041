@@ -57,7 +57,8 @@ else:
 #=======================================================================# 
 #  Declare data containers                                              #
 #=======================================================================#
-gROOT.ProcessLine(".L TBEvent.cc+")
+#gROOT.ProcessLine(".L TBEvent.cc+")
+gSystem.Load("./TBEvent.so")
 
 #=======================================================================# 
 #  Declare an element of the event class for our event                  #
@@ -130,6 +131,10 @@ while 1:
 
         padeSpill=ParsePadeSpillHeader(padeline)
         nSpills=nSpills+1;
+        if padeSpill['status']<0:
+            skipToNextSpill=True
+            logger.Warn("Spill header error detected:",padeSpill['status'],"Skipping this spill\n",
+                        padeline)
         continue                     # read next line in PADE file
     if skipToNextSpill: continue     # begin reading at next spill header (trigger by certain errors)
 
