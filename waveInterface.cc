@@ -70,6 +70,7 @@ waveInterface::waveInterface(bool initialise) {
   _width = 1000; 
   _height = 500; 
   _playerStatus = false; 
+  _delay=1000;
   //By default start the interface
   if (initialise)
     initWindow(); 
