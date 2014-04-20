@@ -7,6 +7,8 @@ void pulseHeights(Int_t board=112, TString file="latest.root",
     gSystem->Load("TBEvent_cc.so");  // n.b. make sure to compile if changed
   }
 
+
+
   TFile *f = new TFile(file);
   // create a pointer to an event object for reading the branch values.
   TBEvent *event = new TBEvent();
@@ -21,13 +23,15 @@ void pulseHeights(Int_t board=112, TString file="latest.root",
     hpulse[i]=new TH1F(name,name,xmax-xmin,xmin,xmax);
   }
 
+
   // loop over events
   for (Int_t i=0; i< t1041->GetEntries(); i++) {
     t1041->GetEntry(i);
     // loop over PADE channels
     for (Int_t j=0; j<event->NPadeChan(); j++){
       if (event->GetPadeChan(j).GetBoardID() != board) continue;
-      hpulse[j]->Fill(event->GetPadeChan(j).GetMax());
+      int chan=event->GetPadeChan(j).GetChannelID();
+      hpulse[chan]->Fill(event->GetPadeChan(j).GetMax());
     }
   }
   

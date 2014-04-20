@@ -78,6 +78,7 @@ void PadeChannel::Reset(){
   _hw_counter=0;
   _ch_number=0;
   _eventnum=0;
+  _max=0;
   for (int i=0; i<N_PADE_SAMPLES; i++) _wform[i]=0;
 }
 

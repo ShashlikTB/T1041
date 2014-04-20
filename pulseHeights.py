@@ -13,7 +13,7 @@ def usage():
     print "Usage: python pulseHeights.ps [OPTION]"
     print "      -b boardID  [112]"
     print "      -f rootFile [latest.root]"
-    print "      -m minimum of pulseheight histogram [50]"
+    print "      -m minimum of pulseheight histogram [80]"
     print "      -M maximium of pulseheight histogram [300]"
     print "      -h print this message"
     print 
@@ -23,14 +23,14 @@ def usage():
 
 fname="latest.root"
 board=112
-xmin=50
+xmin=80
 xmax=300
 
 opts, args = getopt.getopt(sys.argv[1:], "b:f:m:M:h")
 for o, a in opts:
     if o == "-b": board=int(a)
     elif o == "-f": fname=a
-    elif o=="-m": xmin = int(a)
+    elif o=="-m": xmin=int(a)
     elif o=="-M": xmax=int(a)
     elif o=="-h": usage()
 
