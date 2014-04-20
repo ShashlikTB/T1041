@@ -2,12 +2,12 @@
 // Created 4/12/2014 B.Hirosky: Initial release
 
 
-void readerExample(){
+void readerExample(TString file="latest.root"){
   if (!TClassTable::GetDict("TBEvent")) {
     gSystem->Load("TBEvent_cc.so");  // n.b. make sure to compile if changed
   }
 
-  TFile *f = new TFile("outputNtuple.root");
+  TFile *f = new TFile(file);
   // create a pointer to an event object for reading the branch values.
   TBEvent *event = new TBEvent();
 
