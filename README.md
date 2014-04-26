@@ -51,10 +51,10 @@ root -l rootscript/testChannelMap.C+
 
 Simple event display  
 ====================  
-# Make plots averaged over all events -- saves .gif files  
+Make plots averaged over all events -- saves .gif files  
 python dqmPlots.py filename.root  
 
-# Make plots for a single event -- saves .gif files  
+Make plots for a single event -- saves .gif files  
 python python/dqmPlots.py filename.root eventNumber  
 
 Simple wave form scanner  
