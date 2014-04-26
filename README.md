@@ -12,7 +12,7 @@ Directories:
 
 
 ** First Steps **  
-source setupTB.sh
+source setupTB.sh  
 Run make
 
 Generate DB of WC runs 
