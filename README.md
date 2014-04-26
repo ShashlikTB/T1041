@@ -3,28 +3,50 @@ T1041
 
 Analysis code for T1041 test beam run
 
-Make TTrees from TB data 
+Directories:  
+- include, src : inputs for Makefile to generate shared libraries
+- python       : python scipts to run code
+- rootscript   : misc root code/scripts, recomend using for user code
+- dqm          : dqm utilities, for running online
+- doc          : various documentation
+
+
+** First Steps **  
+source setupTB.sh
+Run make
+
+Generate DB of WC runs 
+======================
+To allow association of WC tracks, you will need the file: wcdb.txt  
+Either copy this from your data area or run wcdbGenerator.py
+
+# generate wcdb, adding only newer files if wcdb exists  
+python python/wcdbGenerator.py   
+# forces full regeneration of wcdb  
+python python/wcdbGenerator.py --force  
+# flag to specify directory fo WC files  
+python python/wcdbGenerator.py -f WC_file_dir  
+# print help message  
+python python/wcdbGenerator.py -h  
+
+
+Make TTrees from TB data
 ========================
 Usage:  
-python TBNtupleMaker [OPTION] PADE_FILE 
+python python/TBNtupleMaker [OPTION] PADE_FILE 
        Options  
        -n max_events  : Maximum number of events to read"  
 Produces an output file with the same basename as the PADE_FILE, replacing .txt(.bz2) with .root
 
 
-To allow association of WC tracks, first run wcdbGenerator.py.  This will 
-process all the WC data files and produse a database of spill times "wcdb.txt".
-The TBNtupleMaker will use this database to find the corresponding WC hits for
-each event witten by the PADEs. 
-
-python wcdbGenerator.py    # generates wcdb, adding only newer files if wcdb exists  
-python wcdbGenerator.py --force    # forces full regeneration of wcdb
-
+Example of reconstruction tools  
+===============================  
+python python/readerExample.py file.root
  
 
 Display channel mapping  
 ======================  
-root -l testChannelMap.C+
+root -l rootscript/testChannelMap.C+
 
 
 Simple event display  
@@ -33,24 +55,25 @@ Simple event display
 python dqmPlots.py filename.root  
 
 # Make plots for a single event -- saves .gif files  
-python dqmPlots.py filename.root eventNumber  
+python python/dqmPlots.py filename.root eventNumber  
 
-Simple wave fom scanner  
-=======================  
-python waveViewer.py rec_capture_20140413_003028.root
-
+Simple wave form scanner  
+========================  
+python python/waveViewer.py rec_capture_20140413_003028.root
 
 
 Make png plots and html page from a root file
 =============================================
-python root2html.py file.root  
+python python/root2html.py file.root  
   png files and an index.html file are produced in directory called "file", 
 the root file name w/o the .root
 
 
 Run Jordan's WC display  
 =======================  
-python WC_Reader.py file.root
+python dqm/WC_Reader.py file.root
+
+
 
 
 git cheatsheet

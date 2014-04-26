@@ -1,0 +1,160 @@
+// Created 4/12/2014 B.Hirosky: Initial release
+
+#include <iostream>
+#include <stdio.h>
+#include "TTree.h"
+#include "TFile.h"
+#include "TString.h"
+#include "shashlik.h"
+#include "WC.h"
+
+#include "TBEvent.h"
+
+using namespace std;
+
+void TBEvent::Reset(){
+  padeChannel.clear();
+  wc.clear();
+}
+
+
+void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
+			      UShort_t  board_id, UInt_t hw_counter, 
+			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform){
+
+  Mapper *mapper=Mapper::Instance();
+  if (!mapper->validChannel(board_id, ch_number)){ // sanity check 
+    cerr << "Warning: channel ID error, board:channel " 
+	 << board_id << ":" << ch_number << endl;
+  }
+  PadeChannel pc;  // todo make constructor w/ fill inputs
+  pc.Fill(ts, transfer_size, board_id, hw_counter, ch_number, eventnum, wform);
+  padeChannel.push_back(pc);
+}
+
+
+void TBEvent::AddWCHit(UChar_t num, UChar_t wire, UShort_t count){
+  WCChannel wctmp(num,wire,count);
+  wc.push_back(wctmp);
+}
+
+// return X hits in a WC (if min/ma given, use these to calculate in-time hits)
+vector<WCChannel> TBEvent::GetWChitsX(Int_t nwc, Int_t *min, Int_t* max) const{
+  vector<WCChannel> hits;
+  for (unsigned i=0;i<wc.size(); i++){
+    Int_t tdc=wc[i].GetTDCNum();
+    bool keep = tdc2WC(tdc)==nwc && (tdc-1)%4<2;   // match to chamber
+    if (max) {
+      UShort_t count=wc[i].GetCount();
+      keep &= count>=min[tdc] && count<=max[tdc];
+    }
+    if (keep) hits.push_back(wc[i]);
+  }
+  return hits;
+}
+vector<WCChannel> TBEvent::GetWChitsY(Int_t nwc, Int_t *min, Int_t* max) const{
+  vector<WCChannel> hits;
+  for (unsigned i=0;i<wc.size(); i++){
+    Int_t tdc=wc[i].GetTDCNum();
+    bool keep = tdc2WC(tdc)==nwc && (tdc-1)%4>1;   // match to chamber
+    if (max) {
+      UShort_t count=wc[i].GetCount();
+      keep &= count>=min[tdc] && count<=max[tdc];
+    }
+    if (keep) hits.push_back(wc[i]);  
+  }
+  return hits;
+}
+
+
+
+void TBEvent::cp(const TBEvent &e){
+  spillNumber = e.spillNumber;
+  nTrigWC = e.nTrigWC;
+  padeChannel = e.padeChannel;
+  wc = e.wc;
+}
+
+
+void PadeChannel::Dump() const{
+  cout << "Header ==> timestamp: " <<  _ts << " size: " 
+       << _transfer_size << " board: " << _board_id << " xfer#: " 
+       << _hw_counter << " ch#: " <<  _ch_number << " event#: " 
+       << _eventnum << endl << "samples=> " << (hex);
+  for (int i=0; i<N_PADE_SAMPLES; i++) cout << _wform[i] << " ";
+  cout << (dec) << endl;
+}
+
+
+void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size, 
+		      UShort_t board_id, UInt_t hw_counter, 
+		      UInt_t  ch_number,  UInt_t eventnum, Int_t *wform){
+  _ts = ts;
+  _transfer_size = transfer_size;
+  _board_id = board_id;
+  _hw_counter = hw_counter;
+  _ch_number = ch_number;
+  _eventnum = eventnum;
+  _max=0;
+  for (int i=0; i<N_PADE_SAMPLES; i++) {
+    _wform[i]=wform[i];
+    if ((unsigned)wform[i]>_max) {
+      _max=wform[i];
+      _peak=i;  // sample numebe for peak
+    }
+  }
+  _flag = 0;
+}
+
+void PadeChannel::Reset(){
+  _ts=0;
+  _transfer_size=0;
+  _board_id=0;
+  _hw_counter=0;
+  _ch_number=0;
+  _eventnum=0;
+  _max=0;
+  for (int i=0; i<N_PADE_SAMPLES; i++) _wform[i]=0;
+}
+
+Int_t PadeChannel::GetModule(){
+  return 0;
+}
+Int_t PadeChannel::GetFiber(){return 0;}
+
+void PadeChannel::GetHist(TH1F *h){
+  TString ti;
+  ti.Form("Event %d : Board %d, channel %d",_eventnum, GetBoardID(),GetChannelID());
+  h->Reset();
+  h->SetTitle(ti);
+  h->SetBins(N_PADE_SAMPLES,0,N_PADE_SAMPLES);
+  for (int i=0; i<N_PADE_SAMPLES; i++){
+    h->SetBinContent(i,_wform[i]);
+  }
+}
+
+
+void WCChannel::Dump() const {
+  cout << "TDC# " << (int)_tdcNumber <<  " Wire " << (int)_tdcWire 
+       << " Count " << (int)_tdcCount << endl;
+}
+
+
+
+void TBSpill::SetSpillData(Int_t spillNumber, ULong64_t pcTime, 
+			   Int_t nTrigWC, ULong64_t wcTime){
+  _spillNumber=spillNumber;
+  _pcTime=pcTime;
+  _nTrigWC=nTrigWC;
+  _wcTime=wcTime;
+}
+
+void TBSpill::Reset(){
+  _spillNumber=0;
+  _pcTime=0;
+  _nTrigWC=0;
+  _wcTime=0;
+  _padeHeader.clear();
+}
+
+

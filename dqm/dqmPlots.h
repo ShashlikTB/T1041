@@ -2,8 +2,8 @@
 
 #include "TString.h"
 #include "TFile.h"
-#include "TBEvent.h"
-#include "shashlik.h"
+#include "../include/TBEvent.h"
+#include "../include/shashlik.h"
 #include "TTree.h"
 #include "TBranch.h"
 #include "TH2F.h"
