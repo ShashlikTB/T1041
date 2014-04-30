@@ -354,7 +354,7 @@ if __name__ == '__main__':
         print "Processing File ===>",padeDat,count,"/",len(fileList)
         print "="*60
         filler(padeDat,NEventLimit,keepFlag)
-
+        count=count+1
 
     if prof:
         pr.disable()
