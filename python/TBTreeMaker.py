@@ -9,6 +9,7 @@
 ###############################################################################
 
 import os, re, glob, sys, getopt, commands
+import cProfile, pstats, StringIO
 from ROOT import *
 from string import split
 from array import array
@@ -64,10 +65,10 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
     #=======================================================================#
     outFile=padeDat.replace(".bz2","").replace(".txt",".root")
     if  os.path.isfile(outFile) and keepFlag:
-        logger.Info(outFile,"is present, spip processing due to -k flag")
+        logger.Info(outFile,"is present, skip processing due to -k flag")
         return
 
-    fout = TFile(outFile, "recreate")
+    fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
     logger.Info("Writing to output file",outFile)
 
     BeamTree = [TTree("t1041", "T1041")] # ugly python hack to pass a reference
@@ -251,7 +252,7 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
                         wcline=fWC.readline()
                         if not wcline : break   # EOF 
                         wcline=wcline.split()
-                        if len(wcline)<2: print "====>>>",wcline
+                        if len(wcline)<2: logger.Warn("Error in line from WC file:",wcline)
                         if "Module" in wcline: tdcNum=int(wcline[1])
                         elif "Channel" in wcline:
                             wire=int(wcline[1])
@@ -289,6 +290,7 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
     print "writing file:",outFile
     BeamTree[0].Write()
     fout.Close()
+    commands.getoutput("mv -f "+outFile+"_tmp "+outFile)
 
     # for convinence when working interactively
     print commands.getoutput(ccat('ln -sf',outFile,' latest.root'))
@@ -304,7 +306,7 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:k")
+        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:kp")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
@@ -312,6 +314,7 @@ if __name__ == '__main__':
     inputDir=""
     recurse=False
     keepFlag=False
+    prof=False
     for o, a in opts:
         if o == "-n": NEventLimit=int(a)
         elif o == "-d":
@@ -320,6 +323,7 @@ if __name__ == '__main__':
             inputDir=a
             recurse=True
         elif o == "-k": keepFlag=True
+        elif o == "-p": prof=True
 
 
     if inputDir=="":
@@ -340,9 +344,25 @@ if __name__ == '__main__':
     #===========================================================#
     LoadLibs("TBLIB","TBEvent.so")
 
+    if prof:
+        pr = cProfile.Profile()
+        pr.enable()
+
+    count=1
     for padeDat in fileList:
-        print "===>",padeDat
+        print "="*60
+        print "Processing File ===>",padeDat,count,"/",len(fileList)
+        print "="*60
         filler(padeDat,NEventLimit,keepFlag)
+
+
+    if prof:
+        pr.disable()
+        s = StringIO.StringIO()
+        sortby = 'cumulative'
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print s.getvalue()
 
     print "Exiting" 
     exit(0)
