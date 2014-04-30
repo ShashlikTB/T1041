@@ -29,10 +29,10 @@ def usage():
     print "      -n max_events  : Maximum (requested) number of events to read"
     print "                       Always read at least 1 spill"
     print "      -d DIR         : Process all padefiles in DIR"
-    print "                       Overrides and files given on command line list"
+    print "                       Overrides all files given on command line list"
     print "      -r DIR         : Process all padefiles in DIR, and all subdirectories"
-    print "                       Overrides and files given on command line list"
-    print "      -k             : Keep existing root files, ony process new ones"
+    print "                       Overrides all files given on command line list"
+    print "      -k             : Keep existing root files, only process new inputs"
     print 
     sys.exit()
 
