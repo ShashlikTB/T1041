@@ -157,4 +157,11 @@ void TBSpill::Reset(){
   _padeHeader.clear();
 }
 
+void TBSpill::Dump() const {
+  cout << "### TBSpill Dump ###" << endl;
+  cout << "Spill Number: " << _spillNumber << endl;
+  cout << "PC Time : " << _pcTime << endl;
+  cout << "####################";
+}
+
 

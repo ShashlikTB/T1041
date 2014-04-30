@@ -95,6 +95,7 @@ public:
   ULong64_t GetPCTime() const {return _pcTime;}
   Int_t GetnTigWC() const {return _nTrigWC;}
   ULong64_t GetWCTime() const {return _wcTime;}
+  void Dump() const;
   // setters
   void Reset();
   void SetSpillData(Int_t spillNumber, ULong64_t pcTime, Int_t nTrigWC, ULong64_t wcTime);
@@ -125,7 +126,6 @@ public:
   Int_t GetSpillNumber() const {return spillNumber;}
   WCChannel GetWCChan(const int idx) {return wc[idx];}
   Int_t GetWCHits() const {return wc.size();}
-  TBSpill GetHeader() const {return header;}
   vector<WCChannel> GetWChitsX(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   vector<WCChannel> GetWChitsY(Int_t wc, Int_t *min=0, Int_t* max=0) const;
 
@@ -138,14 +138,12 @@ public:
 		       UShort_t  board_id, UInt_t hw_counter, 
 		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform);
   void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
-  void SetHeader(TBSpill hdr) {header=hdr;}
 
 private:
   Int_t         spillNumber;
   Int_t         nTrigWC;
   vector<PadeChannel> padeChannel;
   vector<WCChannel> wc; 
-  TBSpill       header;
 };
 
 

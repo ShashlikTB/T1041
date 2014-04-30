@@ -33,9 +33,16 @@ python python/wcdbGenerator.py -h
 Make TTrees from TB data
 ========================
 Usage:  
-python python/TBNtupleMaker [OPTION] PADE_FILE 
-       Options  
-       -n max_events  : Maximum number of events to read"  
+Usage: python TBNtupleMaker [OPTION] [PADE_FILE] [PADE_FILE] ...
+      -n max_events  : Maximum (requested) number of events to read
+                       Always read at least 1 spill
+      -d DIR         : Process all padefiles in DIR
+                       Overrides and files given on command line list
+      -r DIR         : Process all padefiles in DIR, and all subdirectories
+                       Overrides and files given on command line list
+      -k             : Keep existing root files, ony process new ones
+
+
 Produces an output file with the same basename as the PADE_FILE, replacing .txt(.bz2) with .root
 
 

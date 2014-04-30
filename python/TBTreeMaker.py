@@ -5,6 +5,7 @@
 # https://cdcvs.fnal.gov/redmine/projects/ftbfwirechamberdaq/wiki/Processed_hit_data_description
 #
 # Created 04/12/2014 B.Hirosky: Initial release
+# 4/30/2014: BH big cleanup and new command line args
 ###############################################################################
 
 import os, re, glob, sys, getopt, commands
@@ -13,287 +14,335 @@ from string import split
 from array import array
 from TBUtils import *
 
-# Unify PADE blocks and WC blocks into one Ntuple by doing
-# python FakeDataNtupleMaker.py rec_capture_20140324_134340.txt wc_data.txt t1041_20140320232645.dat
+##### Parameter block #####
 
 DEBUG_LEVEL = 0
-NEventLimit = 1000000
+NMAX = 1000000
 MASTERID = 112
 MAXPERSPILL=126
 
+###########################
+
 def usage():
     print
-    print "Usage: python TBNtupleMaker [OPTION] PADE_FILE [WC_FILE]"
+    print "Usage: python TBNtupleMaker [OPTION] [PADE_FILE] [PADE_FILE] ..."
     print "      -n max_events  : Maximum (requested) number of events to read"
     print "                       Always read at least 1 spill"
+    print "      -d DIR         : Process all padefiles in DIR"
+    print "                       Overrides and files given on command line list"
+    print "      -r DIR         : Process all padefiles in DIR, and all subdirectories"
+    print "                       Overrides and files given on command line list"
+    print "      -k             : Keep existing root files, ony process new ones"
     print 
     sys.exit()
 
-logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
-#=======================================================================# 
-#  Read in and characterize the input file                              #
-#=======================================================================#
-opts, args = getopt.getopt(sys.argv[1:], "n:")
-
-for o, a in opts:
-    if o == "-n":
-        NEventLimit=int(a)
-        logger.Info("Stop at end of spill after reading at least",NEventLimit,"events")
-
-if len(args)==0: usage()
-padeDat=args[0]
-outFile=padeDat.replace(".bz2","").replace(".txt",".root")
-fPade=TBOpen(padeDat)                   # open the PADE data file
 
 
-#=======================================================================# 
-#  Declare data containers                                              #
-#=======================================================================#
-LoadLibs("TBLIB","TBEvent.so")
-
-#=======================================================================# 
-#  Declare an element of the event class for our event                  #
-#=======================================================================#
-tbevent = TBEvent()
-tbspill = TBSpill()
-padeChannel = PadeChannel()
-#=======================================================================# 
-#  Declare new file and tree with branches                              #
-#=======================================================================#
-fout = TFile(outFile, "recreate")
-logger.Info("Writing to output file",outFile)
-BeamTree = TTree("t1041", "T1041")
-BeamTree.Branch("tbevent", "TBEvent", AddressOf(tbevent), 64000, 0)
-BeamTree.Branch("tbspill", "TBSpill", AddressOf(tbspill), 64000, 0)
-
-
-eventDict={} # dictionary holds event data for a spill, use event # as key
-padeDict={}  # dictionary holds PADE header data for a spill, use PADE ID as key
-
-def fillTree():
+def fillTree(tree, eventDict, tbspill):  
     if len(eventDict)==0: return
     nfill=min(len(eventDict),MAXPERSPILL)
+    tree[0].SetBranchAddress("tbspill",AddressOf(tbspill))
     for ievt in range(nfill):
         if ievt in eventDict:
-            tbevent.cp(eventDict[ievt])
-            BeamTree.Fill()
-        else: logger.Warn("Skip write of missing event in master",ievt,"of",len(eventDict))
+            tree[0].SetBranchAddress("tbevent",AddressOf(eventDict[ievt]))            
+            tree[0].Fill()
 
-lastBoardID=-1
-lastEvent=-1
-nSpills=0
-nEventsInSpill=0
-nEventsTot=0
-skipToNextSpill=False
-skipToNextBoard=False
 
-fakeSpillData=False
+def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
 
-writevent=True
+    logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 
-# read PADE data file
-while 1:
-    padeline=fPade.readline().rstrip()
-    if not padeline: 
-        fillTree()          # end of file
-        break
+    #=======================================================================# 
+    #  Declare an element of the event class for our event                  #
+    #=======================================================================#
+    tbevent = TBEvent()
+    tbspill = TBSpill()
+    padeChannel = PadeChannel()
 
-    ###########################################################
-    ############### Reading spill header information ##########
+    #=======================================================================# 
+    #  Declare new file and tree with branches                              #
+    #=======================================================================#
+    outFile=padeDat.replace(".bz2","").replace(".txt",".root")
+    if  os.path.isfile(outFile) and keepFlag:
+        logger.Info(outFile,"is present, spip processing due to -k flag")
+        return
 
-    if "fake" in padeline:
-        fakeSpillData=True
-        logger.Info("Fake spill data")
-        continue
+    fout = TFile(outFile, "recreate")
+    logger.Info("Writing to output file",outFile)
 
-    if "starting spill" in padeline:   # new spill condition
-        fillTree()
-        if (nEventsTot>=NEventLimit): break
-        tbspill.Reset();
-        logger.Info(padeline)
-        eventDict={}           # clear dictionary containing events in spill
-        boardHeaders={}
-        lastBoardID=-1
-        lastEvent=-1
-        newEvent=False
-        skipToNextSpill=False
-        skipToNextBoard=False
-        nEventsInSpill=0
+    BeamTree = [TTree("t1041", "T1041")] # ugly python hack to pass a reference
+    BeamTree[0].Branch("tbevent", "TBEvent", AddressOf(tbevent), 64000, 0)
+    BeamTree[0].Branch("tbspill", "TBSpill", AddressOf(tbspill), 64000, 0)
 
-        if padeline.endswith("time ="):
-            logger.Warn("Spill header error detected: WC time stamp missing")
 
-        padeSpill=ParsePadeSpillHeader(padeline)
-        nSpills=nSpills+1;
-        if padeSpill['status']<0:
-            skipToNextSpill=True
-            logger.Warn("Spill header error detected: Invalid WC time stamp")
+    if (NEventLimit<NMAX):
+        logger.Info("Stop at end of spill after reading at least",NEventLimit,"events")
+    fPade=TBOpen(padeDat)                   # open the PADE data file
+
+
+    eventDict={} # dictionary holds event data for a spill, use event # as key
+    padeDict={}  # dictionary holds PADE header data for a spill, use PADE ID as key
+
+    lastBoardID=-1
+    lastEvent=-1
+    nSpills=0
+    nEventsInSpill=0
+    nEventsTot=0
+    skipToNextSpill=False
+    skipToNextBoard=False
+
+    fakeSpillData=False
+
+    writevent=True
+
+    # read PADE data file
+    while 1:
+        padeline=fPade.readline().rstrip()
+        if not padeline: 
+            fillTree(BeamTree,eventDict,tbspill)          # end of file
+            break
+
+        ###########################################################
+        ############### Reading spill header information ##########
+
+        if "fake" in padeline:
+            fakeSpillData=True
+            logger.Info("Fake spill data")
             continue
-        tbspill.SetSpillData(padeSpill['number'],int(padeSpill['pctime']),
-                             padeSpill['nTrigWC'],int(padeSpill['wcTime']))
-        
-        # find associated spill in WC data
-        wcSpill=wcLookup(padeSpill['wcTime'])
-        if (wcSpill[0]>=0):
-            logger.Info("WC data from file:",wcSpill[1])
-        else:
-            logger.Warn("No corresponding WC data found for spill")
 
-        continue  # finished w/ spill header read next line in PADE file
+        if "starting spill" in padeline:   # new spill condition
+            fillTree(BeamTree,eventDict,tbspill) 
+            if (nEventsTot>=NEventLimit): break
+            tbspill.Reset();
+            logger.Info(padeline)
+            eventDict={}           # clear dictionary containing events in spill
+            boardHeaders={}
+            lastBoardID=-1
+            lastEvent=-1
+            newEvent=False
+            skipToNextSpill=False
+            skipToNextBoard=False
+            nEventsInSpill=0
 
-    # begin reading at next spill header (triggered by certain errors)
-    if skipToNextSpill: continue    
+            if padeline.endswith("time ="):
+                logger.Warn("Spill header error detected: WC time stamp missing")
 
-    if "spill status" in padeline:   # spill header for a PADE card
-        (isMaster,boardID,status,trgStatus,
-         events,memReg,trigPtr,pTemp,sTemp) = ParsePadeBoardHeader(padeline)
-        boardHeaders[boardID]=PadeHeader(isMaster,boardID,status,trgStatus,
-                                        events,memReg,trigPtr,pTemp,sTemp)
-        tbspill.AddPade(PadeHeader(isMaster,boardID,status,trgStatus,
-                                        events,memReg,trigPtr,pTemp,sTemp))
-        continue
+            padeSpill=ParsePadeSpillHeader(padeline)
+            nSpills=nSpills+1;
+            if padeSpill['status']<0:
+                skipToNextSpill=True
+                logger.Warn("Spill header error detected: Invalid WC time stamp")
+                continue
+            tbspill.SetSpillData(padeSpill['number'],int(padeSpill['pctime']),
+                                 padeSpill['nTrigWC'],int(padeSpill['wcTime']))
 
-    ############### Reading spill header information ########## 
-    ###########################################################
-    
-    # parse PADE channel data
-    (pade_ts,pade_transfer_size,pade_board_id,
-     pade_hw_counter,pade_ch_number,padeEvent,waveform)=ParsePadeData(padeline)
-
-
-    # new board/event conditions
-    newBoard =  (pade_board_id != lastBoardID)
-    newEvent = (padeEvent!=lastEvent)
-    newMasterEvent = (pade_board_id==MASTERID and newEvent)
-
-    if newBoard: 
-        lastBoardID=pade_board_id
-        lastEvent=-1
-        skipToNextBoard=False
-    if skipToNextBoard: continue
-
-    # check for event overflows
-    if padeEvent>MAXPERSPILL:
-        logger.Warn("Event count overflow in spill, reading 1st",
-                    MAXPERSPILL,"events")
-        skipToNextBoard=True
-        continue
-
-    # check for sequential events
-    if newEvent and (padeEvent-lastEvent)!=1:
-        #logger.Warn("Nonsequential event #:",padeEvent,"Expected",lastEvent+1,
-        #            " Board:",pade_board_id,"channel:",pade_ch_number,"Clearing events in dictionary")
-        logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
-                    " Board:",pade_board_id,"channel:",pade_ch_number," Clearing events in dictionary")
-        skipToNextBoard=True     # give up on remainder of this spill
-        for ievt in range(lastEvent,len(eventDict)):
-            if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
-        continue
-    lastEvent=padeEvent
-
-    # check packet counter
-    goodPacketCount = (newBoard or newEvent) or (pade_hw_counter-lastPacket)==1
-    if not goodPacketCount:
-        logger.Warn("Packet counter increment error, delta=",
-                    pade_hw_counter-lastPacket," Board:",pade_board_id,"channel:",pade_ch_number,
-                    "Clearing events in dictionary")
-        for ievt in range(lastEvent,len(eventDict)):
-            if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
-        skipToNextBoard=True
-        continue
-    lastPacket=pade_hw_counter
-
-    # fetch ADC samples (to do clear event from here on error)
-    samples=array("i",[0xFFF]*padeChannel.__SAMPLES())
-    nsamples=len(waveform)
-    if nsamples != padeChannel.__SAMPLES():
-        logger.Warn("Incorrect number of ADC samples, expected",
-                    padeChannel.__SAMPLES(),"found:",nsamples,"Board:", pade_board_id)
-        continue
-    else:
-        isSaturated = "FFF" in waveform
-        if (isSaturated):
-            logger.Warn("ADC shows saturation. Board:",
-                        pade_board_id,"channel:",pade_ch_number)
-        for i in range(nsamples): 
-            samples[i]=int(waveform[i],16)
-            if (samples[i]>4095):
-                logger.Warn("Invalid ADC reading > 0xFFF", 
-                            pade_board_id,"channel:",pade_ch_number)
-                
-    writeChan=True   # now assume channel is good to write, until proven guilty
-    # new event condition in master
-    if newMasterEvent:
-        nEventsTot=nEventsTot+1
-        nEventsInSpill=nEventsInSpill+1
-        if padeEvent%100==0:
-            print "Event in spill",padeSpill['number'],"(",padeEvent,")  / total", nEventsTot
-
-        eventDict[padeEvent]=TBEvent()
-        eventDict[padeEvent].SetSpill(padeSpill['number'])
-        eventDict[padeEvent].SetNtrigWC(padeSpill['nTrigWC'])
-        
-
-        # search for WC spill info
-        if wcSpill[0]>=0:
-            fWC = TBOpen(wcSpill[1])
-            fWC.seek(int(wcSpill[0]))
-            # advance file pointer and return location of event 
-            wcStart=findWCEvent(fWC,padeEvent)  
-            if wcStart>0:         # matching event found in WC data
-                fWC.seek(wcStart)
-                etime=fWC.readline()            # discard ETIME line
-                while 1:
-                    wcline=fWC.readline()
-                    if not wcline : break   # EOF 
-                    wcline=wcline.split()
-                    if len(wcline)<2: print "====>>>",wcline
-                    if "Module" in wcline: tdcNum=int(wcline[1])
-                    elif "Channel" in wcline:
-                        wire=int(wcline[1])
-                        tdcCount=int(wcline[2])
-                        eventDict[padeEvent].AddWCHit(tdcNum,wire,tdcCount)
-                    else: break
+            # find associated spill in WC data
+            wcSpill=wcLookup(padeSpill['wcTime'])
+            if (wcSpill[0]>=0):
+                logger.Info("WC data from file:",wcSpill[1])
             else:
-                logger.Warn("No matching event in WC")
-            fWC.close()
+                logger.Warn("No corresponding WC data found for spill")
 
-    else: # new event in a slave
-        if not padeEvent in eventDict:
-#            logger.Warn("Event count mismatch. Slave:",
-#                        pade_board_id,"reports event",padeEvent,"not present in master.",
-#                        "Total events in master:",nEventsInSpill)
-            logger.Warn("Event count mismatch. Slave:",
-                        pade_board_id,"reports event not present in master.")
-            writeChan=False
+            continue  # finished w/ spill header read next line in PADE file
+
+        # begin reading at next spill header (triggered by certain errors)
+        if skipToNextSpill: continue    
+
+        if "spill status" in padeline:   # spill header for a PADE card
+            (isMaster,boardID,status,trgStatus,
+             events,memReg,trigPtr,pTemp,sTemp) = ParsePadeBoardHeader(padeline)
+            boardHeaders[boardID]=PadeHeader(isMaster,boardID,status,trgStatus,
+                                            events,memReg,trigPtr,pTemp,sTemp)
+            tbspill.AddPade(PadeHeader(isMaster,boardID,status,trgStatus,
+                                            events,memReg,trigPtr,pTemp,sTemp))
+            continue
+
+        ############### Reading spill header information ########## 
+        ###########################################################
+
+        # parse PADE channel data
+        (pade_ts,pade_transfer_size,pade_board_id,
+         pade_hw_counter,pade_ch_number,padeEvent,waveform)=ParsePadeData(padeline)
+
+
+        # new board/event conditions
+        newBoard =  (pade_board_id != lastBoardID)
+        newEvent = (padeEvent!=lastEvent)
+        newMasterEvent = (pade_board_id==MASTERID and newEvent)
+
+        if newBoard: 
+            lastBoardID=pade_board_id
+            lastEvent=-1
+            skipToNextBoard=False
+        if skipToNextBoard: continue
+
+        # check for event overflows
+        if padeEvent>MAXPERSPILL:
+            logger.Warn("Event count overflow in spill, reading 1st",
+                        MAXPERSPILL,"events")
             skipToNextBoard=True
+            continue
 
-    if writeChan:
-        eventDict[padeEvent].FillPadeChannel(pade_ts, pade_transfer_size, 
-                                             pade_board_id, pade_hw_counter, 
-                                             pade_ch_number, padeEvent, samples)
-        if DEBUG_LEVEL>1: eventDict[padeEvent].GetLastPadeChan().Dump()
+        # check for sequential events
+        if newEvent and (padeEvent-lastEvent)!=1:
+            #logger.Warn("Nonsequential event #:",padeEvent,"Expected",lastEvent+1,
+            #            " Board:",pade_board_id,"channel:",pade_ch_number,"Clearing events in dictionary")
+            logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
+                        " Board:",pade_board_id,"channel:",pade_ch_number," Clearing events in dictionary")
+            skipToNextBoard=True     # give up on remainder of this spill
+            for ievt in range(lastEvent,len(eventDict)):
+                if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
+            continue
+        lastEvent=padeEvent
+
+        # check packet counter
+        goodPacketCount = (newBoard or newEvent) or (pade_hw_counter-lastPacket)==1
+        if not goodPacketCount:
+            logger.Warn("Packet counter increment error, delta=",
+                        pade_hw_counter-lastPacket," Board:",pade_board_id,"channel:",pade_ch_number,
+                        "Clearing events in dictionary")
+            for ievt in range(lastEvent,len(eventDict)):
+                if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
+            skipToNextBoard=True
+            continue
+        lastPacket=pade_hw_counter
+
+        # fetch ADC samples (to do clear event from here on error)
+        samples=array("i",[0xFFF]*padeChannel.__SAMPLES())
+        nsamples=len(waveform)
+        if nsamples != padeChannel.__SAMPLES():
+            logger.Warn("Incorrect number of ADC samples, expected",
+                        padeChannel.__SAMPLES(),"found:",nsamples,"Board:", pade_board_id)
+            continue
+        else:
+            isSaturated = "FFF" in waveform
+            if (isSaturated):
+                logger.Warn("ADC shows saturation. Board:",
+                            pade_board_id,"channel:",pade_ch_number)
+            for i in range(nsamples): 
+                samples[i]=int(waveform[i],16)
+                if (samples[i]>4095):
+                    logger.Warn("Invalid ADC reading > 0xFFF", 
+                                pade_board_id,"channel:",pade_ch_number)
+
+        writeChan=True   # now assume channel is good to write, until proven guilty
+        # new event condition in master
+        if newMasterEvent:
+            nEventsTot=nEventsTot+1
+            nEventsInSpill=nEventsInSpill+1
+            if padeEvent%100==0:
+                print "Event in spill",padeSpill['number'],"(",padeEvent,")  / total", nEventsTot
+
+            eventDict[padeEvent]=TBEvent()
+            eventDict[padeEvent].SetSpill(padeSpill['number'])
+            eventDict[padeEvent].SetNtrigWC(padeSpill['nTrigWC'])
 
 
-#=======================================================================# 
-#  Write tree and file to disk                                          #
-#=======================================================================#
-print
-print "Finished processing"
-BeamTree.Print()
-eventsInTree=BeamTree.GetEntries()
-print "writing file:",outFile
-BeamTree.Write()
-fout.Close()
+            # search for WC spill info
+            if wcSpill[0]>=0:
+                fWC = TBOpen(wcSpill[1])
+                fWC.seek(int(wcSpill[0]))
+                # advance file pointer and return location of event 
+                wcStart=findWCEvent(fWC,padeEvent)  
+                if wcStart>0:         # matching event found in WC data
+                    fWC.seek(wcStart)
+                    etime=fWC.readline()            # discard ETIME line
+                    while 1:
+                        wcline=fWC.readline()
+                        if not wcline : break   # EOF 
+                        wcline=wcline.split()
+                        if len(wcline)<2: print "====>>>",wcline
+                        if "Module" in wcline: tdcNum=int(wcline[1])
+                        elif "Channel" in wcline:
+                            wire=int(wcline[1])
+                            tdcCount=int(wcline[2])
+                            eventDict[padeEvent].AddWCHit(tdcNum,wire,tdcCount)
+                        else: break
+                else:
+                    logger.Warn("No matching event in WC")
+                fWC.close()
 
-# for convinence when working interactively
-print commands.getoutput(ccat('ln -sf',outFile,' latest.root'))
+        else: # new event in a slave
+            if not padeEvent in eventDict:
+    #            logger.Warn("Event count mismatch. Slave:",
+    #                        pade_board_id,"reports event",padeEvent,"not present in master.",
+    #                        "Total events in master:",nEventsInSpill)
+                logger.Warn("Event count mismatch. Slave:",
+                            pade_board_id,"reports event not present in master.")
+                writeChan=False
+                skipToNextBoard=True
 
-print
-logger.Info("Summary: nSpills processed= ",nSpills," Total Events Processed= ",nEventsTot)
-logger.Info("Fraction of events kept:",float(eventsInTree)/nEventsTot*100)
+        if writeChan:
+            eventDict[padeEvent].FillPadeChannel(pade_ts, pade_transfer_size, 
+                                                 pade_board_id, pade_hw_counter, 
+                                                 pade_ch_number, padeEvent, samples)
+            if DEBUG_LEVEL>1: eventDict[padeEvent].GetLastPadeChan().Dump()
 
-logger.Summary()
-if fakeSpillData: logger.Info("Fake spill data")
-print "Exiting" 
-exit(0)
+
+    #=======================================================================# 
+    #  Write tree and file to disk                                          #
+    #=======================================================================#
+    print
+    print "Finished processing"
+    BeamTree[0].Print()
+    eventsInTree=BeamTree[0].GetEntries()
+    print "writing file:",outFile
+    BeamTree[0].Write()
+    fout.Close()
+
+    # for convinence when working interactively
+    print commands.getoutput(ccat('ln -sf',outFile,' latest.root'))
+
+    print
+    logger.Info("Summary: nSpills processed= ",nSpills," Total Events Processed= ",nEventsTot)
+    logger.Info("Fraction of events kept:",float(eventsInTree)/nEventsTot*100)
+
+    logger.Summary()
+    if fakeSpillData: logger.Info("Fake spill data")
+
+
+
+if __name__ == '__main__': 
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:k")
+    except getopt.GetoptError as err: usage()
+
+    NEventLimit=NMAX
+    fileList=[]
+    inputDir=""
+    recurse=False
+    keepFlag=False
+    for o, a in opts:
+        if o == "-n": NEventLimit=int(a)
+        elif o == "-d":
+            inputDir=a
+        elif o == "-r":
+            inputDir=a
+            recurse=True
+        elif o == "-k": keepFlag=True
+
+
+    if inputDir=="":
+        if len(args)>0: fileList=args[0:]
+        else: usage()
+    elif not recurse:
+        if not os.path.isdir(inputDir): usage()
+        fileList.extend( glob.glob(inputDir+'/rec_capture_*.txt*') )
+    elif recurse:
+        cmd=ccat('find',inputDir,'-name "rec_capture_*.txt*"')
+        fileList.extend( commands.getoutput(cmd).split() )
+    else: usage()
+
+    print "Processing",len(fileList),"files"
+
+    #===========================================================# 
+    #  Declare data containers                                  #
+    #===========================================================#
+    LoadLibs("TBLIB","TBEvent.so")
+
+    for padeDat in fileList:
+        print "===>",padeDat
+        filler(padeDat,NEventLimit,keepFlag)
+
+    print "Exiting" 
+    exit(0)
