@@ -162,8 +162,7 @@ def readWCevent(fWC):
             if DEBUG_LEVEL>1: event.GetWCChan(nhits).Dump()
             nhits=nhits+1
 
-def getWCspills(fWC):
-    
+def getWCspills(fWC):    
     endOfEvent=0
     fWC.seek(loc)
     while 1:
@@ -191,13 +190,35 @@ def getWCspills(fWC):
             nhits=nhits+1
 
 
-#WC Database lookup
+# WC Database lookup
 # match WC spills w/in 15 seconds of timestamp given by PADE
 def wcLookup(tgttime, bound=15, filename="wcdb.txt"):
     tgttime=float(tgttime)
+    lookval=int(tgttime)/100   # seek matches w/in 100 second time range
     try:
-        handle = open(filename, 'r')
-        
+        spills=getoutput("look "+str(lookval)+" "+filename)   # binary search of file
+        if len(spills)==0: return (-1, None)                  # no lines match
+        spills=spills.split("\n") 
+        for spill in spills:   # seach spills <100 seconds from time in PADE spill header 
+            split = re.split(' +', spill.strip())
+            sTime = float(split[0])
+            diff = sTime-tgttime
+            if abs(diff) <= bound:   # fuzzy time match
+                return( int(split[4]),split[3] )  # byte offset and filename
+            elif (diff>bound):       # Moved past the spill in the db file
+                return (-1, None)
+
+    except IOError as e:
+        print "Failed to open file %s due to %s" % (filename, e)
+
+    return (-1,None)
+
+# WC Database lookup [old version]
+# match WC spills w/in 15 seconds of timestamp given by PADE
+def wcLookup_(tgttime, bound=15, filename="wcdb.txt"):
+    tgttime=float(tgttime)
+    try:
+        handle = open(filename, 'r')        
         withinBound = []
         for line in handle:                       # todo: replace with binary search!
             split = re.split(' +', line.strip())
@@ -213,6 +234,9 @@ def wcLookup(tgttime, bound=15, filename="wcdb.txt"):
         print "Failed to open file %s due to %s" % (filename, e)
 
     return (-1,None)
+
+
+
 
 # find matching WC event number
 def findWCEvent(fd,tgtevent):
