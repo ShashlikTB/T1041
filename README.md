@@ -41,6 +41,7 @@ Usage: python TBNtupleMaker [OPTION] [PADE_FILE] [PADE_FILE] ...
       -r DIR         : Process all padefiles in DIR, and all subdirectories
                        Overrides and files given on command line list
       -k             : Keep existing root files, ony process new ones
+      -o DIR         : Output dir, instead of default = location of input file
 
 
 Produces an output file with the same basename as the PADE_FILE, replacing .txt(.bz2) with .root

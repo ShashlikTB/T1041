@@ -18,9 +18,9 @@ from TBUtils import *
 ##### Parameter block #####
 
 DEBUG_LEVEL = 0
-NMAX = 1000000
-MASTERID = 112
-MAXPERSPILL=126
+NMAX = 1000000   # stop after NMAX events
+MASTERID = 112   
+MAXPERSPILL=126  # do not process more that this many events per spill ( mem overwrite issue )
 
 ###########################
 
@@ -34,7 +34,7 @@ def usage():
     print "      -r DIR         : Process all padefiles in DIR, and all subdirectories"
     print "                       Overrides all files given on command line list"
     print "      -k             : Keep existing root files, only process new inputs"
-    print "      -o DIR         : Output dir, instead of default location of input file" 
+    print "      -o DIR         : Output dir, instead of default = location of input file" 
     print 
     sys.exit()
 
