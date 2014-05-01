@@ -28,6 +28,7 @@ class PadeChannel : public TObject {
   Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
   Int_t GetModule();
   Int_t GetFiber();
+  Float_t GetPedistal(){return 100;}  // *** place holder ***
   void GetHist(TH1F* h);
 
   // private:
