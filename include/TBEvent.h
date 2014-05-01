@@ -117,13 +117,11 @@ class TBEvent : public TObject {
   ClassDef(TBEvent,1);  //Event structure
 public:
   void Reset();    // clear data
-  void cp(const TBEvent &e);  // copy constructor interfce for python, ugh!
 
   // getters (tbd - return const references, not copies, where appopriate)
   Int_t NPadeChan() const {return padeChannel.size();}
   PadeChannel GetPadeChan(const int idx) const {return padeChannel[idx];}
   PadeChannel GetLastPadeChan() const {return padeChannel.back();}
-  Int_t GetSpillNumber() const {return spillNumber;}
   WCChannel GetWCChan(const int idx) {return wc[idx];}
   Int_t GetWCHits() const {return wc.size();}
   vector<WCChannel> GetWChitsX(Int_t wc, Int_t *min=0, Int_t* max=0) const;
@@ -131,8 +129,6 @@ public:
 
 
   // setters
-  void SetSpill(Int_t s) {spillNumber=s;}
-  void SetNtrigWC(Int_t n) {nTrigWC=n;}
   void SetPadeChannel(const PadeChannel p, Int_t i) {padeChannel[i]=p;}
   void FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 		       UShort_t  board_id, UInt_t hw_counter, 
@@ -140,8 +136,6 @@ public:
   void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
 
 private:
-  Int_t         spillNumber;
-  Int_t         nTrigWC;
   vector<PadeChannel> padeChannel;
   vector<WCChannel> wc; 
 };

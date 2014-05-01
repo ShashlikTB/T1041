@@ -68,14 +68,6 @@ vector<WCChannel> TBEvent::GetWChitsY(Int_t nwc, Int_t *min, Int_t* max) const{
 
 
 
-void TBEvent::cp(const TBEvent &e){
-  spillNumber = e.spillNumber;
-  nTrigWC = e.nTrigWC;
-  padeChannel = e.padeChannel;
-  wc = e.wc;
-}
-
-
 void PadeChannel::Dump() const{
   cout << "Header ==> timestamp: " <<  _ts << " size: " 
        << _transfer_size << " board: " << _board_id << " xfer#: " 

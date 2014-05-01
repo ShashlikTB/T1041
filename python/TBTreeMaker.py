@@ -34,6 +34,7 @@ def usage():
     print "      -r DIR         : Process all padefiles in DIR, and all subdirectories"
     print "                       Overrides all files given on command line list"
     print "      -k             : Keep existing root files, only process new inputs"
+    print "      -o DIR         : Output dir, instead of default location of input file" 
     print 
     sys.exit()
 
@@ -49,7 +50,7 @@ def fillTree(tree, eventDict, tbspill):
             tree[0].Fill()
 
 
-def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
+def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
 
     logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 
@@ -64,11 +65,15 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
     #  Declare new file and tree with branches                              #
     #=======================================================================#
     outFile=padeDat.replace(".bz2","").replace(".txt",".root")
+    if not outDir=="":
+        outFile=outDir+"/"+os.path.basename(outFile)
+
     if  os.path.isfile(outFile) and keepFlag:
         logger.Info(outFile,"is present, skip processing due to -k flag")
         return
 
     fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
+
     logger.Info("Writing to output file",outFile)
 
     BeamTree = [TTree("t1041", "T1041")] # ugly python hack to pass a reference
@@ -117,7 +122,6 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
             tbspill.Reset();
             logger.Info(padeline)
             eventDict={}           # clear dictionary containing events in spill
-            boardHeaders={}
             lastBoardID=-1
             lastEvent=-1
             newEvent=False
@@ -152,8 +156,6 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
         if "spill status" in padeline:   # spill header for a PADE card
             (isMaster,boardID,status,trgStatus,
              events,memReg,trigPtr,pTemp,sTemp) = ParsePadeBoardHeader(padeline)
-            boardHeaders[boardID]=PadeHeader(isMaster,boardID,status,trgStatus,
-                                            events,memReg,trigPtr,pTemp,sTemp)
             tbspill.AddPade(PadeHeader(isMaster,boardID,status,trgStatus,
                                             events,memReg,trigPtr,pTemp,sTemp))
             continue
@@ -235,9 +237,6 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
                 print "Event in spill",padeSpill['number'],"(",padeEvent,")  / total", nEventsTot
 
             eventDict[padeEvent]=TBEvent()
-            eventDict[padeEvent].SetSpill(padeSpill['number'])
-            eventDict[padeEvent].SetNtrigWC(padeSpill['nTrigWC'])
-
 
             # search for WC spill info
             if wcSpill[0]>=0:
@@ -306,7 +305,7 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False):
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:kp")
+        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:o:kp")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
@@ -315,6 +314,7 @@ if __name__ == '__main__':
     recurse=False
     keepFlag=False
     prof=False
+    outDir=""
     for o, a in opts:
         if o == "-n": NEventLimit=int(a)
         elif o == "-d":
@@ -324,6 +324,7 @@ if __name__ == '__main__':
             recurse=True
         elif o == "-k": keepFlag=True
         elif o == "-p": prof=True
+        elif o == "-o": outDir=a
 
 
     if inputDir=="":
@@ -353,8 +354,11 @@ if __name__ == '__main__':
         print "="*60
         print "Processing File ===>",padeDat,count,"/",len(fileList)
         print "="*60
-        filler(padeDat,NEventLimit,keepFlag)
+        filler(padeDat,NEventLimit,keepFlag,outDir)
         count=count+1
+        print "="*60
+        print "Finished File ===>",padeDat
+        print "="*60
 
     if prof:
         pr.disable()
