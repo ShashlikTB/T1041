@@ -2,6 +2,7 @@
 
 #ifndef TBEVENT_H
 #define TBEVENT_H
+#include "shashlik.h"
 #include <TH1F.h>
 #include <vector>
 
@@ -21,13 +22,13 @@ class PadeChannel : public TObject {
 
   // getters
   UInt_t GetBoardID() {return _board_id;}
-  UInt_t GetChannelID() {return _ch_number;}
+  UInt_t GetChannelNum() {return _ch_number;}
+  UInt_t GetChannelID() {return _board_id*100+_ch_number;}
   UShort_t* GetWform() {return _wform;}
   UInt_t GetMax() {return _max;}
   Int_t GetPeak() {return _peak;}
   Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
-  Int_t GetModule();
-  Int_t GetFiber();
+  void GetXYZ(float &x, float &y, float &z);
   Float_t GetPedistal(){return 100;}  // *** place holder ***
   void GetHist(TH1F* h);
 

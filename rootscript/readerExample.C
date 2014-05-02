@@ -45,12 +45,18 @@ void readerExample(TString file="latest.root"){
   TH1I *htime115=new TH1I("time115","Timing board 115",120,0,120);
   TH1I *htime116=new TH1I("time116","Timing board 116",120,0,120);
 
+  // histograms for cluster x,y positions
+  TH1F *hClusterX=new TH1F("hXCluster","Cluster X",56,-28,28);  // 1mm bins
+  TH1F *hClusterY=new TH1F("hYCluster","Cluster Y",56,-28,28);
+
+
   // create a pointer to an event object for reading the branch values.
   TBEvent *event = new TBEvent(); 
   TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
 
   // loop over events
+  CalCluster calCluster;
   for (Int_t i=0; i< t1041->GetEntries(); i++) {
     t1041->GetEntry(i);
 
@@ -80,7 +86,14 @@ void readerExample(TString file="latest.root"){
       hslopeY->Fill(track.GetSlopeY());   
     }
     
-    // to do add cal cluster finder
+    // plot x,y positions of "energy" (really ADC value) clusters
+    // Warning clustering code is not vetted
+    // calCluster.MakeCluster(event);  
+    calCluster.MakeCluster(event,5);  // cut requiring 5 adc counts>pedistal
+    hClusterX->Fill(calCluster.GetX());
+    hClusterY->Fill(calCluster.GetY());
+
+    // to do
     //       track extrapolation to face of calorimeter
     //       delta_x,y plots between cal cluster and track
   }

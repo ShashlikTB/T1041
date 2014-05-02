@@ -33,7 +33,7 @@ void waveViewer(TString fdat, Int_t board=-1, Int_t channel=-1){
     for (Int_t j=0; j<event->NPadeChan(); j++){
       PadeChannel pch=event->GetPadeChan(j);
       if (board>0 && (int)pch.GetBoardID()!=board) continue;
-      if (channel>0 && (int)pch.GetChannelID()!=channel) continue;
+      if (channel>0 && (int)pch.GetChannelNum()!=channel) continue;
       pch.GetHist(hw);
       hw->Draw();
       c->Update();

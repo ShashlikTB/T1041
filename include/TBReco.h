@@ -18,7 +18,7 @@ class WCtrack{
   // bit 1: confirmed by project to SC2
   static const int kSC1=1;
   static const int kSC2=2;
-  bool Confirmed(int flag=1){return true;}  // to do 
+  //bool Confirmed(int flag=1){return true;}  // to do 
  private:
   void SetSlopeX();
   void SetSlopeY();
@@ -50,13 +50,20 @@ class CalCluster{
  public:
   CalCluster(){;}
   CalCluster(const TBEvent *event);
+  void MakeCluster(const TBEvent *event=0, float threshold=0);
+  void MakeCluster(float threshold=0);
+  void SetEvent(const TBEvent *event) {_event=event;}
+  float GetX() {return _x;}
+  float GetY() {return _y;}
  private:
   const TBEvent *_event;
-  float _Eu, _Ed;   // upsteam and downstream energies
+  float _Eu, _Ed;   // upsteam and downstream "energies"
   float _x, _y;     // E-weighted position  
   float _sx, _sy;   // width
   vector<PadeChannel> _channels;   // channels included in cluster
 };
+
+
 
 // use this for plots integrated over a run
 class CalReco{

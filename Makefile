@@ -39,7 +39,7 @@ waveInterface.o: waveInterface.cc
 	$(CC) -I$(<D)/../include $(NONSHARED) $^
 
 
-TBEvent.so: TBEvent.o TBEventDict.so
+TBEvent.so: shashlik.o TBEvent.o TBEventDict.so
 	$(CC) $(SHAREDCFLAGS) -o $@ $(abspath $(patsubst %.so, $(LIB)/%.so,$^)) $(ROOTLIBS)
 	mv $@ $(LIB)/	
 
@@ -59,7 +59,10 @@ TBReco.so: TBReco.o
 	$(CC) $(SHAREDCFLAGS) -o $@ $(abspath $(patsubst %.so, $(LIB)/%.so,$^)) $(ROOTLIBS)
 	mv $@ $(LIB)/
 
-TBReco.o: TBReco.cc 
+TBReco.o: TBReco.cc TBReco.h
+	$(CC) -I$(<D)/../include $(NONSHARED) $^
+
+shashlik.o: shashlik.cc 
 	$(CC) -I$(<D)/../include $(NONSHARED) $^
 
 clean:

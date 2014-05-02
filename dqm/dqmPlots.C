@@ -1,6 +1,6 @@
 #include "dqmPlots.h"
 
-const UShort_t threshold = 200;
+const UShort_t threshold = 120;
 
 // inputs data file and event in file to display (default is to integrate all)
 void dqmDisplay(TString fdat, int ndisplay = -1){
@@ -55,45 +55,22 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
 
   for (Int_t i=start; i < end; i++) {
     t1041->GetEntry(i);
-
-    int nOverThreshold = 0;
-
     for (Int_t j = 0; j < event->NPadeChan(); j++){
       PadeChannel pch = event->GetPadeChan(j);
 
-      UShort_t * wform = pch.GetWform();
-      UShort_t max = 0;
-      Int_t maxTime = 0;
+      UShort_t max = pch.GetMax();
+      Int_t maxTime = pch.GetPeak();
+      if (max>MAXADC) continue;    // skip channels with bad adc readings (should be RARE)
 
-      bool overMax = false;
-      int nMaximumsFound = 0;
+      int channelID=pch.GetChannelID();   // boardID*100+channelNum in PADE
+      int moduleID,fiberID;
+      mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
 
-      for (Int_t k = 0; k < event->GetPadeChan(j).__SAMPLES(); k++){
-	if(wform[k] > MAXADC) {
-	  overMax = true;
-	  break;
-	}
-	if (wform[k] > max) {
-	  max = wform[k];
-	  maxTime = k;
-	  nMaximumsFound++;
-	}
-      }
-
-      if(overMax) continue;
-      if(nMaximumsFound == 120) continue;
-
-      ///////////////////////////////////////////////////////////////
-      int module,fiber;
-      mapper->Pade2Fiber(pch.GetBoardID(), pch.GetChannelID(), module, fiber);
-      int xm,ym;
-      mapper->ModuleXY(module, xm, ym);
-
-      float xf,yf;
-      int fiberID = module * 100 + fiber;
+      float xm,ym,xf,yf;
+      mapper->ModuleXY(moduleID,xm,ym);
       mapper->FiberXY(fiberID, xf, yf);
-
-      if(module < 0) {
+	    
+      if(moduleID < 0) {
 	hModU_ntriggers->Fill(xm, ym);
 	hChanU_ntriggers->Fill(xf, yf);
       }
@@ -101,12 +78,10 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
 	hModD_ntriggers->Fill(xm, ym);
 	hChanD_ntriggers->Fill(xf, yf);
       }
-
       if(max <= threshold) continue;
 
-      nOverThreshold++;
 
-      if (module < 0) {
+      if (moduleID < 0) {
 	hModU->Fill(xm, ym, max);
 	hModU_time->Fill(xm, ym, maxTime);
 	hModU_nhits->Fill(xm, ym);
@@ -126,8 +101,6 @@ void dqmDisplay(TString fdat, int ndisplay = -1){
       }
       
     }
-
-    //if(nOverThreshold > 0) cout << "For event " << i << ", found " << nOverThreshold << " channels over threshold" << endl;
 
   }
 

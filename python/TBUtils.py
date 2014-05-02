@@ -74,6 +74,15 @@ class Logger():
         print " WARNING Summary (end)"
         print "="*40        
 
+
+# hack to pass immutable data types by reference (under consideration)
+class pyref():  
+    def __init__(self,data):
+        self.data=[data]
+    def ref(self):
+        return self.data[0]
+
+
 def TBOpen(fin):
     if fin.endswith("bz2"): return bz2.BZ2File(fin,"r")
     else: return open(fin,"r")

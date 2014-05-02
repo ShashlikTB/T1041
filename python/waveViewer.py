@@ -17,10 +17,10 @@ gROOT.ProcessLine(".L rootscript/waveViewer.C+")
 print "To kill use: kill",os.getpid()
 
 # show all wave forms in file
-# waveViewer(runDat)
+waveViewer(runDat)
 
 # restrict display to a specific board/channel
-waveViewer(runDat,115,10)
+#waveViewer(runDat,115,10)
 
 
 

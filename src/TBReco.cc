@@ -119,11 +119,37 @@ void WCReco::GetTDChists(TH1I** TDC, int nmax){
   }
 }
 
-CalCluster::CalCluster(const TBEvent *event):_event(event){
-  for (Int_t j=0; j<event->NPadeChan(); j++){
-    ;
+
+CalCluster::CalCluster(const TBEvent *event) : _event(event) {;}
+
+// theshold in counts above pedistal
+void CalCluster::MakeCluster(float threshold){
+  if (!_event) return;
+  float sumx=0, sumy=0; 
+  _Eu=0;
+  _Ed=0;
+  float x,y,z;
+  for (Int_t j=0; j<_event->NPadeChan(); j++){
+    PadeChannel p=_event->GetPadeChan(j);
+    float val=p.GetPeak()-p.GetPedistal();
+    if (val<threshold) continue;
+    p.GetXYZ(x,y,z);
+    if (z>0) _Ed+=val;
+    else _Eu+=val;
+    sumx+=val*x;
+    sumy+=val*y;
   }
+  if (_Ed+_Eu==0) return;
+  _x=sumx/(_Ed+_Eu);
+  _y=sumy/(_Ed+_Eu);
 }
+
+void CalCluster::MakeCluster(const TBEvent *event, float threshold){
+  _event=event;
+  MakeCluster(threshold);
+}
+
+
 
 CalReco::CalReco(const TTree *tbdata) : _tbdata(tbdata) {;}
 

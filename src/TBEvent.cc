@@ -5,7 +5,6 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TString.h"
-#include "shashlik.h"
 #include "WC.h"
 
 #include "TBEvent.h"
@@ -67,7 +66,6 @@ vector<WCChannel> TBEvent::GetWChitsY(Int_t nwc, Int_t *min, Int_t* max) const{
 }
 
 
-
 void PadeChannel::Dump() const{
   cout << "Header ==> timestamp: " <<  _ts << " size: " 
        << _transfer_size << " board: " << _board_id << " xfer#: " 
@@ -109,21 +107,26 @@ void PadeChannel::Reset(){
   for (int i=0; i<N_PADE_SAMPLES; i++) _wform[i]=0;
 }
 
-Int_t PadeChannel::GetModule(){
-  return 0;
-}
-Int_t PadeChannel::GetFiber(){return 0;}
 
 void PadeChannel::GetHist(TH1F *h){
   TString ti;
-  ti.Form("Event %d : Board %d, channel %d",_eventnum, GetBoardID(),GetChannelID());
+  ti.Form("Event %d : Board %d, channel %d",_eventnum, GetBoardID(),GetChannelNum());
   h->Reset();
   h->SetTitle(ti);
-  h->SetBins(N_PADE_SAMPLES,0,N_PADE_SAMPLES);
+  h->SetBins(N_PADE_SAMPLES,-0.5,N_PADE_SAMPLES-0.5);
   for (int i=0; i<N_PADE_SAMPLES; i++){
     h->SetBinContent(i,_wform[i]);
   }
 }
+
+void PadeChannel::GetXYZ(float &x, float &y, float &z){
+  Mapper *mapper=Mapper::Instance();
+  int fiberID=mapper->ChannelID2FiberID(GetChannelID());
+  mapper->FiberXY(fiberID,x,y);
+  if (fiberID<0) z=-1;
+  else z=1;
+}
+
 
 
 void WCChannel::Dump() const {

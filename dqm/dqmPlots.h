@@ -18,7 +18,8 @@ TH2F * moduleHistogram(bool isUpstream, TString title, int zmin, int zmax, bool 
   TString hName = isUpstream ? "hModU_"+title : "hModD_"+title;
   TString hTitle = isUpstream ? "Modules Upstream "+title : "Modules Downstream "+title;
 
-  TH2F * h = new TH2F(hName, hTitle, 4, 0.5, 4.5, 4, 0.5, 4.5);
+  TH2F * h = new TH2F(hName, hTitle, 4, -28, 28, 4, -28, 28);
+  
   
   if(singleEvent) {
     h->SetMinimum(0);
@@ -37,7 +38,9 @@ TH2F * channelHistogram(bool isUpstream, TString title, int zmin, int zmax, bool
   TString hName = isUpstream ? "hChanU_"+title : "hChanD_"+title;
   TString hTitle = isUpstream ? "Channels Upstream "+title : "Channels Downstream "+title;
 
-  TH2F * h = new TH2F(hName, hTitle, 8, 0.5, 4.5, 8, 0.5, 4.5);
+  TH2F * h = new TH2F(hName, hTitle, 8, -28, 28, 8, -28, 28);
+  h->GetXaxis()->SetNdivisions(8,0);
+  h->GetYaxis()->SetNdivisions(8,0);
 
   if(singleEvent) {
     h->SetMinimum(0);
@@ -61,7 +64,7 @@ void drawChannelMap(TCanvas*& can, int nEvents, int singleEventNumber) {
   TH2I *hChanD=new TH2I(TString(can->GetName()) + "_label_d","Channels DownStream", 8, 0.5, 4.5, 8, 0.5, 4.5);
 
   for (int i=1; i<=NMODULES; i++){
-    int x,y;
+    float x,y;
     mapper->ModuleXY(i,x,y);
     hModU->Fill(x,y,-i);
     hModD->Fill(x,y,i);
