@@ -77,7 +77,6 @@ void WCReco::FitTDCs(){
   fGaussian->SetLineColor(2);
 
   for(Int_t drawG=0; drawG<NTDC; ++drawG){  
-    tspectrum.Search(_TDC[drawG],2,"goff",0.25); 
     // finding peak using tspectrum
     tspectrum.Search(_TDC[drawG],2,"goff",0.25); 
     int npeaks = tspectrum.GetNPeaks();
@@ -91,7 +90,7 @@ void WCReco::FitTDCs(){
     _mean[drawG]  = _TDC[drawG]->GetBinCenter(maxBin);
     int ampl      = _TDC[drawG]->GetBinContent(maxBin);
     fGaussian->SetParameters(ampl, _mean[drawG], 4.5);
-    fGaussian->SetRange(0, _mean[drawG]+tdcRange);
+    fGaussian->SetRange(_mean[drawG]-tdcRange, _mean[drawG]+tdcRange);
     if (_TDC[drawG]->GetEntries()<150) _TDC[drawG]->Rebin(2);   // BH: improve for small samples
     _TDC[drawG]->Fit(fGaussian,"0+QRL");  // BH:add L, improve fits for small samples
     const Int_t kNotDraw = 1<<9;
