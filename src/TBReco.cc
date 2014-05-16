@@ -130,7 +130,7 @@ void CalCluster::MakeCluster(float threshold){
   float x,y,z;
   for (Int_t j=0; j<_event->NPadeChan(); j++){
     PadeChannel p=_event->GetPadeChan(j);
-    float val=p.GetPeak()-p.GetPedistal();
+    float val=p.GetMax()-p.GetPedistal();
     if (val<threshold) continue;
     p.GetXYZ(x,y,z);
     if (z>0) _Ed+=val;
