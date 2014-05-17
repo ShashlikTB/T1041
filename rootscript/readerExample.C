@@ -1,6 +1,7 @@
 // ftp://root.cern.ch/root/doc/ROOTUsersGuideHTML/ch12s17.html
 // Created 4/12/2014 B.Hirosky: Initial release
 
+
 #include <TString.h>
 #include <TFile.h>
 #include <TTree.h>
@@ -36,8 +37,11 @@ void readerExample(TString file="latest.root"){
   wcReco.GetTDChists(hTDC);    // use to see the histograms
   /////////////////////////////////////////
 
+  // slopes and x-y postion of track at face of detector
   TH1F *hslopeX=new TH1F("hslopeX","Beam slope in X",50,-0.005,0.005);
   TH1F *hslopeY=new TH1F("hslopeY","Beam slope in Y",50,-0.005,0.005);
+  TH1F *htrackX=new TH1F("hTrackX","Track X",56,-28,28);  // 1mm bins
+  TH1F *htrackY=new TH1F("hTrackY","Track Y",56,-28,28);
 
   // histograms of peak times
   TH1I *htime112=new TH1I("time112","Timing board 112",120,0,120);
@@ -46,9 +50,11 @@ void readerExample(TString file="latest.root"){
   TH1I *htime116=new TH1I("time116","Timing board 116",120,0,120);
 
   // histograms for cluster x,y positions
-  TH1F *hClusterX=new TH1F("hXCluster","Cluster X",56,-28,28);  // 1mm bins
-  TH1F *hClusterY=new TH1F("hYCluster","Cluster Y",56,-28,28);
-
+  TH1F *hClusterX=new TH1F("hClusterX","Cluster X",56,-28,28);  // 1mm bins
+  TH1F *hClusterY=new TH1F("hClusterY","Cluster Y",56,-28,28);
+  // and cluster center vs extrapolated track
+  TH1F *hClusterDX=new TH1F("hClusterDX","Cluster DX",56,-28,28);  // 1mm bins
+  TH1F *hClusterDY=new TH1F("hClusterDY","Cluster DY",56,-28,28);
 
   // create a pointer to an event object for reading the branch values.
   TBEvent *event = new TBEvent(); 
@@ -79,13 +85,8 @@ void readerExample(TString file="latest.root"){
     bool haveTrack= (hitsX1.size()==1 && hitsY1.size()==1 && 
 		     hitsX2.size()==1 && hitsY2.size()==1);   // require only 2 x,y hits
 
-    // find slopes of tracks
-    if (haveTrack){
-      WCtrack track(hitsX1[0],hitsY1[0],hitsX2[0],hitsY2[0]);
-      hslopeX->Fill(track.GetSlopeX());
-      hslopeY->Fill(track.GetSlopeY());   
-    }
-    
+
+
     // plot x,y positions of "energy" (really ADC value) clusters
     // Warning clustering code is not vetted
     // calCluster.MakeCluster(event);  
@@ -93,14 +94,26 @@ void readerExample(TString file="latest.root"){
     hClusterX->Fill(calCluster.GetX());
     hClusterY->Fill(calCluster.GetY());
 
-    // to do
-    //       track extrapolation to face of calorimeter
-    //       delta_x,y plots between cal cluster and track
+    if (haveTrack){
+      WCtrack track(hitsX1[0],hitsY1[0],hitsX2[0],hitsY2[0]); // fit a track
+      hslopeX->Fill(track.GetSlopeX());
+      hslopeY->Fill(track.GetSlopeY());  
+
+      float trackX, trackY;
+      track.Project(zShash,trackX,trackY);
+
+      htrackX->Fill(trackX);
+      htrackY->Fill(trackY); 
+
+      hClusterDX->Fill(calCluster.GetX()-trackX);
+      hClusterDY->Fill(calCluster.GetY()-trackY);
+    }    
+
   }
 
   tfo->Write();
   tfo->Close();
     
-  cout << "Created: " << tfo->GetName() << endl;
+  cout << "\nCreated: " << tfo->GetName() << endl;
 }
 

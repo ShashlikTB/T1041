@@ -6,7 +6,7 @@
 ////////////////////////////////////////////
 /*  Mapping
   shashlik   WC2   WC1   SC2     SC1         SC0 (position unknown)
- +Z <------------------------------------------------
+ +Z <---------------0---------------------------------
 
  Use LH coordinte system with +Z=downstream, +Y=up, +X to the right 
  when facing downstream

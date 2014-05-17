@@ -159,4 +159,15 @@ void TBSpill::Dump() const {
   cout << "####################";
 }
 
+// warning: assume we only deal w/ WC1 and WC2! _tdcnum<=4
+float WCChannel::GetX(){
+  if (_tdcNumber==2 || _tdcNumber==6) return (0.5+_tdcWire);
+  else if (_tdcNumber==1 || _tdcNumber==5) return -63.5+_tdcWire;
+  return -999;  // not an x hit
+}
 
+float WCChannel::GetY(){
+  if (_tdcNumber==4 || _tdcNumber==8) return -1.0*(0.5+_tdcWire);
+  else if(_tdcNumber==3 || _tdcNumber==7) return 63.5-_tdcWire;
+  return -999;  // not a y hit
+}

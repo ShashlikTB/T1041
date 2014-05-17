@@ -17,7 +17,7 @@ NONSHARED = -c -pipe -Wshadow -W -Woverloaded-virtual $(ROOTCFLAGS) $(CXXFLAGS) 
 BUILDDIR = $(CURDIR)/build
 LIB = $(BUILDDIR)/lib
 
-all: dirs waveEventDict.so TBEvent.so TBReco.so
+all: dirs waveInterface.so TBEvent.so TBReco.so
 
 dirs:
 	test -d $(LIB) || mkdir -p $(LIB)
@@ -36,7 +36,7 @@ waveEventDict.cxx: waveInterface.h waveLinkDef.h
 	mv waveEventDict.[ch]* $(BUILDDIR)
 
 waveInterface.o: waveInterface.cc
-	$(CC) -I$(<D)/../include $(NONSHARED) $^
+	$(CC) -I$(<D)/../include $(NONSHARED)  -Wno-sign-compare $^
 
 
 TBEvent.so: shashlik.o TBEvent.o TBEventDict.so

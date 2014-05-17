@@ -17,28 +17,19 @@ WCtrack::WCtrack(WCChannel x1, WCChannel y1, WCChannel x2, WCChannel y2):
   SetSlopeY();
 } 
 
+void WCtrack::Project(float z, float &x, float &y){
+  x=_x1.GetX()+_mx*z;
+  y=_y1.GetY()+_my*z;
+}
+
 
 // warning slope claculations assume we only deal w/ WC1 and WC2!
 void WCtrack::SetSlopeX(){
-  float x1,x2;             // hit locations in mm
-  int wire=_x1.GetWire();
-  if (_x1.GetTDCNum()==2) x1 = (wire-63)-0.5;
-  else x1 = (0.5+wire);
-  wire=_x2.GetWire();
-  if (_x2.GetTDCNum()==6) x2 = (wire-63)-0.5;
-  else x2 = (0.5+wire);
-  _mx = (x2-x1)/dWC1toWC2; 
+  _mx = (_x2.GetX()-_x1.GetX())/dWC1toWC2; 
 }
 
 void WCtrack::SetSlopeY(){
-  float y1,y2;             // hit locations in mm
-  int wire=_y1.GetWire();
-  if (_y1.GetTDCNum()==4) y1=-1.0*(0.5+wire);
-  else y1=(63-wire)+0.5;
-  wire=_y2.GetWire();
-  if (_y2.GetTDCNum()==8) y2=-1.0*(0.5+wire);
-  else y2=(63-wire)+0.5;
-  _my = (y2-y1)/dWC1toWC2;  
+  _my = (_y2.GetY()-_y1.GetY())/dWC1toWC2;  
 }
 
 

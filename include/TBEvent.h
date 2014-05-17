@@ -81,6 +81,8 @@ class WCChannel : public TObject{
   UChar_t GetTDCNum() const {return _tdcNumber;}
   UChar_t GetWire() const {return _tdcWire;}
   UShort_t GetCount() const {return _tdcCount;}
+  float GetX();
+  float GetY();
  private:
   UChar_t       _tdcNumber;			
   UChar_t       _tdcWire;			

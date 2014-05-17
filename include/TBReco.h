@@ -13,6 +13,7 @@ class WCtrack{
   WCtrack(WCChannel x1, WCChannel y1, WCChannel x2, WCChannel y2);
   float GetSlopeX(){return _mx;}
   float GetSlopeY(){return _my;}
+  void Project(float z, float &x, float &y);
   // flag is a bit mask
   // bit 0: confirmed by project to SC1
   // bit 1: confirmed by project to SC2
