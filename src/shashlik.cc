@@ -1,7 +1,5 @@
 #include "shashlik.h"
 
-
-
 Mapper::Mapper(){  // Private so that it cannot be called
   // fill maps
   for (int i=0; i<NPADECHANNELS*2; i+=2){
@@ -15,7 +13,47 @@ Mapper::Mapper(){  // Private so that it cannot be called
   }
 }
 
+bool Mapper::validChannel(int boardID, int channelNum) const{
+  int channelID=boardID*100+channelNum;
+  std::map<int,int>::const_iterator search = _padeMap.find(channelID);
+  if (search == _padeMap.end()) return false;
+  return true;
+}
 
+int Mapper::ChannelID2FiberID(int channelID) const {
+  std::map<int,int>::const_iterator search=_padeMap.find(channelID);
+  if  (search == _padeMap.end()) return 0;
+  return search->second; 
+}
+
+void Mapper::ChannelID2ModuleFiber(int channelID, int &moduleID, int &fiberID) const{
+  std::map<int,int>::const_iterator search=_padeMap.find(channelID);
+  fiberID=search->second;
+  moduleID=fiberID/100;
+}
+
+int Mapper::ChannelID2ChannelIndex(int channelID) const {
+  int module,fiberID;
+  ChannelID2ModuleFiber(channelID,module,fiberID);
+  int fiber=TMath::Abs(fiberID)%5;
+  if (module<0) return 4*(TMath::Abs(module)-1) + (fiber-1);
+  else return 64 + 4*(module-1) + (fiber-1);
+}
+
+int Mapper::ChannelIndex2ChannelID(int channelIndex) const{
+  int fiber, module, fiberID;
+  fiber=(channelIndex%4)+1;
+  module=(channelIndex/4)+1;
+  if (module<=16) fiberID=-1*(module*100+fiber);
+  else fiberID=(module-16)*100+fiber;
+  return FiberID2ChannelID(fiberID);
+}
+
+int Mapper::FiberID2ChannelID(int fiberID) const {
+  std::map<int,int>::const_iterator search =_fiberMap.find(fiberID);
+  if  (search == _fiberMap.end()) return 0;
+  return search->second;
+}
 
 
 // return X-Y coordinate of module from upstream view
@@ -62,8 +100,8 @@ void Mapper::SetChannelBins(TH2 *h) const{
 void Mapper::GetModuleMap(TH2I* h, int z) const{
   h->Reset();
   SetModuleBins(h);
-  if (z==-1) h->SetTitle("Modules UpStream;X [mm];Y [mm]");
-  else h->SetTitle("Modules DownStream;X [mm];Y [mm]");
+  if (z==-1) h->SetTitle("Module IDs UpStream;X [mm];Y [mm]");
+  else h->SetTitle("Module IDs DownStream;X [mm];Y [mm]");
   float x,y;
   for (int i=1; i<=NMODULES; i++){
     ModuleXY(i,x,y);
@@ -71,7 +109,7 @@ void Mapper::GetModuleMap(TH2I* h, int z) const{
   }
 }
 
-void Mapper::GetChannelMap(TH2I* h, int z) const{;
+void Mapper::GetChannelMap(TH2I* h, int z) const{
   h->Reset();
   SetChannelBins(h);
   float x,y;
@@ -79,18 +117,44 @@ void Mapper::GetChannelMap(TH2I* h, int z) const{;
   for (int i=0; i<NPADECHANNELS/2; i++){
     if (z==1){
       // downstream channels
-      h->SetTitle("Channels DownStream;X [mm];Y [mm]");
+      h->SetTitle("Channel IDs DownStream;X [mm];Y [mm]");
       channelID=FIBERMAP[i*4];
       fiberID=FIBERMAP[i*4+1];
     }
     else{
       // upstream channels
-      h->SetTitle("Channels UpStream;X [mm];Y [mm]");
+      h->SetTitle("Channel IDs UpStream;X [mm];Y [mm]");
       channelID=FIBERMAP[i*4+2];
       fiberID=FIBERMAP[i*4+3];
     }
     FiberXY(fiberID, x, y); 
     h->Fill(x,y,channelID);
+  }
+}
+
+
+void Mapper::GetChannelIdx(TH2I* h, int z) const{
+  h->Reset();
+  h->SetMinimum(-1);
+  SetChannelBins(h);
+  float x,y;
+  int channelID,fiberID;
+  for (int i=0; i<NPADECHANNELS/2; i++){
+    if (z==1){
+      // downstream channels
+      h->SetTitle("Channel Idx DownStream;X [mm];Y [mm]");
+      channelID=FIBERMAP[i*4];
+      fiberID=FIBERMAP[i*4+1];
+    }
+    else{
+      // upstream channels
+      h->SetTitle("Channel Idx UpStream;X [mm];Y [mm]");
+      channelID=FIBERMAP[i*4+2];
+      fiberID=FIBERMAP[i*4+3];
+    }
+    FiberXY(fiberID, x, y); 
+    int index=ChannelID2ChannelIndex(channelID);
+    h->Fill(x,y,index);
   }
 }
 

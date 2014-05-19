@@ -18,27 +18,40 @@ void testChannelMap(){
   gStyle->SetOptStat(0);
   Mapper *mapper=Mapper::Instance();
 
+  // module numbers
   TH2I *hModU=new TH2I();
   mapper->GetModuleMap(hModU,-1);
   TH2I *hModD=new TH2I();
   mapper->GetModuleMap(hModD,1);
+  // hardware channelIDs
   TH2I *hChanU=new TH2I();
   mapper->GetChannelMap(hChanU,-1);
   TH2I *hChanD=new TH2I();
   mapper->GetChannelMap(hChanD,1);
+  // contiguous channel Indexs
+  TH2I *hIdxU=new TH2I();
+  mapper->GetChannelIdx(hIdxU,-1);
+  TH2I *hIdxD=new TH2I();
+  mapper->GetChannelIdx(hIdxD,1);
 
-  TCanvas *c1=new TCanvas("maps","maps",800,800);
-  c1->Divide(2,2);
+  TCanvas *c1=new TCanvas("maps","maps",1200,800);
+  c1->Divide(3,2);
 
   c1->cd(1);
   hModD->Draw("text");
-  c1->cd(2);
+  c1->cd(4);
   hModU->Draw("text");
 
-  c1->cd(3);
+  c1->cd(2);
   hChanD->Draw("text");
-  c1->cd(4);
+  c1->cd(5);
   hChanU->Draw("text");
+
+  c1->cd(3);
+  hIdxD->Draw("text");
+  c1->cd(6);
+  hIdxU->Draw("text");
+
 }
 
 

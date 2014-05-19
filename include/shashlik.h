@@ -136,22 +136,15 @@ class Mapper{
   void SetChannelBins(TH2 *h) const;
   void GetModuleMap(TH2I* h, int z=1 /*-1 for upstream*/ ) const;
   void GetChannelMap(TH2I* h, int z=1 /*-1 for upstream*/ ) const;
+  void GetChannelIdx(TH2I* h, int z=1 /*-1 for upstream*/ ) const;
 
-  bool validChannel(int boardID, int channelNum){
-    int channelID=boardID*100+channelNum;
-    if (_padeMap.find(channelID) == _padeMap.end()) return false;
-    return true;
-  }
+  bool validChannel(int boardID, int channelNum) const;
+  int ChannelID2FiberID(int channelID) const;
+  int FiberID2ChannelID(int fiberID) const;
+  void ChannelID2ModuleFiber(int channelID, int &moduleID, int &fiberID) const;
+  int ChannelID2ChannelIndex(int channelID) const;
+  int ChannelIndex2ChannelID(int channelIndex) const;
 
-  int ChannelID2FiberID(int channelID) {
-    if  (_padeMap.find(channelID) == _padeMap.end()) return 0;
-    return _padeMap[channelID]; 
-  }
-
-  void ChannelID2ModuleFiber(int channelID, int &moduleID, int &fiberID){
-    fiberID=_padeMap[channelID];
-    moduleID=fiberID/100;
-  }
 
 
   /// convert board ID and channel number to module and fiber (negative module # is rear side)
@@ -162,10 +155,7 @@ class Mapper{
   // fiberNum=fiberID-moduleNum*100;
   //}
 
-  int FiberID2ChannelID(int fiberID)  {
-    if  (_fiberMap.find(fiberID) == _fiberMap.end()) return 0;
-    return _fiberMap[fiberID];
-  }
+
 
   /* void Fiber2Channel(int moduleNum, int fiberNum, int &boardID, int &channelNum) { */
   /*   int fiberID=moduleNum*100+fiberNum; */

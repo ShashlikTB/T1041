@@ -59,10 +59,10 @@ TBReco.so: TBReco.o
 	$(CC) $(SHAREDCFLAGS) -o $@ $(abspath $(patsubst %.so, $(LIB)/%.so,$^)) $(ROOTLIBS)
 	mv $@ $(LIB)/
 
-TBReco.o: TBReco.cc TBReco.h
+TBReco.o: TBReco.cc TBReco.h calconstants.h shashlik.h
 	$(CC) -I$(<D)/../include $(NONSHARED) $^
 
-shashlik.o: shashlik.cc 
+shashlik.o: shashlik.cc shashlik.h
 	$(CC) -I$(<D)/../include $(NONSHARED) $^
 
 clean:
