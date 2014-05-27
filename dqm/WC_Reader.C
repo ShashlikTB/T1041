@@ -1,7 +1,7 @@
-// Created: 4/12/2014 J.Adams, A. Santra: Initial release
-//                    B. Hirosky: allow input file name, add new branch names
-//                                setup to compile, small bug 
-//         4/20/2014 BH: Update to start using tools in TBReco library
+//////          Created: 4/12/2014 J.Adams, A. Santra: Initial release
+//////                    B. Hirosky: allow input file name, add new branch names
+//////                                setup to compile, small bug 
+//////         4/20/2014 BH: Update to start using tools in TBReco library  */
 
 #include <TH2.h>
 #include <TH1F.h>
@@ -25,12 +25,19 @@ using std::cout;
 using std::endl;
 
 
-Float_t GetProjection(Float_t pos1, Float_t pos2, 
-		      Float_t WCdist, Float_t projDist){
-  Float_t Delta = pos1 - pos2;
-  Float_t projection = pos1 + (projDist*(Delta/WCdist)); 
-  return (projection - 64);
-}
+// Float_t GetProjection(Float_t pos1, Float_t pos2, 
+// 		      Float_t WCdist, Float_t projDist){
+//   Float_t Delta = pos1 - pos2;
+//   Float_t projection = pos1 + (projDist*(Delta/WCdist)); 
+//   return (projection - 64);
+// }
+// 
+// bool ScinConfirm(Float_t XPos1, Float_t XPos2, Float_t WCDist){
+//   const float ProjDist = -(1231.9+4445.0);
+//   Float_t CheckProjection = GetProjection(XPos1, XPos2, WCDist, ProjDist); 
+//   if(fabs(CheckProjection)<=50)return true;
+//   else return false;
+// }
 
 void DrawShashBox(){
   vector<TBox*> bx;
@@ -55,7 +62,7 @@ void DrawScintBox(){
 
 
 void WC_Reader(TString filename="outputNtuple.root"){
-
+  /// root filename needs to be changed when not used with python wrapper code ///
   /// Read in NTuple from TBNtupleMaker2.py output, and grab the TTree ///
   
   TFile *f = new TFile(filename);
@@ -90,7 +97,7 @@ void WC_Reader(TString filename="outputNtuple.root"){
 
   TH1F *slopeY = new TH1F("slopeY","slopeY",100,-0.005,0.005);
 
-  TH2I* WC[4], *WCO[4], *WC_Timing[2];
+  TH2I *WC[4], *WCO[4], *WC_Timing[2];
   char *histnameWC     = new char[15];
   char *histnameWCO    = new char[15];
   char *histtiming     = new char[25];
@@ -109,10 +116,10 @@ void WC_Reader(TString filename="outputNtuple.root"){
   for (Int_t d=0;d<2; d++){
     sprintf(histtiming, "WCtiming%d",d+1);
     sprintf(histtimingtitle,"TDC counts %d, For In Time Hits;X TDC counts;Y TDC counts",d+1);
-    WC_Timing[d]=new TH2I(histtiming,histtimingtitle, 40,95,135,40,95,135);
+    WC_Timing[d]=new TH2I(histtiming,histtimingtitle, 60,30,90,60,30,90);
   }
 
-    bevent->SetAddress(&event);
+  bevent->SetAddress(&event);
   /// PLOT TDC TIMING DISTRIBUTIONS ///
   TCanvas *C = new TCanvas("C","TDC Timing by Channel",1200,900);
   C->Divide(4,4);
@@ -130,13 +137,35 @@ void WC_Reader(TString filename="outputNtuple.root"){
     Int_t Y_pos_WC1 = 0, Y_pos_WC2 = 0;
     Int_t X_tim_WC1 = 0, X_tim_WC2 = 0;
     Int_t Y_tim_WC1 = 0, Y_tim_WC2 = 0;
+    //+std::cout << "WCHits: " << event->GetWCHits() << std::endl;
+    //Int_t AdjacentHitXFlag[600] = {0}; // giving some bogus initial value
     // Loop over X wires
     for(int j = 0; j < event->GetWCHits(); j++){
       Int_t X_channelAdjust = 0, XY_channelAdjust = 0;
       Int_t X_module         = event->GetWCChan(j).GetTDCNum(); 
-      Int_t XY_channelNumber = event->GetWCChan(j).GetWire();
+      Int_t XY_channelNumber = event->GetWCChan(j).GetWire(); 
       Int_t XY_channelCount  = event->GetWCChan(j).GetCount(); 
-      if(X_module%4 == 3 || X_module%4 == 0) continue;
+      if(X_module%4 == 3 || X_module%4 == 0) continue; // only X wires
+
+//       if(((j+1) < event->GetWCHits()) && (AdjacentHitXFlag[j] >= 0) && (((event->GetWCChan(j).GetTDCNum() == event->GetWCChan(j+1).GetTDCNum()) && (event->GetWCChan(j+1).GetWire() - event->GetWCChan(j).GetWire()==1) )||((event->GetWCChan(j+1).GetTDCNum()-event->GetWCChan(j).GetTDCNum()==1) && (event->GetWCChan(j).GetWire() - event->GetWCChan(j+1).GetWire()==63)))){
+//         //&& (fabs(event->GetWCChan(j).GetCount() - event->GetWCChan(j+1).GetCount())==5)
+//         // && (fabs(event->GetWCChan(j).GetCount() - event->GetWCChan(j+1).GetCount())==5)
+//         AdjacentHitXFlag[j]   = 1;
+//         AdjacentHitXFlag[j+1] = -1;
+//       }
+//       else if(((j+1) < event->GetWCHits()) && (AdjacentHitXFlag[j] >= 0)){
+//         AdjacentHitXFlag[j]   = 1;
+//         AdjacentHitXFlag[j+1] = 0;
+//       }
+
+//       if(AdjacentHitXFlag[j] > 0){
+//         X_module         = event->GetWCChan(j).GetTDCNum(); 
+//         XY_channelNumber = event->GetWCChan(j).GetWire();
+//         XY_channelCount  = event->GetWCChan(j).GetCount(); 
+//       }
+
+      
+      
       Int_t ModuleNum1 = 0, ModuleNum2  = 0, ModuleNum5  = 0, ModuleNum6  = 0;
       Int_t ModuleNum9 = 0, ModuleNum10 = 0, ModuleNum13 = 0, ModuleNum14 = 0;
       if(X_module%4 == 1){
@@ -160,22 +189,35 @@ void WC_Reader(TString filename="outputNtuple.root"){
       if(X_module%4 == 2 && XY_channelCount >  mean[X_module-1] + tdcRange) OutTimeX2++; 
       if(X_module%4 == 2 && XY_channelCount <= mean[X_module-1] + tdcRange) InTimeX2++; 
       X_channelAdjust = XY_channelAdjust; 
-      // Loop over Y wires
+      //Int_t AdjacentHitYFlag[600] = {0}; // giving some bogus initial value
+        // Loop over Y wires
       for(int k = 0; k < event->GetWCHits(); ++k){
-        Int_t Y_channelAdjust   = 0;
-        Int_t XY_channelAdjust2 = 0;
-        Int_t Y_module          = event->GetWCChan(k).GetTDCNum(); 
-        Int_t XY_channelNumber2 = event->GetWCChan(k).GetWire();
-        Int_t XY_channelCount2  = event->GetWCChan(k).GetCount(); 
-        if(Y_module%4 == 1 || Y_module%4 == 2) continue;
-        Int_t ModuleNum3  = 0;
-        Int_t ModuleNum4  = 0;  
-        Int_t ModuleNum7  = 0;
-        Int_t ModuleNum8  = 0;
-        Int_t ModuleNum11 = 0;
-        Int_t ModuleNum12 = 0;
-        Int_t ModuleNum15 = 0;
-        Int_t ModuleNum16 = 0;
+        Int_t Y_channelAdjust   = 0, XY_channelAdjust2 = 0;
+        Int_t Y_module          = event->GetWCChan(k).GetTDCNum(); // giving some bogus initial value
+        Int_t XY_channelNumber2 = event->GetWCChan(k).GetWire(); // giving some bogus initial value
+        Int_t XY_channelCount2  = event->GetWCChan(k).GetCount(); // giving some bogus initial value
+        if(Y_module%4 == 1 || Y_module%4 == 2) continue; // only Y wires
+
+//           if(((k+1) < event->GetWCHits()) && (AdjacentHitYFlag[k] >= 0) && (((event->GetWCChan(k+1).GetTDCNum() == event->GetWCChan(k).GetTDCNum()) && (event->GetWCChan(k+1).GetWire() - event->GetWCChan(k).GetWire()==1)  )||((event->GetWCChan(k+1).GetTDCNum()-event->GetWCChan(k).GetTDCNum()==1) && (event->GetWCChan(k).GetWire() - event->GetWCChan(k+1).GetWire()==63) ))){
+//             //&& (fabs(event->GetWCChan(k).GetCount() - event->GetWCChan(k+1).GetCount())==5)
+//             //&& (fabs(event->GetWCChan(k).GetCount() - event->GetWCChan(k+1).GetCount())==5)
+//             //std::cout << "No Problem" << k << std::endl;
+//             AdjacentHitYFlag[k]   = 1;
+//             AdjacentHitYFlag[k+1] = -1;
+//           }
+//           else if(((k+1) < event->GetWCHits()) && (AdjacentHitYFlag[k] >= 0)){
+//             AdjacentHitYFlag[k]   = 1;
+//             AdjacentHitYFlag[k+1] = 0;
+//           }
+// 
+//           if(AdjacentHitYFlag[k] > 0){
+//             Y_module          = event->GetWCChan(k).GetTDCNum(); 
+//             XY_channelNumber2 = event->GetWCChan(k).GetWire();
+//             XY_channelCount2  = event->GetWCChan(k).GetCount(); 
+//           }
+
+        Int_t ModuleNum3  = 0, ModuleNum4 = 0, ModuleNum7 = 0, ModuleNum8 = 0;
+        Int_t ModuleNum11 = 0, ModuleNum12 = 0, ModuleNum15 = 0, ModuleNum16 = 0;
         if(Y_module%4 == 3){
           XY_channelAdjust2 = (129 - XY_channelNumber2);
           if(Y_module == 3)  ModuleNum3  = Y_module;
@@ -190,18 +232,16 @@ void WC_Reader(TString filename="outputNtuple.root"){
           if(Y_module == 12) ModuleNum12 = Y_module;
           if(Y_module == 16) ModuleNum16 = Y_module;
         }
-        Int_t InTimeY1  = 0;
-        Int_t InTimeY2  = 0;
-        Int_t OutTimeY1 = 0;
-        Int_t OutTimeY2 = 0;
+        Int_t InTimeY1  = 0, InTimeY2  = 0;
+        Int_t OutTimeY1 = 0, OutTimeY2 = 0;
         if(Y_module%4 == 3 && XY_channelCount2 >  mean[Y_module-1] + tdcRange) OutTimeY1++; 
         if(Y_module%4 == 3 && XY_channelCount2 <= mean[Y_module-1] + tdcRange) InTimeY1++; 
         if(Y_module%4 == 0 && XY_channelCount2 >  mean[Y_module-1] + tdcRange) OutTimeY2++;
         if(Y_module%4 == 0 && XY_channelCount2 <= mean[Y_module-1] + tdcRange) InTimeY2++; 
         Y_channelAdjust = XY_channelAdjust2;
-        // Fill the scatter plots
+            // Fill the scatter plots
         if(X_channelAdjust != 0 && Y_channelAdjust != 0){
-          // WC 1 //
+            // WC 1 //
           if(((InTimeX1==1 && ModuleNum1==1) || (InTimeX2==1 && ModuleNum2==2)) && ((InTimeY1==1 && ModuleNum3==3) || (InTimeY2==1 && ModuleNum4==4))){
             WireChamber1Hit++;
             X_pos_WC1 = X_channelAdjust;
@@ -211,7 +251,7 @@ void WC_Reader(TString filename="outputNtuple.root"){
             WC[0]->Fill((X_channelAdjust - 64), (Y_channelAdjust - 64), 1); 
           }
           if(((OutTimeX1==1 && ModuleNum1==1) || (OutTimeX2==1 && ModuleNum2==2)) && ((OutTimeY1==1 && ModuleNum3==3) || (OutTimeY2==1 && ModuleNum4==4)))WCO[0]->Fill(X_channelAdjust-64, Y_channelAdjust-64, 1); 
-          // WC 2 //
+            // WC 2 //
           if(((InTimeX1==1 && ModuleNum5==5) || (InTimeX2==1 && ModuleNum6==6)) && ((InTimeY1==1 && ModuleNum7==7) || (InTimeY2==1 && ModuleNum8==8))){
             WireChamber2Hit++;
             X_pos_WC2 = X_channelAdjust;
@@ -221,10 +261,10 @@ void WC_Reader(TString filename="outputNtuple.root"){
 	    WC[1]->Fill((X_channelAdjust - 64), (Y_channelAdjust - 64), 1);
           } 
           if(((OutTimeX1==1 && ModuleNum5==5) || (OutTimeX2==1 && ModuleNum6==6)) && ((OutTimeY1==1 && ModuleNum7==7) || (OutTimeY2==1 && ModuleNum8==8)))WCO[1]->Fill(X_channelAdjust-64, Y_channelAdjust-64, 1);
-          // WC 3 //
+            // WC 3 //
           if(((InTimeX1==1 && ModuleNum9==9) || (InTimeX2==1 && ModuleNum10==10)) && ((InTimeY1==1 && ModuleNum11==11) || (InTimeY2==1 && ModuleNum12==12)))WC[2]->Fill(X_channelAdjust-64, Y_channelAdjust-64, 1); 
           if(((OutTimeX1==1 && ModuleNum9==9) || (OutTimeX2==1 && ModuleNum10==10)) && ((OutTimeY1==1 && ModuleNum11==11) || (OutTimeY2==1 && ModuleNum12==12)))WCO[2]->Fill(X_channelAdjust-64, Y_channelAdjust-64, 1);
-          // WC 4 //
+            // WC 4 //
           if(((InTimeX1==1 && ModuleNum13==13) || (InTimeX2==1 && ModuleNum14==14)) && ((InTimeY1==1 && ModuleNum15==15) || (InTimeY2==1 && ModuleNum16==16)))WC[3]->Fill(X_channelAdjust-64, Y_channelAdjust-64, 1); 
           if(((OutTimeX1==1 && ModuleNum13==13) || (OutTimeX2==1 && ModuleNum14==14)) && ((OutTimeY1==1 && ModuleNum15==15) || (OutTimeY2==1 && ModuleNum16==16)))WCO[3]->Fill(X_channelAdjust-64, Y_channelAdjust-64, 1);
         }
@@ -232,14 +272,17 @@ void WC_Reader(TString filename="outputNtuple.root"){
     }// X loop ends 
 
     if(i%1000==0)std::cout << "Beam particles processed: " << i << std:: endl;
-    Float_t CutX = GetProjection(X_pos_WC1, X_pos_WC2, dWC1toWC2, -(dWC1toScin1 + dScin1toScin2));
-    Float_t CutY = GetProjection(Y_pos_WC1, Y_pos_WC2, dWC1toWC2, -(dWC1toScin1 + dScin1toScin2));
-    if((CutX <= 50) && (CutX >= -50) && (CutY <= 50) && (CutY >= -50)){
-      
-      // If we have exactly one hit in WC1 and WC2
+    //Float_t CutX = wcReco.GetProjection(X_pos_WC1, X_pos_WC2, dWC1toWC2, -(dWC1toScin1 + dScin1toScin2));// why was dWC1toScin1 negative to begin with?
+    //Float_t CutY = wcReco.GetProjection(Y_pos_WC1, Y_pos_WC2, dWC1toWC2, -(dWC1toScin1 + dScin1toScin2));
+
+    bool ConfirmScinX = wcReco.ScintConfirm(X_pos_WC1, X_pos_WC2, dWC1toWC2);
+    bool ConfirmScinY = wcReco.ScintConfirm(Y_pos_WC1, Y_pos_WC2, dWC1toWC2); 
+    //if((CutX <= 50) && (CutX >= -50) && (CutY <= 50) && (CutY >= -50)){
+    if(ConfirmScinX && ConfirmScinY){
+      // If we have exactly one in-time hit in WC1 and WC2
       if(WireChamber1Hit == 1 && WireChamber2Hit == 1){
 	// Timing plots
-	WC_Timing[0]->Fill(X_tim_WC1, Y_tim_WC1);
+        WC_Timing[0]->Fill(X_tim_WC1, Y_tim_WC1);
 	WC_Timing[1]->Fill(X_tim_WC2, Y_tim_WC2);
 	// Timing difference plots
 	WC_TimDiff_XX->Fill(X_tim_WC2 - X_tim_WC1);
@@ -250,19 +293,25 @@ void WC_Reader(TString filename="outputNtuple.root"){
 	WC1_Beam->Fill(X_pos_WC1 - 64, Y_pos_WC1 - 64, 1);
 	WC2_Beam->Fill(X_pos_WC2 - 64, Y_pos_WC2 - 64, 1);
 	// Extrapolating to the shashlik face
-	Float_t ShashX = GetProjection(X_pos_WC1, X_pos_WC2, dWC1toWC2, (dWC1toWC2 + dWC2toShash));
-	Float_t ShashY = GetProjection(Y_pos_WC1, Y_pos_WC2, dWC1toWC2, (dWC1toWC2 + dWC2toShash));
+	Float_t ShashX = wcReco.GetProjection(X_pos_WC1, X_pos_WC2, dWC1toWC2, (dWC1toWC2 + dWC2toShash));
+	Float_t ShashY = wcReco.GetProjection(Y_pos_WC1, Y_pos_WC2, dWC1toWC2, (dWC1toWC2 + dWC2toShash));
 	slopeY->Fill((Y_pos_WC1-Y_pos_WC2)/dWC1toWC2);
 	WC_Shashlik->Fill(ShashX, ShashY, 1); 
 	// Backtracking to Scintillator 1 and Scintillator 2
-	Float_t Scint1X = GetProjection(X_pos_WC1, X_pos_WC2, dWC1toWC2, dWC1toScin1);
-	Float_t Scint1Y = GetProjection(Y_pos_WC1, Y_pos_WC2, dWC1toWC2, dWC1toScin1);
+	Float_t Scint1X = wcReco.GetProjection(X_pos_WC1, X_pos_WC2, dWC1toWC2, dWC1toScin1);
+	Float_t Scint1Y = wcReco.GetProjection(Y_pos_WC1, Y_pos_WC2, dWC1toWC2, dWC1toScin1);
 	WC_Scin1->Fill(Scint1X, Scint1Y, 1);
-	Float_t Scint2X = GetProjection(X_pos_WC1, X_pos_WC2, dWC1toWC2, -(dWC1toScin1 + dScin1toScin2));
-	Float_t Scint2Y = GetProjection(Y_pos_WC1, Y_pos_WC2, dWC1toWC2, -(dWC1toScin1 + dScin1toScin2));
+	Float_t Scint2X = wcReco.GetProjection(X_pos_WC1, X_pos_WC2, dWC1toWC2, -(dWC1toScin1 + dScin1toScin2));
+	Float_t Scint2Y = wcReco.GetProjection(Y_pos_WC1, Y_pos_WC2, dWC1toWC2, -(dWC1toScin1 + dScin1toScin2));
 	WC_Scin2->Fill(Scint2X, Scint2Y, 1);
-      } 
-    }
+      }// only one in-time hit in wirechamber 
+
+      // If we have more than one in-time hits in WC1 and WC2
+      if(WireChamber1Hit > 1 && WireChamber2Hit > 1){
+        
+
+      }// more than one in-time hits in wirechamber
+    }// confirming hit in scintillator 1 and scintillator 2 
   }// Event loop ends
   
   C->SaveAs("TDC_timing.gif");
@@ -355,7 +404,6 @@ void WC_Reader(TString filename="outputNtuple.root"){
   WC1_Beam->Draw("COLZ");
 
   W->SaveAs("beamTracks.gif");
-
   f->Close(); 
   A->cd();
   A->Write(); 

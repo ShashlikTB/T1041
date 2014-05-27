@@ -47,6 +47,22 @@ WCReco::WCReco(TTree *tree){
   AddTree(tree);
 }
 
+float WCReco::GetProjection(Float_t pos1, Float_t pos2, 
+		      Float_t WCdist, Float_t projDist){
+  Float_t Delta = pos1 - pos2;
+  Float_t projection = pos1 + (projDist*(Delta/WCdist)); 
+  return (projection - 64);
+}
+
+bool WCReco::ScintConfirm(Float_t Pos1, Float_t Pos2, Float_t WCDist){
+  const float ProjDist1 = -1231.9;          // distance between WC1 and Scin1
+  const float ProjDist2 = -(1231.9+4445.0); // distance between WC1 and Scin2
+  Float_t CheckProjection1 = WCReco::GetProjection(Pos1, Pos2, WCDist, ProjDist1); 
+  Float_t CheckProjection2 = WCReco::GetProjection(Pos1, Pos2, WCDist, ProjDist2); 
+  if(fabs(CheckProjection1)<=50 && fabs(CheckProjection2)<=50)return true;
+  else return false;
+}
+
 void WCReco::AddTree(TTree *tree){
   TBEvent *event = new TBEvent();
   TBranch *bevent = tree->GetBranch("tbevent");
@@ -75,7 +91,7 @@ void WCReco::FitTDCs(){
     Float_t *tdc_peaks = tspectrum.GetPositionX();
     Float_t early_peak = 9999.;
     for (int ipeak = 0; ipeak < npeaks; ipeak++){
-      if ( tdc_peaks[ipeak] < early_peak ) early_peak = tdc_peaks[ipeak];
+      if ( tdc_peaks[ipeak] < early_peak && tdc_peaks[ipeak] > 25.0 ) early_peak = tdc_peaks[ipeak]; //modified early_peak > 25
     }
     // Fitting the peak with a gaussian
     int maxBin    = _TDC[drawG]->FindBin(early_peak);
