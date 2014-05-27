@@ -37,6 +37,9 @@ public:
   void AddTree(TTree *tree);
   void GetTDChists(TH1I** TDC, int nmax=NTDC);
   void GetTDCcuts(int *mean, int *tLow, int *tHigh);
+  float GetProjection(float pos1, float pos2, float WCdist, float projDist);
+  bool ScintConfirm(float Pos1, float Pos2, float WCDist);
+
  private:
   void FitTDCs();
   TH1I* _TDC[NTDC];
