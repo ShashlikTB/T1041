@@ -1,2 +1,2 @@
-
-setenv TBLIB `pwd`/build/lib
+#!/bin/csh
+setenv TBLIB "`pwd`/build/lib"
