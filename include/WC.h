@@ -5,7 +5,7 @@
 // Wire chamber information
 ////////////////////////////////////////////
 /*  Mapping
-  shashlik   WC2   WC1   SC2     SC1         SC0 (position unknown)
+  shashlik   WC2   WC1   SC1     SC2         SC3 (position unknown)
  +Z <---------------0---------------------------------
 
  Use LH coordinte system with +Z=downstream, +Y=up, +X to the right 
@@ -38,7 +38,7 @@ const float zWC2=3476.625;
 const float dWC1toWC2     = 3476.625;   // Distance between WC1 and WC2     (mm)
 const float dWC2toShash   = 533.4;      // Distance between WC2 and Shashlik(mm)
 const float dScin1toWC1   = 1231.9;     // Distance between Scint 1 and WC1 (mm)
-const float dWC1toScin1   = -1231.9;
+const float dWC1toScin1   = 1231.9;     /////////// AAAAAA BUGGGGGGGGGGGG ???????? why minus? removed the minus
 const float dScin1toScin2 = 4445.0;     //        ""    Scint 1 and Scint 2 (mm)
 
 // derived distances

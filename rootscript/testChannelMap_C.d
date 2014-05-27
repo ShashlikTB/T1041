@@ -1,0 +1,57 @@
+
+# DO NOT DELETE
+
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TH2I.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TH2.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TH1.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TAxis.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TNamed.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TObject.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/Rtypes.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/RConfig.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/RVersion.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/DllImport.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/Rtypeinfo.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/snprintf.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/strlcpy.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TGenericClassInfo.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TSchemaHelper.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TStorage.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TVersionCheck.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/Riosfwd.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TBuffer.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TString.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TMathBase.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TAttAxis.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TArrayD.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TArray.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TAttLine.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TAttFill.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TAttMarker.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TArrayC.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TArrayS.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TArrayI.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TArrayF.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/Foption.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TVectorFfwd.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TVectorDfwd.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TFitResultPtr.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TMatrixFBasefwd.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TMatrixDBasefwd.h
+./rootscript/testChannelMap_C.so: /uscms_data/d3/asantra4/FNALTestBeam/TestBeamData/FromHirosky/UsingGit/CMSSW_7_0_0_pre12/src/T1041/./include/shashlik.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TMath.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TError.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TStyle.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TAttText.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TCanvas.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TPad.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TVirtualPad.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TAttPad.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TVirtualX.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/GuiTypes.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/Buttons.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TQObject.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TAttCanvas.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/TCanvasImp.h
+./rootscript/testChannelMap_C.so: /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/cintdictversion.h /uscmst1/prod/sw/cms/slc5_amd64_gcc481/lcg/root/5.34.10-cms/include/RVersion.h
+testChannelMap_C__ROOTBUILDVERSION= 5.34/10
