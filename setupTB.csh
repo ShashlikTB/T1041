@@ -1,2 +1,2 @@
 
-setenv TBLIB `pwd`/build/lib
+setenv TBLIB "`pwd`/build/lib"

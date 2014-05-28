@@ -1,3 +1,3 @@
 #!/bin/bash
 
-export TBLIB=`pwd`/build/lib
+export TBLIB="`pwd`/build/lib"

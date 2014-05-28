@@ -5,7 +5,7 @@ Analysis code for T1041 test beam run
 Directories:  
 - include, src : inputs for Makefile to generate shared libraries
 - python       : python scipts to run code
-- rootscript   : misc root code/scripts, recomend using for user code
+- rootscript   : misc root code/scripts, recommend using for user code
 - dqm          : dqm utilities, for running online
 - doc          : various documentation
 
@@ -70,7 +70,7 @@ the root file name w/o the .root
 
 
 ### Run Jordan's WC display  
-* python dqm/WC_Reader.py file.root
+* python python/WC_Reader.py file.root (not working properly)
 
 
 
