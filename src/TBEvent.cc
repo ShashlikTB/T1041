@@ -193,7 +193,6 @@ Int_t PadeChannel::GetChannelIndex(){
 
 
 void TBEvent::GetCalHits(vector<CalHit> &calHits, float* calconstants){
-  Mapper *mapper=Mapper::Instance();
   calHits.clear();
   for (Int_t i=0; i<NPadeChan(); i++){
     int idx=padeChannel[i].GetChannelIndex();
