@@ -13,7 +13,7 @@ const int MAXADC=4095;
 
 
 // inputs data file and event in file to display (default is to integrate all)
-void calDisplay(TString fdat, int ndisplay=0){
+void calDisplay(TString fdat, int ndisplay=-1){
 
   gStyle->SetOptStat(0);
 
@@ -22,8 +22,8 @@ void calDisplay(TString fdat, int ndisplay=0){
     cout << "Cannot open file: " << fdat << endl;
     return;
   }
-
-  Bool_t singleEvent=ndisplay>0;
+  
+  Bool_t singleEvent=ndisplay>=0;
   Mapper *mapper=Mapper::Instance();
 
   // Histograms of ADC counts
@@ -64,17 +64,20 @@ void calDisplay(TString fdat, int ndisplay=0){
   bevent->SetAddress(&event);
 
   Int_t start=0; Int_t end=t1041->GetEntries();
-  if (singleEvent) {
-    start=ndisplay-1;
-    end=ndisplay;
-  }
+  
 
+  if (singleEvent && ndisplay<t1041->GetEntries() ) {
+    start=ndisplay;
+    end=ndisplay+1;
+  }
+  
+  int nEntries=0;
   for (Int_t i=start; i<end; i++) {
     t1041->GetEntry(i);
     for (Int_t j = 0; j < event->NPadeChan(); j++){
       PadeChannel pch = event->GetPadeChan(j);
 
-      UShort_t max = pch.GetMax();
+      UShort_t max = pch.GetMax()-pch.GetPedistal();
       Int_t maxTime = pch.GetPeak();
       if (max>MAXADC) continue;    // skip channels with bad adc readings (should be RARE)
       //max-=pch.GetPedistal();
@@ -105,17 +108,18 @@ void calDisplay(TString fdat, int ndisplay=0){
       }
 
     }
+    nEntries++;
   }
 
-  hModD->Scale(1./hModD->GetEntries());
-  hModU->Scale(1./hModU->GetEntries());
-  hChanD->Scale(1./hChanD->GetEntries());
-  hChanU->Scale(1./hChanU->GetEntries());
+  hModD->Scale(1./nEntries);
+  hModU->Scale(1./nEntries);
+  hChanD->Scale(1./nEntries);
+  hChanU->Scale(1./nEntries);
   
-  hModD_time->Scale(1./hModD_time->GetEntries());
-  hModU_time->Scale(1./hModU_time->GetEntries());
-  hChanD_time->Scale(1./hChanD_time->GetEntries());
-  hChanU_time->Scale(1./hChanU_time->GetEntries());
+  hModD_time->Scale(1./nEntries);
+  hModU_time->Scale(1./nEntries);
+  hChanD_time->Scale(1./nEntries);
+  hChanU_time->Scale(1./nEntries);
 
 
   // fetch module and channel maps

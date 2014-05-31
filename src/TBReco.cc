@@ -5,7 +5,7 @@
 #include <iostream>
 #include "TBReco.h"
 #include "TBEvent.h"
-#include "calconstants.h"
+#include "calConstants.h"
 #include "WC.h"
 
 using std::endl;
@@ -111,33 +111,31 @@ void WCReco::GetTDChists(TH1I** TDC, int nmax){
 }
 
 
-CalCluster::CalCluster(const TBEvent *event) : _event(event) {;}
-
-// theshold in counts above pedistal
-void CalCluster::MakeCluster(float threshold){
-  if (!_event) return;
+void CalCluster::MakeCluster(const vector<CalHit> &calHits, float threshold){
   float sumx=0, sumy=0; 
-  _Eu=0;
-  _Ed=0;
+  _Eu=_Ed=0;
   float x,y,z;
-  for (Int_t j=0; j<_event->NPadeChan(); j++){
-    PadeChannel p=_event->GetPadeChan(j);
-    float val=p.GetMax()-p.GetPedistal();
+  for (unsigned j=0; j<calHits.size(); j++){
+    float val=calHits[j].Value();
     if (val<threshold) continue;
-    p.GetXYZ(x,y,z);
+    calHits[j].GetXYZ(x,y,z);
+    //    calHits[j].Print();
+
     if (z>0) _Ed+=val;
     else _Eu+=val;
     sumx+=val*x;
     sumy+=val*y;
   }
+  _x=_y=_z=0;
   if (_Ed+_Eu==0) return;
-  _x=sumx/(_Ed+_Eu);
-  _y=sumy/(_Ed+_Eu);
+  _x= sumx/(_Ed+_Eu);
+  _y= sumy/(_Ed+_Eu);
+  _z= ( _Eu*(-1)+ _Ed*(1) ) / (_Ed+_Eu);
 }
 
-void CalCluster::MakeCluster(const TBEvent *event, float threshold){
-  _event=event;
-  MakeCluster(threshold);
+void CalCluster::Print(){
+  cout << "CalCluster (x,y,z,E) = ( " 
+       << _x << "," << _y << "," << _z << ","  << _Ed+_Eu << " )" << endl;
 }
 
 

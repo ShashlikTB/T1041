@@ -119,7 +119,7 @@ const int FIBERMAP[]={
 
 
 // bad channel map (PADE Channel, UTC time remove, UTC time return)
-const unsigned long BADCHANMAP[]={11613, 1397186943, 0}; // stuck lower bit(s)
+const unsigned long BADCHANMAP[]={11316, 1397186943, 0}; // stuck lower bit(s)
 
 
 // mapping functions
@@ -132,6 +132,8 @@ class Mapper{
   }
   void ModuleXY(int module, float &x, float &y) const;
   void FiberXY(int fiberID, float &x, float &y) const; 
+  void ChannelXYZ(int channelID, float &x, float &y, float &z) const;
+
   void SetModuleBins(TH2 *h) const;
   void SetChannelBins(TH2 *h) const;
   void GetModuleMap(TH2I* h, int z=1 /*-1 for upstream*/ ) const;
@@ -172,6 +174,18 @@ class Mapper{
 
   Mapper();
   Mapper(Mapper const&){;}              // copy constructor is private
+};
+
+class CalHit{
+ public:
+ CalHit(int idx, float val): _channelIndex(idx), _val(val) {;}
+  int GetChannelIndex() const {return _channelIndex;}
+  float Value() const {return _val;}
+  void GetXYZ(float &x, float&y, float &z) const;
+  void Print() const;
+ private:
+  int _channelIndex;
+  float _val;
 };
 
 

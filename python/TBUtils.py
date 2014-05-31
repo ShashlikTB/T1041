@@ -203,7 +203,7 @@ def getWCspills(fWC):
 # match WC spills w/in 15 seconds of timestamp given by PADE
 def wcLookup(tgttime, bound=15, filename="wcdb.txt"):
     tgttime=float(tgttime)
-    lookval=int(tgttime)/100   # seek matches w/in 100 second time range
+    lookval=int(tgttime)/1000   # seek matches w/in 1000 second time range
     try:
         spills=getoutput("look "+str(lookval)+" "+filename)   # binary search of file
         if len(spills)==0: return (-1, None)                  # no lines match
@@ -255,7 +255,7 @@ def findWCEvent(fd,tgtevent):
         if not wcline or "SPILL" in wcline: return -1
         if "EVENT" in wcline:
             thisevent=int(wcline.split()[2])
-            if thisevent==tgtevent: return fd.tell()
-            elif thisevent>tgtevent: return -1  # past the event number
+            if thisevent-1==tgtevent: return fd.tell()  # WC/PADE events start at 1/0
+            elif thisevent-1>tgtevent: return -1  # past the event number
         
         

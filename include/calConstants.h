@@ -1,5 +1,5 @@
-#ifndef CALIBRATION_H
-#define CALIBRATION_H
+#ifndef CALCONSTANTS_H
+#define CALCONSTANTS_H
 
 /*
 #
@@ -10,6 +10,7 @@
 # 2nd column is C_i
 #
 */
+
 float CalConstants[128]={
 /*	0	*/	0.855966	,
 /*	1	*/	0.992713	,

@@ -11,6 +11,10 @@ using std::vector;
 const Int_t N_PADE_SAMPLES=120;     // fixed in FW
 const Int_t PADE_THRESHOLD=100;
 
+// approximate sample times for board 112, 113, 115, 116  !! too hacky, needs improvement
+const Int_t PADE_SAMPLE_TIMES[4]={27,21,14,17};
+const Int_t PADE_SAMPLE_RANGE=3;  // +-3 count window = ~5sigma
+
 class PadeChannel : public TObject {
   ClassDef(PadeChannel,1); 
  public:
@@ -21,15 +25,16 @@ class PadeChannel : public TObject {
   void Dump() const;
 
   // getters
-  UInt_t GetBoardID() {return _board_id;}
-  UInt_t GetChannelNum() {return _ch_number;}
-  UInt_t GetChannelID() {return _board_id*100+_ch_number;}
+  Int_t GetBoardID() {return _board_id;}
+  Int_t GetChannelNum() {return _ch_number;}
+  Int_t GetChannelID() {return _board_id*100+_ch_number;}
+  Int_t GetChannelIndex();  // index 0--127, following Ledovskoy convention
   UShort_t* GetWform() {return _wform;}
   UInt_t GetMax() {return _max;}
   Int_t GetPeak() {return _peak;}
   Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
   void GetXYZ(float &x, float &y, float &z);
-  Float_t GetPedistal(){return 100;}  // *** place holder ***
+  Float_t GetPedistal();
   void GetHist(TH1F* h);
 
   // private:
@@ -122,7 +127,7 @@ class TBEvent : public TObject {
 public:
   void Reset();    // clear data
 
-  // getters (tbd - return const references, not copies, where appopriate)
+  // getters (tbd - return (const) references, not copies, where appopriate)
   Int_t NPadeChan() const {return padeChannel.size();}
   PadeChannel GetPadeChan(const int idx) const {return padeChannel[idx];}
   PadeChannel GetLastPadeChan() const {return padeChannel.back();}
@@ -130,6 +135,7 @@ public:
   Int_t GetWCHits() const {return wc.size();}
   vector<WCChannel> GetWChitsX(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   vector<WCChannel> GetWChitsY(Int_t wc, Int_t *min=0, Int_t* max=0) const;
+  void GetCalHits(vector<CalHit> &calHits, float* calconstants=0);
 
 
   // setters
@@ -138,6 +144,7 @@ public:
 		       UShort_t  board_id, UInt_t hw_counter, 
 		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform);
   void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
+
 
 private:
   vector<PadeChannel> padeChannel;

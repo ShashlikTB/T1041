@@ -1,6 +1,11 @@
 // ftp://root.cern.ch/root/doc/ROOTUsersGuideHTML/ch12s17.html
 // Created 4/12/2014 B.Hirosky: Initial release
 
+// Note:  This code give examples for using many of the featues if the T1041 analysis
+// package.  These are not at 'production level' and may represent coarse approximations
+// or simplistic calculations.  Please do not assume all data returned is applicable for
+// a precise analysis, until you have verified and (ideally) improved the supplied library
+// code
 
 #include <TString.h>
 #include <TFile.h>
@@ -11,13 +16,18 @@
 #include <vector>
 #include <TH1I.h>
 #include <TH1F.h>
+#include <TH2F.h>
+#include <TMath.h>
 #include "../include/TBReco.h"
 #include "../include/WC.h"
 #include "../include/TBEvent.h"
+#include "../include/calConstants.h"
+#include "../include/shashlik.h"
 
 using std::cout;
 using std::endl;
 using std::vector;
+using TMath::Min;
 
 void readerExample(TString file="latest.root"){
 
@@ -28,13 +38,13 @@ void readerExample(TString file="latest.root"){
   outname.ReplaceAll(".root","_reco.root");
   TFile *tfo=new TFile(outname,"recreate");
 
-  //// find definition of in-time hits ////
+  //// Use WCReco to find definition of in-time hits ////
   WCReco wcReco;
   wcReco.AddTree(t1041);
   Int_t tMean[NTDC], tLow[NTDC], tHigh[NTDC];
   wcReco.GetTDCcuts(tMean, tLow, tHigh); 
   TH1I* hTDC[NTDC];
-  wcReco.GetTDChists(hTDC);    // use to see the histograms
+  wcReco.GetTDChists(hTDC);    // use to fetch the TDC histograms 
   /////////////////////////////////////////
 
   // slopes and x-y postion of track at face of detector
@@ -42,6 +52,9 @@ void readerExample(TString file="latest.root"){
   TH1F *hslopeY=new TH1F("hslopeY","Beam slope in Y",50,-0.005,0.005);
   TH1F *htrackX=new TH1F("hTrackX","Track X",56,-28,28);  // 1mm bins
   TH1F *htrackY=new TH1F("hTrackY","Track Y",56,-28,28);
+
+  // plot location of tracks projected onto face of the detector
+  // TBD
 
   // histograms of peak times
   TH1I *htime112=new TH1I("time112","Timing board 112",120,0,120);
@@ -53,8 +66,26 @@ void readerExample(TString file="latest.root"){
   TH1F *hClusterX=new TH1F("hClusterX","Cluster X",56,-28,28);  // 1mm bins
   TH1F *hClusterY=new TH1F("hClusterY","Cluster Y",56,-28,28);
   // and cluster center vs extrapolated track
-  TH1F *hClusterDX=new TH1F("hClusterDX","Cluster DX",56,-28,28);  // 1mm bins
-  TH1F *hClusterDY=new TH1F("hClusterDY","Cluster DY",56,-28,28);
+  TH1F *hClusterDX=new TH1F("hClusterDX","Cluster-trk DX",56,-28,28);  // 1mm bins
+  TH1F *hClusterDY=new TH1F("hClusterDY","Cluster-trk DY",56,-28,28);
+
+  // histograms for cluster x,y positions (after channel calibrations)
+  TH1F *hClusterCalibX=new TH1F("hClusterCalibX","Cluster X (calibrated)",56,-28,28); // 1mm bins
+  TH1F *hClusterCalibY=new TH1F("hClusterCalibY","Cluster Y (calibrated)",56,-28,28);
+  // and cluster center vs extrapolated track (after channel calibrations)
+  TH1F *hClusterCalibDX=new TH1F("hClusterCalibDX","Cluster-trk DX (calibrated)",56,-28,28);  // 1mm bins
+  TH1F *hClusterCalibDY=new TH1F("hClusterCalibDY","Cluster-trk DY (calibrated)",56,-28,28);
+
+  // location of maximum fiber, Upstream or Downstream
+  TH2F *hMax = new TH2F("hMax","",1,1,1,1,1,1);
+  Mapper *mapper=Mapper::Instance();
+  mapper->SetChannelBins(hMax);
+
+  // cluster "energies"
+  const float EMIN=5000;
+  const float EMAX=20000;
+  TH1F* hClusterE=new TH1F("hClusterE","Cluster E", 40, EMIN, EMAX);
+  TH1F* hClusterECalib=new TH1F("hClusterECalib","Cluster E (calibrated)", 40, EMIN, EMAX);
 
   // create a pointer to an event object for reading the branch values.
   TBEvent *event = new TBEvent(); 
@@ -62,12 +93,15 @@ void readerExample(TString file="latest.root"){
   bevent->SetAddress(&event);
 
   // loop over events
-  CalCluster calCluster;
+  CalCluster calCluster, calClusterCalib;
+  vector<CalHit> calhits, calhitsCalib;
+
   for (Int_t i=0; i< t1041->GetEntries(); i++) {
     t1041->GetEntry(i);
-
+    
     // loop over PADE channels
     // cout << (dec) << "Spill number: " << event->GetSpillNumber()<<endl;
+    
     for (Int_t j=0; j<event->NPadeChan(); j++){
       PadeChannel pc=event->GetPadeChan(j);
       int board=pc.GetBoardID();
@@ -77,6 +111,7 @@ void readerExample(TString file="latest.root"){
       if (board==116) htime116->Fill(pc.GetPeak());
     }
 
+    
     vector<WCChannel> hitsX1, hitsY1, hitsX2, hitsY2;
     hitsX1=event->GetWChitsX(1,tLow,tHigh);   // fetch x,y hits in chambers 1 and 2
     hitsY1=event->GetWChitsY(1,tLow,tHigh);   // only selecting in-time hits
@@ -85,15 +120,40 @@ void readerExample(TString file="latest.root"){
     bool haveTrack= (hitsX1.size()==1 && hitsY1.size()==1 && 
 		     hitsX2.size()==1 && hitsY2.size()==1);   // require only 2 x,y hits
 
+    event->GetCalHits(calhits);  // fetch ped-subtracted calorimter hits
+    event->GetCalHits(calhitsCalib,CalConstants);  // and again w/ Shasha's inter calibration
+
+    // Loop over calhits to find the channel with maximum energy
+    // Use CalHits here and not the loop over PadeChannels above, b/c
+    // CalHits are pedestal corrected and our bad channel is remapped to the opposing SIPM
+    float max=0;
+    float x,y,z;
+    for (unsigned k=0; k<calhits.size(); k++) { 
+      if (calhits[k].Value()>max){
+	max=calhits[k].Value();
+	calhits[k].GetXYZ(x,y,z);
+      }
+    }
+    cout << max <<endl;
+    hMax->Fill(x,y);
 
 
-    // plot x,y positions of "energy" (really ADC value) clusters
-    // Warning clustering code is not vetted
-    // calCluster.MakeCluster(event);  
-    calCluster.MakeCluster(event,5);  // cut requiring 5 adc counts>pedistal
-    hClusterX->Fill(calCluster.GetX());
-    hClusterY->Fill(calCluster.GetY());
-
+    // plot x,y positions and "energy" (really ADC value) clusters
+    // Warning clustering code is not well vetted
+    float adcMin=10;
+    calCluster.MakeCluster(calhits,adcMin);  // cut requiring adcMin counts>pedistal
+    if (calCluster.GetE()>adcMin){
+      hClusterX->Fill(calCluster.GetX());
+      hClusterY->Fill(calCluster.GetY());
+      hClusterE->Fill( Min((double)calCluster.GetE(), EMAX-0.0001) );
+    }
+    calCluster.Print();
+    calClusterCalib.MakeCluster(calhitsCalib,adcMin);  
+    if (calClusterCalib.GetE()>adcMin){
+      hClusterCalibX->Fill(calClusterCalib.GetX());
+      hClusterCalibY->Fill(calClusterCalib.GetY());
+      hClusterECalib->Fill( Min((double)calClusterCalib.GetE(), EMAX-0.0001) );
+    }
     if (haveTrack){
       WCtrack track(hitsX1[0],hitsY1[0],hitsX2[0],hitsY2[0]); // fit a track
       hslopeX->Fill(track.GetSlopeX());
@@ -105,10 +165,13 @@ void readerExample(TString file="latest.root"){
       htrackX->Fill(trackX);
       htrackY->Fill(trackY); 
 
-      hClusterDX->Fill(calCluster.GetX()-trackX);
-      hClusterDY->Fill(calCluster.GetY()-trackY);
+      if (calCluster.GetE()>adcMin){
+	hClusterDX->Fill(calCluster.GetX()-trackX);
+	hClusterDY->Fill(calCluster.GetY()-trackY);
+	hClusterCalibDX->Fill(calClusterCalib.GetX()-trackX);
+	hClusterCalibDY->Fill(calClusterCalib.GetY()-trackY);
+      }
     }    
-
   }
 
   tfo->Write();

@@ -49,19 +49,19 @@ public:
 
 class CalCluster{
  public:
-  CalCluster(){;}
-  CalCluster(const TBEvent *event);
-  void MakeCluster(const TBEvent *event=0, float threshold=0);
-  void MakeCluster(float threshold=0);
-  void SetEvent(const TBEvent *event) {_event=event;}
+  void MakeCluster(const vector<CalHit> &calHits, float threshold=0);
   float GetX() {return _x;}
   float GetY() {return _y;}
+  float GetZ() {return _z;}
+  float GetE() {return _Eu+_Ed;}
+  float GEtEu() {return _Eu;}
+  float GEtEd() {return _Ed;}
+  void Print();
  private:
-  const TBEvent *_event;
   float _Eu, _Ed;   // upsteam and downstream "energies"
-  float _x, _y;     // E-weighted position  
+  float _x, _y, _z;     // E-weighted position  
   float _sx, _sy;   // width
-  vector<PadeChannel> _channels;   // channels included in cluster
+  vector<CalHit> _hits;   // hits included in cluster
 };
 
 

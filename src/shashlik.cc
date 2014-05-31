@@ -87,6 +87,14 @@ void Mapper::FiberXY(int fiberID, float &x, float &y) const{
   }
 }
 
+void Mapper::ChannelXYZ(int channelID, float &x, float &y, float &z) const{
+  int fiberID=ChannelID2FiberID(channelID);
+  FiberXY(fiberID,x,y);
+  if (fiberID<0) z=-1;
+  else z=1;
+}
+
+
 void Mapper::SetModuleBins(TH2 *h) const{
   h->SetBins(4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
   h->SetXTitle("X [mm]");
@@ -158,6 +166,18 @@ void Mapper::GetChannelIdx(TH2I* h, int z) const{
   }
 }
 
+void CalHit::GetXYZ(float &x, float&y, float &z) const{
+   Mapper *mapper=Mapper::Instance();
+   int channelID=mapper->ChannelIndex2ChannelID(_channelIndex);
+   mapper->ChannelXYZ(channelID,x,y,z);
+}
+
+void CalHit::Print() const{
+  float x,y,z;
+  GetXYZ(x,y,z);
+  cout << "Calhit (index,x,y,z,val) = ( " << _channelIndex << "," 
+       << x << "," << y << "," << z << "," << _val << " )" << endl;
+}
 
 
 Mapper* Mapper::_pInstance=NULL;

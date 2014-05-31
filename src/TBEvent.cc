@@ -1,12 +1,14 @@
 // Created 4/12/2014 B.Hirosky: Initial release
 
+// to do: get smater that GetMax, at least apply a timing cut!
+
 #include <iostream>
 #include <stdio.h>
 #include "TTree.h"
 #include "TFile.h"
 #include "TString.h"
 #include "WC.h"
-
+#include "calConstants.h"
 #include "TBEvent.h"
 
 using namespace std;
@@ -86,11 +88,20 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   _ch_number = ch_number;
   _eventnum = eventnum;
   _max=0;
+
+  // HACK, needs improvement
+  // find in-time window
+  int idx=_board_id-112;   // BAD practice!
+  if (idx>1) idx--;
+  int tmin=PADE_SAMPLE_TIMES[idx]-PADE_SAMPLE_RANGE;
+  int tmax=PADE_SAMPLE_TIMES[idx]+PADE_SAMPLE_RANGE;
+
   for (int i=0; i<N_PADE_SAMPLES; i++) {
     _wform[i]=wform[i];
+    if (i<tmin || i>tmax) continue;
     if ((unsigned)wform[i]>_max) {
       _max=wform[i];
-      _peak=i;  // sample numebe for peak
+      _peak=i;  // sample number for peak
     }
   }
   _flag = 0;
@@ -121,12 +132,15 @@ void PadeChannel::GetHist(TH1F *h){
 
 void PadeChannel::GetXYZ(float &x, float &y, float &z){
   Mapper *mapper=Mapper::Instance();
-  int fiberID=mapper->ChannelID2FiberID(GetChannelID());
-  mapper->FiberXY(fiberID,x,y);
-  if (fiberID<0) z=-1;
-  else z=1;
+  mapper->ChannelXYZ(GetChannelID(),x,y,z);
 }
 
+// trivial pedistal estimation
+Float_t PadeChannel::GetPedistal(){
+  float ped=0;
+  for (int i=0;i<5;i++) {ped+=_wform[i];}
+  return ped/5;
+}
 
 
 void WCChannel::Dump() const {
@@ -170,4 +184,30 @@ float WCChannel::GetY(){
   if (_tdcNumber==4 || _tdcNumber==8) return -1.0*(0.5+_tdcWire);
   else if(_tdcNumber==3 || _tdcNumber==7) return 63.5-_tdcWire;
   return -999;  // not a y hit
+}
+
+Int_t PadeChannel::GetChannelIndex(){
+  Mapper *mapper=Mapper::Instance();
+  return mapper->ChannelID2ChannelIndex(GetChannelID());
+}
+
+
+void TBEvent::GetCalHits(vector<CalHit> &calHits, float* calconstants){
+  Mapper *mapper=Mapper::Instance();
+  calHits.clear();
+  for (Int_t i=0; i<NPadeChan(); i++){
+    int idx=padeChannel[i].GetChannelIndex();
+    float val=padeChannel[i].GetMax()-padeChannel[i].GetPedistal();  // replace w/ fit!!!
+    if (calconstants) val*=calconstants[idx];     // relative calibration
+
+    // Hack here to fix bad channel
+    // bad channel 11316, set equal to 11608 (set rear fiber to front fiber)
+    // padechannels are ordered according to boardID*100+channelID
+    // so 11316 = padeChannel[48],  11608 = padeChannel[104]
+    if (i==48){
+      val=padeChannel[104].GetMax()-padeChannel[104].GetPedistal();
+    }
+
+    calHits.push_back( CalHit(idx, val) );
+  }
 }

@@ -43,7 +43,7 @@ TBEvent.so: shashlik.o TBEvent.o TBEventDict.so
 	$(CC) $(SHAREDCFLAGS) -o $@ $(abspath $(patsubst %.so, $(LIB)/%.so,$^)) $(ROOTLIBS)
 	mv $@ $(LIB)/	
 
-TBEvent.o: TBEvent.cc 
+TBEvent.o: TBEvent.cc calConstants.h shashlik.h
 	$(CC) -I$(<D)/../include $(NONSHARED) $^
 
 TBEventDict.so: TBEventDict.cxx
@@ -59,15 +59,15 @@ TBReco.so: TBReco.o
 	$(CC) $(SHAREDCFLAGS) -o $@ $(abspath $(patsubst %.so, $(LIB)/%.so,$^)) $(ROOTLIBS)
 	mv $@ $(LIB)/
 
-TBReco.o: TBReco.cc TBReco.h calconstants.h shashlik.h
+TBReco.o: TBReco.cc TBReco.h shashlik.h
 	$(CC) -I$(<D)/../include $(NONSHARED) $^
 
-shashlik.o: shashlik.cc shashlik.h
+shashlik.o: shashlik.cc shashlik.h 
 	$(CC) -I$(<D)/../include $(NONSHARED) $^
 
 clean:
-	rm  -f *.so *.o *~ TBEventDict.cxx TBEventDict.h waveEventDict.cxx waveEventDict.h 
+	rm  -f *.so *.o *~ TBEventDict.cxx TBEventDict.h waveEventDict.cxx waveEventDict.h include/*.gch
 	rm -rf $(BUILDDIR) $(LIB)
 
 cleanall:  clean
-	rm -f */*so *root */*.d */*~
+	rm -f */*so *root */*.d */*~ python/*pyc
