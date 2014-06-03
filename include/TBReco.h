@@ -53,6 +53,8 @@ class CalCluster{
   float GetX() {return _x;}
   float GetY() {return _y;}
   float GetZ() {return _z;}
+  float GetSigX() {return _sx;}
+  float GetSigY() {return _sy;}
   float GetE() {return _Eu+_Ed;}
   float GEtEu() {return _Eu;}
   float GEtEd() {return _Ed;}

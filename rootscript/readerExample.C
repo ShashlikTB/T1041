@@ -62,9 +62,11 @@ void readerExample(TString file="latest.root"){
   TH1I *htime115=new TH1I("time115","Timing board 115",120,0,120);
   TH1I *htime116=new TH1I("time116","Timing board 116",120,0,120);
 
-  // histograms for cluster x,y positions
+  // histograms for cluster x,y positions, sigmas
   TH1F *hClusterX=new TH1F("hClusterX","Cluster X",56,-28,28);  // 1mm bins
   TH1F *hClusterY=new TH1F("hClusterY","Cluster Y",56,-28,28);
+  TH1F *hClusterSX=new TH1F("hClusterSX","Cluster SX",56,0,28);
+  TH1F *hClusterSY=new TH1F("hClusterSY","Cluster SY",56,0,28);
   // and cluster center vs extrapolated track
   TH1F *hClusterDX=new TH1F("hClusterDX","Cluster-trk DX",56,-28,28);  // 1mm bins
   TH1F *hClusterDY=new TH1F("hClusterDY","Cluster-trk DY",56,-28,28);
@@ -72,9 +74,15 @@ void readerExample(TString file="latest.root"){
   // histograms for cluster x,y positions (after channel calibrations)
   TH1F *hClusterCalibX=new TH1F("hClusterCalibX","Cluster X (calibrated)",56,-28,28); // 1mm bins
   TH1F *hClusterCalibY=new TH1F("hClusterCalibY","Cluster Y (calibrated)",56,-28,28);
+  TH1F *hClusterCalibSX=new TH1F("hClusterCalibSX","Cluster SX (calibrated)",56,0,28);
+  TH1F *hClusterCalibSY=new TH1F("hClusterCalibSY","Cluster SY (calibrated)",56,0,28);
   // and cluster center vs extrapolated track (after channel calibrations)
   TH1F *hClusterCalibDX=new TH1F("hClusterCalibDX","Cluster-trk DX (calibrated)",56,-28,28);  // 1mm bins
   TH1F *hClusterCalibDY=new TH1F("hClusterCalibDY","Cluster-trk DY (calibrated)",56,-28,28);
+
+  
+
+
 
   // location of maximum fiber, Upstream or Downstream
   TH2F *hMax = new TH2F("hMax","",1,1,1,1,1,1);
@@ -120,8 +128,8 @@ void readerExample(TString file="latest.root"){
     bool haveTrack= (hitsX1.size()==1 && hitsY1.size()==1 && 
 		     hitsX2.size()==1 && hitsY2.size()==1);   // require only 2 x,y hits
 
-    event->GetCalHits(calhits);  // fetch ped-subtracted calorimter hits
-    event->GetCalHits(calhitsCalib,CalConstants);  // and again w/ Shasha's inter calibration
+    event->GetCalHits(calhits,0,3.0);  // fetch ped-subtracted calorimter hits, no calib, 3sigma noise cut
+    event->GetCalHits(calhitsCalib,CalConstants,3.0);  // and again w/ Shasha's inter calibration, 3sigma noise cut
 
     // Loop over calhits to find the channel with maximum energy
     // Use CalHits here and not the loop over PadeChannels above, b/c
@@ -134,26 +142,35 @@ void readerExample(TString file="latest.root"){
 	calhits[k].GetXYZ(x,y,z);
       }
     }
-    cout << max <<endl;
-    hMax->Fill(x,y);
+    if (max>0) hMax->Fill(x,y);
 
-
+    // Analysis of calorimter clusters
     // plot x,y positions and "energy" (really ADC value) clusters
     // Warning clustering code is not well vetted
-    float adcMin=10;
-    calCluster.MakeCluster(calhits,adcMin);  // cut requiring adcMin counts>pedistal
-    if (calCluster.GetE()>adcMin){
-      hClusterX->Fill(calCluster.GetX());
-      hClusterY->Fill(calCluster.GetY());
-      hClusterE->Fill( Min((double)calCluster.GetE(), EMAX-0.0001) );
-    }
+    calCluster.MakeCluster(calhits);  // cut requiring adcMin counts>pedistal
+    if (calCluster.GetE()==0) continue;
+    cout << x<<" "<<y<<" "<<max<<endl;;
     calCluster.Print();
-    calClusterCalib.MakeCluster(calhitsCalib,adcMin);  
-    if (calClusterCalib.GetE()>adcMin){
-      hClusterCalibX->Fill(calClusterCalib.GetX());
-      hClusterCalibY->Fill(calClusterCalib.GetY());
-      hClusterECalib->Fill( Min((double)calClusterCalib.GetE(), EMAX-0.0001) );
-    }
+    bool isContained= TMath::Abs( calCluster.GetX()<14 ) && TMath::Abs( calCluster.GetY()<14 );
+
+    hClusterX->Fill(calCluster.GetX());
+    hClusterY->Fill(calCluster.GetY());
+    hClusterSX->Fill(calCluster.GetSigX());
+    hClusterSY->Fill(calCluster.GetSigY());
+    if (isContained) hClusterE->Fill( Min((double)calCluster.GetE(), EMAX-0.0001) );
+   
+
+    calClusterCalib.MakeCluster(calhitsCalib);  
+    isContained= TMath::Abs( calClusterCalib.GetX()<14 ) && TMath::Abs( calClusterCalib.GetY()<14 );
+
+    hClusterCalibX->Fill(calClusterCalib.GetX());
+    hClusterCalibY->Fill(calClusterCalib.GetY());
+    hClusterCalibSX->Fill(calClusterCalib.GetSigX());
+    hClusterCalibSY->Fill(calClusterCalib.GetSigY());
+    if (isContained) hClusterECalib->Fill( Min((double)calClusterCalib.GetE(), EMAX-0.0001) );
+
+
+ 
     if (haveTrack){
       WCtrack track(hitsX1[0],hitsY1[0],hitsX2[0],hitsY2[0]); // fit a track
       hslopeX->Fill(track.GetSlopeX());
@@ -165,7 +182,7 @@ void readerExample(TString file="latest.root"){
       htrackX->Fill(trackX);
       htrackY->Fill(trackY); 
 
-      if (calCluster.GetE()>adcMin){
+      if ( isContained ){
 	hClusterDX->Fill(calCluster.GetX()-trackX);
 	hClusterDY->Fill(calCluster.GetY()-trackY);
 	hClusterCalibDX->Fill(calClusterCalib.GetX()-trackX);

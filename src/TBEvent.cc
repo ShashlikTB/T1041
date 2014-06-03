@@ -136,11 +136,18 @@ void PadeChannel::GetXYZ(float &x, float &y, float &z){
 }
 
 // trivial pedistal estimation
-Float_t PadeChannel::GetPedistal(){
-  float ped=0;
-  for (int i=0;i<5;i++) {ped+=_wform[i];}
-  return ped/5;
+void PadeChannel::GetPedestal(float &ped, float &stdev){
+  const int nsamples=10;
+  float sum=0;
+  float sum2=0;
+  for (int i=0;i<nsamples;i++) {ped+=_wform[i]; sum2+=_wform[i]*_wform[i];}
+  ped=sum/nsamples;
+  float var =  1.0/(nsamples-1) * (sum2-sum*sum/nsamples);
+  stdev = TMath::Sqrt(var);
 }
+
+
+
 
 
 void WCChannel::Dump() const {
@@ -192,11 +199,13 @@ Int_t PadeChannel::GetChannelIndex(){
 }
 
 
-void TBEvent::GetCalHits(vector<CalHit> &calHits, float* calconstants){
+void TBEvent::GetCalHits(vector<CalHit> &calHits, float* calconstants, float cut){
   calHits.clear();
   for (Int_t i=0; i<NPadeChan(); i++){
     int idx=padeChannel[i].GetChannelIndex();
-    float val=padeChannel[i].GetMax()-padeChannel[i].GetPedistal();  // replace w/ fit!!!
+    float ped,sig;
+    padeChannel[i].GetPedestal(ped,sig);
+    float val=padeChannel[i].GetMax()-ped;        // replace w/ fit!!!
     if (calconstants) val*=calconstants[idx];     // relative calibration
 
     // Hack here to fix bad channel
@@ -204,9 +213,9 @@ void TBEvent::GetCalHits(vector<CalHit> &calHits, float* calconstants){
     // padechannels are ordered according to boardID*100+channelID
     // so 11316 = padeChannel[48],  11608 = padeChannel[104]
     if (i==48){
-      val=padeChannel[104].GetMax()-padeChannel[104].GetPedistal();
+      padeChannel[104].GetPedestal(ped,sig);
+      val=padeChannel[104].GetMax()-ped;
     }
-
-    calHits.push_back( CalHit(idx, val) );
+    if (val>0 && val/sig>cut) calHits.push_back( CalHit(idx, val) );  // n-sigma noise cut
   }
 }

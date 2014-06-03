@@ -34,7 +34,8 @@ class PadeChannel : public TObject {
   Int_t GetPeak() {return _peak;}
   Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
   void GetXYZ(float &x, float &y, float &z);
-  Float_t GetPedistal();
+  void GetPedestal(float &ped, float &stdev);
+  Float_t GetNoise();
   void GetHist(TH1F* h);
 
   // private:
@@ -135,7 +136,7 @@ public:
   Int_t GetWCHits() const {return wc.size();}
   vector<WCChannel> GetWChitsX(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   vector<WCChannel> GetWChitsY(Int_t wc, Int_t *min=0, Int_t* max=0) const;
-  void GetCalHits(vector<CalHit> &calHits, float* calconstants=0);
+  void GetCalHits(vector<CalHit> &calHits, float* calconstants=0, float cut=0);
 
 
   // setters

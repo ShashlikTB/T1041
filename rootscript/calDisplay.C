@@ -76,11 +76,12 @@ void calDisplay(TString fdat, int ndisplay=-1){
     t1041->GetEntry(i);
     for (Int_t j = 0; j < event->NPadeChan(); j++){
       PadeChannel pch = event->GetPadeChan(j);
-
-      UShort_t max = pch.GetMax()-pch.GetPedistal();
+      float ped,sig;
+      pch.GetPedestal(ped,sig);
+      UShort_t max = pch.GetMax()-ped;
       Int_t maxTime = pch.GetPeak();
       if (max>MAXADC) continue;    // skip channels with bad adc readings (should be RARE)
-      //max-=pch.GetPedistal();
+      //max-=pch.GetPedestal();
 
       int channelID=pch.GetChannelID();   // boardID*100+channelNum in PADE
       int moduleID,fiberID;
