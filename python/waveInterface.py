@@ -11,7 +11,7 @@ else: runDat=sys.argv[1]
 
 
 print "Processing file:",runDat
-LoadLibs("TBLIB","TBEvent.so","waveInterface.so")
+LoadLibs("TBLIB","PadeChannel.so","TBEvent.so","waveInterface.so")
 
 gROOT.ProcessLine(".L rootscript/waveViewer.C+")
 

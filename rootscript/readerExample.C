@@ -65,8 +65,9 @@ void readerExample(TString file="latest.root"){
   // histograms for cluster x,y positions, sigmas
   TH1F *hClusterX=new TH1F("hClusterX","Cluster X",56,-28,28);  // 1mm bins
   TH1F *hClusterY=new TH1F("hClusterY","Cluster Y",56,-28,28);
-  TH1F *hClusterSX=new TH1F("hClusterSX","Cluster SX",56,0,28);
-  TH1F *hClusterSY=new TH1F("hClusterSY","Cluster SY",56,0,28);
+  TH1F *hClusterSX=new TH1F("hClusterSX","Cluster SX",112,0,28);
+  TH1F *hClusterSY=new TH1F("hClusterSY","Cluster SY",112,0,28);
+  TH2F *hClusterSXY=new TH2F("hClusterSXY","Cluster SXY",28,0,28,28,0,28);
   // and cluster center vs extrapolated track
   TH1F *hClusterDX=new TH1F("hClusterDX","Cluster-trk DX",56,-28,28);  // 1mm bins
   TH1F *hClusterDY=new TH1F("hClusterDY","Cluster-trk DY",56,-28,28);
@@ -74,14 +75,11 @@ void readerExample(TString file="latest.root"){
   // histograms for cluster x,y positions (after channel calibrations)
   TH1F *hClusterCalibX=new TH1F("hClusterCalibX","Cluster X (calibrated)",56,-28,28); // 1mm bins
   TH1F *hClusterCalibY=new TH1F("hClusterCalibY","Cluster Y (calibrated)",56,-28,28);
-  TH1F *hClusterCalibSX=new TH1F("hClusterCalibSX","Cluster SX (calibrated)",56,0,28);
-  TH1F *hClusterCalibSY=new TH1F("hClusterCalibSY","Cluster SY (calibrated)",56,0,28);
+  TH1F *hClusterCalibSX=new TH1F("hClusterCalibSX","Cluster SX (calibrated)",112,0,28);
+  TH1F *hClusterCalibSY=new TH1F("hClusterCalibSY","Cluster SY (calibrated)",112,0,28);
   // and cluster center vs extrapolated track (after channel calibrations)
   TH1F *hClusterCalibDX=new TH1F("hClusterCalibDX","Cluster-trk DX (calibrated)",56,-28,28);  // 1mm bins
   TH1F *hClusterCalibDY=new TH1F("hClusterCalibDY","Cluster-trk DY (calibrated)",56,-28,28);
-
-  
-
 
 
   // location of maximum fiber, Upstream or Downstream
@@ -105,6 +103,7 @@ void readerExample(TString file="latest.root"){
   vector<CalHit> calhits, calhitsCalib;
 
   for (Int_t i=0; i< t1041->GetEntries(); i++) {
+    if (i%200==0) cout << i << "/" << t1041->GetEntries() << endl;
     t1041->GetEntry(i);
     
     // loop over PADE channels
@@ -128,8 +127,16 @@ void readerExample(TString file="latest.root"){
     bool haveTrack= (hitsX1.size()==1 && hitsY1.size()==1 && 
 		     hitsX2.size()==1 && hitsY2.size()==1);   // require only 2 x,y hits
 
-    event->GetCalHits(calhits,0,3.0);  // fetch ped-subtracted calorimter hits, no calib, 3sigma noise cut
-    event->GetCalHits(calhitsCalib,CalConstants,3.0);  // and again w/ Shasha's inter calibration, 3sigma noise cut
+    // just doing peak=pedestal subtraction
+    //    event->GetCalHits(calhits,0,3.0);  // fetch ped-subtracted calorimter hits, no calib, 3sigma noise cut
+    //    event->GetCalHits(calhitsCalib,CalConstants,3.0);  // and again w/ Shasha's inter calibration, 3sigma noise cut
+    // using the pulse shape fit  [ this takes MUCH longer ]
+    if (i==0) cout << "We are doing pulse fits here, so this will be SLOW" << endl;
+    event->GetCalHitsFit(calhits,0,3.0);  // fetch ped-subtracted calorimter hits, no calib, 3sigma noise cut
+    calhitsCalib=calhits;
+    event->CalibrateCalHits(calhitsCalib,CalConstants);  // much faster than redoing fit
+    //    event->GetCalHitsFit(calhitsCalib,CalConstants,3.0);  // and again w/ Shasha's inter calibration, 3sigma noise c
+
 
     // Loop over calhits to find the channel with maximum energy
     // Use CalHits here and not the loop over PadeChannels above, b/c
@@ -149,14 +156,15 @@ void readerExample(TString file="latest.root"){
     // Warning clustering code is not well vetted
     calCluster.MakeCluster(calhits);  // cut requiring adcMin counts>pedistal
     if (calCluster.GetE()==0) continue;
-    cout << x<<" "<<y<<" "<<max<<endl;;
-    calCluster.Print();
+    // calCluster.Print();
     bool isContained= TMath::Abs( calCluster.GetX()<14 ) && TMath::Abs( calCluster.GetY()<14 );
 
     hClusterX->Fill(calCluster.GetX());
     hClusterY->Fill(calCluster.GetY());
     hClusterSX->Fill(calCluster.GetSigX());
     hClusterSY->Fill(calCluster.GetSigY());
+    hClusterSXY->Fill(calCluster.GetSigX(),calCluster.GetSigY());
+
     if (isContained) hClusterE->Fill( Min((double)calCluster.GetE(), EMAX-0.0001) );
    
 

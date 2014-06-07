@@ -16,7 +16,7 @@ print "\nProcessing file:",runDat
 gROOT.SetBatch()
 
 
-LoadLibs("TBLIB","TBEvent.so","TBReco.so")
+LoadLibs("TBLIB","PadeChannel.so","TBEvent.so","TBReco.so")
 
 
 gROOT.ProcessLine(".L dqm/dqmPlots.C+")

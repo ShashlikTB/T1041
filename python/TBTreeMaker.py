@@ -343,7 +343,7 @@ if __name__ == '__main__':
     #===========================================================# 
     #  Declare data containers                                  #
     #===========================================================#
-    LoadLibs("TBLIB","TBEvent.so")
+    LoadLibs("TBLIB","PadeChannel.so","TBEvent.so")
 
     if prof:
         pr = cProfile.Profile()

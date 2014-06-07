@@ -8,7 +8,7 @@ CC = g++
 ROOTLIB=$(shell root-config --libdir)
 ROOTCFLAGS=$(shell root-config --cflags)
 ROOTLFLAGS=$(shell root-config --ldflags)
-ROOTLIBS=$(shell root-config --libs) -lSpectrum -lGui
+ROOTLIBS=$(shell root-config --libs) -lMathMore -lSpectrum -lGui 
 DEBUG=-ggdb
 PROFILE=-pg
 CXXFLAGS=-Wall -fPIC -O2 $(DEBUG) -rdynamic 
@@ -17,12 +17,12 @@ NONSHARED = -c -pipe -Wshadow -W -Woverloaded-virtual $(ROOTCFLAGS) $(CXXFLAGS) 
 BUILDDIR = $(CURDIR)/build
 LIB = $(BUILDDIR)/lib
 
-all: dirs waveInterface.so TBEvent.so TBReco.so
+all: dirs PadeChannel.so TBEvent.so waveInterface.so TBReco.so
 
 dirs:
 	test -d $(LIB) || mkdir -p $(LIB)
 
-waveInterface.so: waveEventDict.so TBEvent.so waveInterface.o TBEventDict.so
+waveInterface.so: PadeChannel.so PadeChannelDict.so TBEvent.so TBEventDict.so waveEventDict.so  waveInterface.o
 	g++ -shared -Wl,-soname,waveInterface.so $(ROOTLFLAGS) -Wl,--no-undefined -Wl,--as-needed -L$(ROOTLIB)  $(filter-out %.so, $^) $(addprefix $(LIB)/,$(filter-out %.o,$(notdir $^)))  $(ROOTLIBS) -o waveInterface.so
 	mv $@ $(LIB)
 
@@ -38,22 +38,6 @@ waveEventDict.cxx: waveInterface.h waveLinkDef.h
 waveInterface.o: waveInterface.cc
 	$(CC) -I$(<D)/../include $(NONSHARED)  -Wno-sign-compare $^
 
-TBEvent.so: shashlik.o TBEvent.o TBEventDict.so
-	$(CC) $(SHAREDCFLAGS) -o $@ $(addprefix $(LIB)/,$(filter-out %.o,$(notdir $^))) $(filter-out %.so,$^) $(ROOTLIBS)
-	mv $@ $(LIB)/	
-
-TBEvent.o: TBEvent.cc calConstants.h shashlik.h
-	$(CC) -I$(<D)/../include $(NONSHARED) $^
-
-TBEventDict.so: TBEventDict.cxx
-	$(CC) $(SHAREDCFLAGS) -I. $(addprefix $(BUILDDIR)/,$(notdir $^)) -o $@
-	mv $@ $(LIB)/
-
-TBEventDict.cxx: TBEvent.h LinkDef.h
-	rm -f ./TBEventDict.cxx ./TBEventDict.h
-	rootcint $@ -c $^ 
-	mv TBEventDict.[ch]* $(BUILDDIR)
-
 TBReco.so: TBReco.o
 	$(CC) $(SHAREDCFLAGS) -o $@ $(addprefix $(LIB)/,$(filter-out %.o,$(notdir $^))) $(filter-out %.so,$^) $(ROOTLIBS)
 	mv $@ $(LIB)/
@@ -61,12 +45,45 @@ TBReco.so: TBReco.o
 TBReco.o: TBReco.cc TBReco.h shashlik.h
 	$(CC) -I$(<D)/../include $(NONSHARED) $^
 
+TBEvent.so: TBEvent.o TBEventDict.so 
+	$(CC) $(SHAREDCFLAGS) -o $@ $(addprefix $(LIB)/,$(filter-out %.o,$(notdir $^))) $(filter-out %.so,$^) $(ROOTLIBS)
+	mv $@ $(LIB)/	
+
+TBEventDict.so: TBEventDict.cxx
+	$(CC) $(SHAREDCFLAGS) -I. $(addprefix $(BUILDDIR)/,$(notdir $^)) -o $@
+	mv $@ $(LIB)/
+
+TBEventDict.cxx: TBEvent.h shashlik.h LinkDef.h
+	rm -f ./TBEventDict.cxx ./TBEventDict.h
+	rootcint $@ -c $^ 
+	mv TBEventDict.[ch]* $(BUILDDIR)
+
+TBEvent.o: TBEvent.cc calConstants.h shashlik.h pulseShapeForFit.h
+	$(CC) -I$(<D)/../include $(NONSHARED) $^
+
+PadeChannel.so: shashlik.o PadeChannel.o PadeChannelDict.so
+	$(CC) $(SHAREDCFLAGS) -o $@ $(addprefix $(LIB)/,$(filter-out %.o,$(notdir $^))) $(filter-out %.so,$^) $(ROOTLIBS)
+	mv $@ $(LIB)/	
+
+PadeChannelDict.so: PadeChannelDict.cxx
+	$(CC) $(SHAREDCFLAGS) -I. $(addprefix $(BUILDDIR)/,$(notdir $^)) -o $@
+	mv $@ $(LIB)/
+
+PadeChannelDict.cxx: PadeChannel.h LinkDef_PadeChannel.h
+	rm -f ./PadeChannelDict.cxx ./PadeChannelDict.h
+	rootcint $@ -c $^ 
+	mv PadeChannelDict.[ch]* $(BUILDDIR)
+
+PadeChannel.o: PadeChannel.cc calConstants.h shashlik.h pulseShapeForFit.h
+	$(CC) -I$(<D)/../include $(NONSHARED) $^
+
 shashlik.o: shashlik.cc shashlik.h 
 	$(CC) -I$(<D)/../include $(NONSHARED) $^
 
 clean:
-	rm  -f *.so *.o *~ TBEventDict.cxx TBEventDict.h waveEventDict.cxx waveEventDict.h include/*.gch
+	rm  -f *.so *.o *~ rootscript/*.so rootscript/*.d
 	rm -rf $(BUILDDIR) $(LIB)
 
 cleanall:  clean
-	rm -f */*so *root */*.d */*~ python/*pyc
+	rm -f */*so *root */*.d */*~ python/*pyc include/*.gch
+

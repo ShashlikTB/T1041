@@ -116,12 +116,12 @@ void CalCluster::MakeCluster(const vector<CalHit> &calHits, float threshold){
   float sumx2=0, sumy2=0;
   float sumE2=0;
   _Eu=_Ed=0;
+  _ECenter=_EIso=0;
   float x,y,z;
   for (unsigned j=0; j<calHits.size(); j++){
     float val=calHits[j].Value();
     if (val<threshold) continue;
     calHits[j].GetXYZ(x,y,z);
-    //    calHits[j].Print();
 
     if (z>0) _Ed+=val;
     else _Eu+=val;
@@ -130,6 +130,8 @@ void CalCluster::MakeCluster(const vector<CalHit> &calHits, float threshold){
     sumy+=val*y;
     sumx2+=val*x*x;
     sumy2+=val*y*y;
+    if (TMath::Abs(x)<14 && TMath::Abs(y)<14) _ECenter+=val;
+    else _EIso+=val;
   }
   _x=_y=_z=0;
   _sx=_sy=0;
@@ -147,6 +149,7 @@ void CalCluster::MakeCluster(const vector<CalHit> &calHits, float threshold){
 void CalCluster::Print(){
   cout << "CalCluster (x,y,z,E;sx,sy) = ( " 
        << _x << "," << _y << "," << _z << ","  << _Ed+_Eu << ";" << _sx << ","<<_sy<<" )" << endl;
+  cout << "ECenter/Iso = " << _ECenter << " / " << _EIso << endl;
 }
 
 

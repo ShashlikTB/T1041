@@ -21,7 +21,7 @@ if selectEvent==999: play=True;
 
 print "Processing file:",runDat
 
-LoadLibs("TBLIB","TBEvent.so")
+LoadLibs("TBLIB","PadeChannel.so","TBEvent.so")
 
 
 gROOT.ProcessLine(".L rootscript/calDisplay.C+")

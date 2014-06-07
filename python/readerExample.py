@@ -16,7 +16,7 @@ else: runDat=sys.argv[1]
 
 print "Processing file:",runDat
 
-LoadLibs("TBLIB","TBEvent.so","TBReco.so")
+LoadLibs("TBLIB","PadeChannel.so","TBEvent.so","TBReco.so")
 
 
 gROOT.ProcessLine(".L rootscript/readerExample.C+")

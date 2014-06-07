@@ -183,6 +183,7 @@ class CalHit{
   float Value() const {return _val;}
   void GetXYZ(float &x, float&y, float &z) const;
   void Print() const;
+  void SetValue(float val) {_val=val;}
  private:
   int _channelIndex;
   float _val;

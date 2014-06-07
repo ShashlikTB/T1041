@@ -11,10 +11,10 @@ else: runDat=sys.argv[1]
 
 
 print "Processing file:",runDat
-LoadLibs("TBLIB","TBEvent.so")
+LoadLibs("TBLIB","PadeChannel.so","TBEvent.so")
 gROOT.ProcessLine(".L rootscript/waveViewer.C+")
 
-print "To kill use: kill",os.getpid()
+print "To kill use: kill",os.getpid(),";fg"
 
 # show all wave forms in file
 waveViewer(runDat)

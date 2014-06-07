@@ -34,7 +34,7 @@ for o, a in opts:
     elif o=="-M": xmax=int(a)
     elif o=="-h": usage()
 
-LoadLibs("TBLIB","TBEvent.so")
+LoadLibs("TBLIB","PadeChannel.so","TBEvent.so")
 
 
 gROOT.ProcessLine(".L dqm/pulseHeights.C+")
