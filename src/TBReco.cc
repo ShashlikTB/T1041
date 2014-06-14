@@ -5,7 +5,7 @@
 #include <iostream>
 #include "TBReco.h"
 #include "TBEvent.h"
-#include "calConstants.h"
+//#include "calConstants.h"
 #include "WC.h"
 
 using std::endl;
@@ -46,6 +46,24 @@ WCReco::WCReco(TTree *tree){
   WCReco();
   AddTree(tree);
 }
+
+float WCReco::GetProjection(Float_t pos1, Float_t pos2,
+                      Float_t WCdist, Float_t projDist){
+  Float_t Delta = pos1 - pos2;
+  Float_t projection = pos1 + (projDist*(Delta/WCdist));
+  return (projection - 64);
+}
+
+bool WCReco::ScintConfirm(Float_t Pos1, Float_t Pos2, Float_t WCDist){
+  const float ProjDist1 = -1231.9;          // distance between WC1 and Scin1
+  const float ProjDist2 = -(1231.9+4445.0); // distance between WC1 and Scin2
+  Float_t CheckProjection1 = WCReco::GetProjection(Pos1, Pos2, WCDist, ProjDist1);
+  Float_t CheckProjection2 = WCReco::GetProjection(Pos1, Pos2, WCDist, ProjDist2);
+  if(fabs(CheckProjection1)<=50 && fabs(CheckProjection2)<=50)return true;
+  else return false;
+}
+
+
 
 void WCReco::AddTree(TTree *tree){
   TBEvent *event = new TBEvent();

@@ -2,15 +2,15 @@
 #include "TString.h"
 #include "TFile.h"
 #include "TBEvent.h"
-#include "shashlik.h"
 #include "TTree.h"
 #include "TBranch.h"
 #include "TH2F.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TSystem.h"
+#include "Mapper.h"
 
-const int MAXADC=4095;
+//const int MAXADC=4095;
 
 // inputs data file and event in file to display (default is to integrate all)
 void waveViewer(TString fdat, Int_t board=-1, Int_t channel=-1){

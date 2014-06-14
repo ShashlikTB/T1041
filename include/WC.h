@@ -38,7 +38,7 @@ const float zWC2=3476.625;
 const float dWC1toWC2     = 3476.625;   // Distance between WC1 and WC2     (mm)
 const float dWC2toShash   = 533.4;      // Distance between WC2 and Shashlik(mm)
 const float dScin1toWC1   = 1231.9;     // Distance between Scint 1 and WC1 (mm)
-const float dWC1toScin1   = -1231.9;
+const float dWC1toScin1   = 1231.9;
 const float dScin1toScin2 = 4445.0;     //        ""    Scint 1 and Scint 2 (mm)
 
 // derived distances
@@ -46,12 +46,6 @@ const float zShash = zWC2+dWC2toShash;
 const float zSC1 = zWC1-dScin1toWC1;
 const float zSC2 = zSC1-dScin1toScin2;
 
-
-int tdc2WC(int tdcNum){
-  if (tdcNum<5) return 1;
-  else if (tdcNum <9) return 2;
-  else if (tdcNum <13) return 3;
-  else return 4;
-}
+int tdc2WC(int tdcNum);
 
 #endif
