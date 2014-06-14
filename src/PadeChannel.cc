@@ -1,5 +1,5 @@
 #include "PadeChannel.h"
-#include "shashlik.h"
+#include "Mapper.h"
 
 void PadeChannel::Reset(){
   _ts=0;
@@ -80,12 +80,21 @@ void PadeChannel::GetPedestal(float &ped, float &stdev){
   float var =  1.0/(nsamples-1) * (sum2-sum*sum/PADE_PED_SAMPLES);
   stdev = TMath::Sqrt(var);
 }
+
+
 /// hack!  to do remove all floats and stick w/ doubles
 void PadeChannel::GetPedestal(double &ped, double &stdev){
   float p,s;
   GetPedestal(p,s);
   ped=p;
   stdev=s;
+}
+
+double PadeChannel::GetPedestal(){
+double ped = 0;
+double stdev = 0;
+GetPedestal(ped, stdev);
+return ped;
 }
 
 Int_t PadeChannel::GetChannelIndex(){

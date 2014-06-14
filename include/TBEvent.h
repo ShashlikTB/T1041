@@ -3,7 +3,7 @@
 #ifndef TBEVENT_H
 #define TBEVENT_H
 #include "PadeChannel.h"
-#include "shashlik.h"
+#include "Mapper.h"
 #include <vector>
 
 using std::vector;
