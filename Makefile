@@ -7,6 +7,8 @@ ifndef ROOTSYS
 $(error *** Please set up environment variable ROOTSYS)
 endif
 # ----------------------------------------------------------------------------
+$(shell mkdir -p build/lib)
+# ----------------------------------------------------------------------------
 NAME	:= TB
 BLDDIR	:= build
 LIBDIR	:= build/lib
