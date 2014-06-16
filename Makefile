@@ -7,14 +7,13 @@ ifndef ROOTSYS
 $(error *** Please set up environment variable ROOTSYS)
 endif
 # ----------------------------------------------------------------------------
-$(shell mkdir -p build/lib)
-# ----------------------------------------------------------------------------
 NAME	:= TB
 BLDDIR	:= build
 LIBDIR	:= build/lib
 SRCDIR	:= src
 INCDIR	:= include
 LIBRARY	:= $(LIBDIR)/lib$(NAME).so
+$(shell mkdir -p build/lib)
 # ----------------------------------------------------------------------------
 # sources for which dictionaries are to be created, 
 # but without the use of LinkDefs
@@ -56,7 +55,7 @@ ifeq ($(OS),Darwin)
 CXX	:= g++
 LD	:= g++
 LDFLAGS += -dynamiclib
-ROOTLIBS:= $(shell root-config --glibs --nonew)
+ROOTLIBS:= $(shell root-config --glibs --nonew) -lMathMore
 else
 CXX	:= g++
 LD	:= g++

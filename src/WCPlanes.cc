@@ -170,21 +170,15 @@ void WCPlanes::Draw(TBEvent* event)
     Int_t ModuleNum2  = 0;
     Int_t ModuleNum5  = 0;
     Int_t ModuleNum6  = 0;
-    Int_t ModuleNum10 = 0;
-    Int_t ModuleNum13 = 0;
-    Int_t ModuleNum14 = 0;
     if(X_module%4 == 1){
       XY_channelAdjust = (XY_channelNumber + 1);
       if(X_module == 1)  ModuleNum1  = X_module;
       if(X_module == 5)  ModuleNum5  = X_module;
-      if(X_module == 13) ModuleNum13 = X_module;
     }
     else if(X_module%4 == 2){
       XY_channelAdjust = (XY_channelNumber + 65);
       if(X_module == 2)  ModuleNum2  = X_module;
       if(X_module == 6)  ModuleNum6  = X_module;
-      if(X_module == 10) ModuleNum10 = X_module;
-      if(X_module == 14) ModuleNum14 = X_module;
     }
     Int_t InTimeX1  = 0, InTimeX2  = 0;
     Int_t OutTimeX1 = 0, OutTimeX2 = 0;
@@ -203,20 +197,15 @@ void WCPlanes::Draw(TBEvent* event)
       if(Y_module%4 == 1 || Y_module%4 == 2) continue; // only Y wires
 
       Int_t ModuleNum3  = 0, ModuleNum4 = 0, ModuleNum7 = 0, ModuleNum8 = 0;
-      Int_t ModuleNum11 = 0, ModuleNum12 = 0, ModuleNum15 = 0, ModuleNum16 = 0;
       if(Y_module%4 == 3){
 	XY_channelAdjust2 = (129 - XY_channelNumber2);
 	if(Y_module == 3)  ModuleNum3  = Y_module;
 	if(Y_module == 7)  ModuleNum7  = Y_module;
-	if(Y_module == 11) ModuleNum11 = Y_module;
-	if(Y_module == 15) ModuleNum15 = Y_module;
       }
       else if(Y_module%4 == 0){
 	XY_channelAdjust2 = (65 - XY_channelNumber2); 
 	if(Y_module == 4)  ModuleNum4  = Y_module;
 	if(Y_module == 8)  ModuleNum8  = Y_module;
-	if(Y_module == 12) ModuleNum12 = Y_module;
-	if(Y_module == 16) ModuleNum16 = Y_module;
       }
       Int_t InTimeY1  = 0, InTimeY2  = 0;
       Int_t OutTimeY1 = 0, OutTimeY2 = 0;
