@@ -35,7 +35,7 @@ class PadeChannel : public TObject {
   void GetXYZ(float &x, float &y, float &z);
   void GetPedestal(float &ped, float &stdev);
   void GetPedestal(double &ped, double &stdev);
-  Float_t GetNoise();
+  //Float_t GetNoise();
   void GetHist(TH1F* h);
   static PulseFit FitPulse(PadeChannel *pc);
   double GetPedestal();
