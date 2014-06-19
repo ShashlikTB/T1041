@@ -173,7 +173,11 @@ class TBEventDisplay:
         self.toolBar = TGHorizontalFrame(self.vframe)
         self.vframe.AddFrame(self.toolBar, TOP_X)
 
-        # Add picture buttons
+        # Add picture buttons        
+        self.enchiladaButton = PictureButton(self, self.toolBar,
+                        picture='Enchilada.jpg',
+                        method='wholeEnchilada',
+                        text='process the whole enchilada')
 
         self.nextButton = PictureButton(self, self.toolBar,
                         picture='GoForward.gif',
@@ -199,25 +203,36 @@ class TBEventDisplay:
                             picture='GoBack.gif',
                             method='previousEvent',
                             text='go to previous event')
+        
+        self.snapCanvasButton = PictureButton(self, self.toolBar,
+                        picture='Camera.png',
+                        method='snapCanvas',
+                        text='snap this canvas')
 
-        self.akkumulateButton = CheckButton(self, self.toolBar,
+        self.accumulateButton = CheckButton(self, self.toolBar,
                         hotstring='Accumulate',
                         method='toggleAccumulate',
-                        text='Akkumulate')
-
+                        text='Accumulate')
         #-------------------------------------------------------------------
         # Add a notebook with multiple pages
         #-------------------------------------------------------------------
-        #self.accumulate = True
+
+        self.util = Util()
+        self.util.accumulate = False   
+        self.util.stealthmode = False  
+        self.shutterOpen = False
+        self.pageName = 'default'
+                 
         self.noteBook = NoteBook(self, self.vframe, 'setPage', width, height)
         # Add pages 
         self.display = {}
-        for pageName, constructor in [('WF traces',     'TracePlot(canvas)'),
-                          ('WF surface',    'SurfacePlot(canvas)'),
-                          ('ADC heatmap',   'ShashlikHeatmap(canvas)'),
-                          ('Wire chambers', 'WCPlanes(canvas)'),
-                          ('3D display',    'Display3D(page)')]:
-            self.noteBook.Add(pageName)
+        for pageName, constructor, buttons in [('WF traces',     'TracePlot(canvas)', 
+                                       [('Camera.png','snapCanvas','Take picture')]),
+                          ('WF surface',    'SurfacePlot(canvas)', None),
+                          ('ADC heatmap',   'ShashlikHeatmap(canvas)', None),
+                          ('Wire chambers', 'WCPlanes(canvas)', None),
+                          ('3D display',    'Display3D(page)', None)]:
+            self.noteBook.Add(pageName, buttons)
             self.noteBook.SetPage(pageName)
             page = self.noteBook.page
             canvas = page.canvas
@@ -227,7 +242,7 @@ class TBEventDisplay:
         #-------------------------------------------------------------------
         # Create a status bar, divided into two parts
         #-------------------------------------------------------------------
-        self.statusBar = TGStatusBar(self.vframe, 1, 1)
+        self.statusBar = TGStatusBar(self.vframe, 1, 1, kDoubleBorder)
         status_parts = array('i')
         status_parts.append(23)
         status_parts.append(77)
@@ -236,7 +251,8 @@ class TBEventDisplay:
 
         # Initial state
 
-        self.noteBook.SetPage('ADC heatmap')
+        self.noteBook.SetPage('Wire chambers')
+        self.wcplanes = self.display['Wire chambers']	
         self.ADCcut  = 500
         self.nevents = 0
         self.eventNumber = -1
@@ -252,17 +268,18 @@ class TBEventDisplay:
         self.main.MapSubwindows()
         self.main.Resize()
         self.main.MapWindow()
-	self.wcplanes = self.display['Wire chambers']	
+	
 
         #DEBUG
         # to debug a display uncomment next line
-        filename = "data/test.root"
+        #filename = "data/test.root"
 
         if filename != None: self.__openFile(filename)
+	else: self.__openFile('data/test.root')	
 
         #DEBUG
         # to debug a display uncomment next two lines
-        self.noteBook.SetPage('ADC heatmap')
+        self.noteBook.SetPage('Wire chambers')
         self.displayEvent()
         
     def __del__(self):
@@ -311,18 +328,32 @@ class TBEventDisplay:
             pass
 
     def setPage(self, id):
+        if id==0:
+            self.pageName = 'Traces'
+        if id==1:
+            self.pageName = 'Surface'
+        if id==2:
+            self.pageName = 'Heatmap'
+        if id==3:
+            self.pageName = 'WC'
+        if id==4:
+            self.pageName = '3D_'
         self.noteBook.SetPage(id)
         if self.eventNumber >= 0:
             self.displayEvent()
 
     def nextEvent(self):
         self.debug("begin:nextEvent")
+        if self.eventNumber > self.nevents-2:
+            self.eventNumber = 0
         self.readEvent(R_FORWARD)
         self.displayEvent()
         self.debug("end:nextEvent")			
 
     def previousEvent(self):
         self.debug('begin:previousEvent')
+        if self.eventNumber < 1:
+            self.eventNumber = self.nevents 
         self.readEvent(R_REWIND)
         self.displayEvent()
         self.debug('end:previousEvent')
@@ -373,15 +404,31 @@ class TBEventDisplay:
 
     def toggleAccumulate(self):
         self.debug("toggle:accumulate")
-        if self.accumulate==True:
-            self.accumulate = False
-            print "turning accumulate off"
-        elif self.accumulate==False:
-            self.accumulate==True
-            print "turning accumulate on"
-        else:
-            self.accumulate = False
-   	    print 'turned it off again' 
+        self.util.accumulate = not self.util.accumulate
+
+    def wholeEnchilada(self):
+        self.debug("begin:wholeEnchilada")
+        rememberAccumulate = self.util.accumulate
+        self.util.accumulate = True
+        self.util.stealthmode = True
+        self.eventNumber = 0
+        while self.eventNumber<self.nevents-2:
+            self.readEvent(R_FORWARD)
+            self.displayEvent()
+        self.util.stealthmode = False
+        self.readEvent(R_FORWARD)
+        self.displayEvent()     
+        self.util.accumulate = rememberAccumulate   
+        self.eventNumber = 0
+        self.debug("end:wholeEnchilada")
+        
+    def snapCanvas(self):
+        self.debug("begin:snapCanvas")
+        self.shutterOpen = True
+        self.displayEvent()
+        self.shutterOpen = False
+        self.debug("end:snapCanvas")	
+        
     def setDelay(self):
         from string import atof
         dialog = Dialog(gClient.GetRoot(), self.main)
@@ -444,7 +491,8 @@ class TBEventDisplay:
         # loop over events and apply ADC cut
 
         if   which == R_ONESHOT:
-            self.statusBar.SetText('event: %d' % self.eventNumber, 0)
+            self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents),
+                                   0)
             self.reader.read(self.eventNumber)
 
             ADCmax = self.reader.maxPadeADC()
@@ -453,7 +501,8 @@ class TBEventDisplay:
         elif which == R_FORWARD:
             while self.eventNumber < self.nevents-1:
                 self.eventNumber += 1
-                self.statusBar.SetText('event: %d' % self.eventNumber, 0)
+                self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents),
+                                       0)
                 self.reader.read(self.eventNumber)
 
                 ADCmax =  self.reader.maxPadeADC()
@@ -463,7 +512,8 @@ class TBEventDisplay:
         else:
             while self.eventNumber > 0:
                 self.eventNumber -= 1
-                self.statusBar.SetText('event: %d' % self.eventNumber, 0)
+                self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents),
+                                       0)
                 self.reader.read(self.eventNumber)
 
                 ADCmax =  self.reader.maxPadeADC()
@@ -487,11 +537,20 @@ class TBEventDisplay:
         currentPage = self.noteBook.currentPage
         page = self.noteBook.pages[currentPage]
         self.debug("begin:displayEvent - %s" % page.name)
-        if not page.redraw:
+
+        if self.shutterOpen:
+            if not os.path.exists("cached_pdfs"):
+                os.system('mkdir cached_pdfs')
+            page.canvas.Print('cached_pdfs/'+self.pageName+str(self.eventNumber)+'.pdf')
+            page.redraw = False
+            return
+            
+        if not page.redraw and not self.shutterOpen:
             self.debug("end:displayEvent - DO NOTHING")		
             return
-        print 'self.reader.event() '
-        print self.reader.event()
-        self.display[page.name].Draw(self.reader.event())
+        self.display[page.name].Draw(self.reader.event(), self.util)
+        print "displaying with self.util.accumulate = "+str(self.util.accumulate)
+                
+            
         page.redraw = False
         self.debug("end:displayEvent")		

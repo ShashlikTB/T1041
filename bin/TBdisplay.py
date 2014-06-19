@@ -9,6 +9,8 @@ from ROOT import *
 from gui.TBEventDisplay import TBEventDisplay
 #------------------------------------------------------------------------------
 def main():
+	#mystruct = Util()
+	#exit(0)
 	if len(sys.argv) > 1:
 		filename = sys.argv[1]
 	else:

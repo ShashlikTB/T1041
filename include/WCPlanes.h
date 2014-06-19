@@ -5,13 +5,14 @@
 #include "TBReco.h"
 #include <TH2.h>
 #include "THStack.h"
+#include "Util.h"
 
 class WCPlanes{
  public:
   WCPlanes();
   WCPlanes(TCanvas* canvas);
   ~WCPlanes();
-  void Draw(TBEvent* event);
+  void Draw(TBEvent* event, Util& util);
   void GetWCMeans(string meanfile, int *tLow, int *mean, int *tHigh);
   void CacheWCMeans(string meanfile, string rootfilename);
 
@@ -32,7 +33,6 @@ class WCPlanes{
   Int_t Y_pos_WC1, Y_pos_WC2;
   Int_t X_tim_WC1, X_tim_WC2;
   Int_t Y_tim_WC1, Y_tim_WC2;
-  bool accumulate_;
 
   int mean[NTDC];
   int tLow[NTDC]; 

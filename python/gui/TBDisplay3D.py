@@ -83,7 +83,7 @@ class Display3D:
 	#----------------------------------------------------------------------
 	# Draw hits
 	#----------------------------------------------------------------------
-	def Draw(self, event):	
+	def Draw(self, event, accumulate=False, stealthmode=False):	
 		from random import uniform
 		from random import randint
 

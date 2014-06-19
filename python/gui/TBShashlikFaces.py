@@ -11,10 +11,10 @@ class ShashlikHeatmap:
 	def __del__(self):
 		pass
 
-	def Draw(self, event):
-		ShashlikFaces(self, self.canvas, event)
+	def Draw(self, event, util):
+		ShashlikFaces(self, self.canvas, event, util)
 		
-def ShashlikFaces(object, c1, event):
+def ShashlikFaces(object, c1, event, util):
 	print "ShashlikeFaces called"
 	try:
 		o = object.hMapFront
@@ -38,15 +38,14 @@ def ShashlikFaces(object, c1, event):
 		object.hMapFront= TH2F('hMap1','Upstream Face (ADC counts)' , 8,-28,28,8,-28,28)
 		object.hMapBack = TH2F('hMap2','Downstream Face (ADC counts)',8,-28,28,8,-28,28)
 		object.hMapReset = True
-		object.accumulate = False
        		print "defining accumulate for the first time"	 
 	hMapFront = object.hMapFront
 	hMapBack  = object.hMapBack
 	
-	if object.accumulate==True:
+	if util.accumulate==True:
 		object.hMapReset = False
 		print "not resetting"
-	if object.accumulate==False:
+	if util.accumulate==False:
 		print "resetting"
 		object.hMapReset = True
 
@@ -75,20 +74,19 @@ def ShashlikFaces(object, c1, event):
         	xy = mymap.ChannelID2XY(chanID)
         	x,y = xy[0], xy[1]
         	hMapBack.Fill(x, y, maxADC)
-	gStyle.SetPalette(1)
-	gStyle.SetOptStat(0)
-
-	HistoSamStyleHeat(hMapFront)
-	HistoSamStyleHeat(hMapBack)
-
-	c1.cd(1)
-	hMapFront.Draw('COLZ')
-
-	c1.cd(2)
-	hMapBack.Draw('COLZ')
-
-	c1.Update()
-
+	
+	if not util.stealthmode:
+		gStyle.SetPalette(1)
+        	gStyle.SetOptStat(0)
+		HistoSamStyleHeat(hMapFront)
+		HistoSamStyleHeat(hMapBack)
+        	print "must not be in stealthmode"
+		c1.cd(1)
+        	hMapFront.Draw('COLZ')
+        	c1.cd(2)
+        	hMapBack.Draw('COLZ')
+        	c1.Update()
+        
 
 def HistoSamStyleHeat(histo):
 	LabelSize = 0.045

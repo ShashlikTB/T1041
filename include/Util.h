@@ -29,6 +29,8 @@
 //-----------------------------------------------------------------------------
 
 /// Simple wrapper around TGFileDialog.
+
+
 struct Util
 {
   ///
@@ -39,6 +41,11 @@ struct Util
   static
   TGLBEntry* GLBEntry(TGListBox* listbox, std::string str, int id, 
                       std::string font="helvetica-medium-r", int fontsize=14);
-};
 
+  bool accumulate;
+  bool stealthmode;
+
+
+
+};
 #endif

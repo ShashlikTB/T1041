@@ -178,12 +178,13 @@ class CheckButton(TGCheckButton):
 #-----------------------------------------------------------------------------
 class NoteBook(TGTab):
 	
-	def __init__(self, object, frame, method, width=800, height=600):
+	def __init__(self, obj, frame, method, width=800, height=600):
 		TGTab.__init__(self, frame, 1, 1)
 		
 		frame.AddFrame(self, TOP_X_Y)
 		self.connection = Connection(self, "Selected(Int_t)",
-									 object, method)
+					     obj, method)
+		self.object= obj
 		self.number=-1
 		self.pages = {}
 		self.names = {}
@@ -195,8 +196,7 @@ class NoteBook(TGTab):
 	def __del__(self):
 		pass
 
-
-	def Add(self, name, canvasType=C_STANDARD, menu=None):
+	def Add(self, name, buttons=None):
 		self.number += 1
 		self.names[name] = self.number
 		self.pages[self.number] = Element()
@@ -208,13 +208,17 @@ class NoteBook(TGTab):
 		element.tab    = self.AddTab(name)
 		
 		# check for menu items
-		if menu != None:
+		if buttons != None:
 			element.hframe2  = TGHorizontalFrame(element.tab, 1, 1)
-			element.tab.AddFrame(element.hframe2, TOP_X)				
-			element.menuBar = MenuBar(object, element.hframe2,
-						  TOP_RIGHT_PADDED)
-			menuName, menuItems = menu
-			element.menuBar.Add(menuName, menuItems)
+			element.tab.AddFrame(element.hframe2, TOP_X)
+			element.buttonlist = []
+			for pict, meth, txt in buttons:
+				print "==>", pict, meth, txt
+				element.buttonlist.append(PictureButton(self.object,
+									element.hframe2,
+									picture=pict,
+									method=meth,
+									text=txt))
 
 		element.hframe  = TGHorizontalFrame(element.tab, 1, 1)
 		element.tab.AddFrame(element.hframe, TOP_X_Y)
