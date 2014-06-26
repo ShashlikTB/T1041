@@ -15,6 +15,7 @@
 #include "TGFont.h"
 #include "TGListBox.h"
 #include "TGResourcePool.h"
+#include "TGButton.h"
 
 
 using namespace std;

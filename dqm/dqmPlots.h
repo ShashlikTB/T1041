@@ -3,7 +3,7 @@
 #include "TString.h"
 #include "TFile.h"
 #include "../include/TBEvent.h"
-#include "../include/shashlik.h"
+#include "../include/Mapper.h"
 #include "TTree.h"
 #include "TBranch.h"
 #include "TH2F.h"

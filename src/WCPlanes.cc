@@ -87,32 +87,35 @@ WCPlanes::WCPlanes(TCanvas* canvas)
   WCO2->SetFillColor(17);
 
 
-  //stack names
-  for(int j=0;j<2;++j){
-    TString stacktitle;
-    stacktitle.Form("WC%d Hits",j+1);
-    hStack1 = 0;
-    hStack2 = 0;
-  }
+    
+  hStack1 = 0;
+  hStack2 = 0;
+  
   
 }
 WCPlanes::~WCPlanes(){}
 
 
-
 void WCPlanes::CacheWCMeans(string meanfile, string rootfilename){
+
   TFile *f = new TFile(rootfilename.c_str());
   TTree* t1041 = (TTree*)f->Get("t1041");
   wcReco.AddTree(t1041);
-  //mean={0};
-  //tLow={0}; 
-  //tHigh={0};
-  wcReco.GetTDCcuts(mean, tLow, tHigh); 
 
+  wcReco.GetTDCcuts(mean, tLow, tHigh); 
   ofstream myfile;
   myfile.open (meanfile.c_str());
   for(int i=0; i<NTDC;i++) myfile << i+1 << "\t" << tLow[i] <<"\t"<<mean[i] <<"\t"<<tHigh[i] << endl;
   myfile.close();
+
+  wcReco.GetTDChists(TDC);
+  TFile* tdcFile = new TFile("tdc_dists.root","RECREATE");
+  gROOT->SetBatch(true);  
+  for(int i = 0; i<NTDC; i++) TDC[i]->Write();
+  tdcFile->Close(); 
+  gROOT->SetBatch(false);
+  //for (int i = 0; i<NTDC; i++)TDC[i]->Reset();
+  
 }
 
 void WCPlanes::GetWCMeans(string meanfile, int *tLow, int *mean, int *tHigh){
@@ -265,15 +268,19 @@ void WCPlanes::Draw(TBEvent* event, Util& util)
 
 
 
-
+  hEmpty  = new TH2I("Empty","Empty",32,-64,64,32,-64,64); 
   if(hStack1!=0) delete hStack1;
-  hStack1 = new THStack("Upstream WC Hits","Upstream WC Hits");
-  hStack2 = new THStack("Downstream WC Hits","Downstream WC Hits");
+  TString name1; name1.Form("Upstream WC - evt %d", util.eventNumber);
+  TString name2; name2.Form("Downstream WC - evt %d", util.eventNumber);
+  hStack1 = new THStack(name1,name1);
+  hStack2 = new THStack(name2,name2);
   c1->cd(1); 
   gPad->SetFrameFillColor(0);
-  hStack1->Add(WCO1);
-  hStack1->Add(WC1);
-  hStack1->Add(WC1_Beam);
+  if(util.WC_showOThits) hStack1->Add(WCO1);
+  if(util.WC_showIThits) hStack1->Add(WC1);
+  if(util.WC_showQhits)hStack1->Add(WC1_Beam);
+  if(!(util.WC_showOThits||util.WC_showIThits||util.WC_showQhits)) 
+    hStack1->Add(hEmpty);
   if(! util.stealthmode)
     {
     hStack1->Draw();
@@ -283,9 +290,11 @@ void WCPlanes::Draw(TBEvent* event, Util& util)
 
 
   c1->cd(2);
-  hStack2->Add(WCO2);
-  hStack2->Add(WC2);
-  hStack2->Add(WC2_Beam);
+  if(util.WC_showOThits) hStack2->Add(WCO2);
+  if(util.WC_showIThits) hStack2->Add(WC2);
+  if(util.WC_showQhits) hStack2->Add(WC2_Beam);
+  if(!(util.WC_showOThits||util.WC_showIThits||util.WC_showQhits))
+    hStack2->Add(hEmpty);
   if(! util.stealthmode)
     {
       hStack2->Draw();
