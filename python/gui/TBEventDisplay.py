@@ -458,7 +458,7 @@ class TBEventDisplay:
         self.util.accumulateButton.SetState(True) 
         self.util.stealthmode = True
         self.eventNumber = 0
-        while self.nevents-2:
+        while self.eventNumber<self.nevents-2:
             self.readEvent(R_FORWARD)
             self.displayEvent()
             self.statusBar.Draw()
