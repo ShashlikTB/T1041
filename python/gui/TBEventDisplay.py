@@ -456,9 +456,9 @@ class TBEventDisplay:
         self.debug("begin:wholeEnchilada")
         self.util.accumulate = True
         self.util.accumulateButton.SetState(True) 
-        #self.util.stealthmode = True
+        self.util.stealthmode = True
         self.eventNumber = 0
-        while self.eventNumber<10:#self.nevents-2:
+        while self.nevents-2:
             self.readEvent(R_FORWARD)
             self.displayEvent()
             self.statusBar.Draw()
