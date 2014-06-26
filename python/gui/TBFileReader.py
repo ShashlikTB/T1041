@@ -18,20 +18,18 @@ class TBFileReader:
 		if not os.path.exists(filename):
 			print "** TBFileReader: can't find file %s" % filename
 			sys.exit(0)
-
 		self.f = TFile(filename)
 		if not self.f.IsOpen():
 			print "** TBFileReader: can't open file %s" % filename
 			sys.exit(0)
-			
 		self.t = self.f.Get(treename)
 		if self.t == None:
 			print "** TBFileReader: can't read tree %s" % treename
 			sys.exit(0)
-			
 		self.nevents = self.t.GetEntries()
 		self.e = TBEvent() 
 		self.t.SetBranchAddress('tbevent', AddressOf(self.e))
+
 
 	def __del__(self):
 		self.f.Close()

@@ -44,7 +44,15 @@ struct Util
 
   bool accumulate;
   bool stealthmode;
+  int eventNumber;
 
+  bool WC_showOThits;
+  bool WC_showIThits;
+  bool WC_showQhits;
+
+  TGButton* accumulateButton;
+
+  std::string filename;
 
 
 };

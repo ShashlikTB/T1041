@@ -17,7 +17,7 @@ $(shell mkdir -p build/lib)
 # ----------------------------------------------------------------------------
 # sources for which dictionaries are to be created, 
 # but without the use of LinkDefs
-SRCSNOLINKDEF	:= WCPlanes.cc Connection.cc Slot.cc Util.cc Dialog.cc \
+SRCSNOLINKDEF	:= WCPlanes.cc Connection.cc Slot.cc Util.cc Dialog.cc\
 Mapper.cc
 
 # sources for which dictionaries are to be created, 

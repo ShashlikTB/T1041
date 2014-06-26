@@ -18,6 +18,7 @@ from gui.utils import *
 from gui.TBFileReader import TBFileReader
 from gui.TBWaveFormPlots import TracePlot, SurfacePlot
 from gui.TBShashlikFaces import ShashlikHeatmap
+from gui.TDCtiming import TDCtiming
 from gui.TBDisplay3D import Display3D
 #------------------------------------------------------------------------------
 WIDTH        = 1000            # Width of GUI in pixels
@@ -44,6 +45,7 @@ ABOUT = \
 %s
 \tTB 2014
 \te-mail: harry@hep.fsu.edu
+\te-mail: samuel.bein@gmail.com
 """ % VERSION
 
 # read modes
@@ -133,6 +135,7 @@ class TBEventDisplay:
         self.connection = Connection(self.main, "CloseWindow()",
                          self,      "close")
 
+        self.util = Util()
         #-------------------------------------------------------------------
         # Create menu bar
         #-------------------------------------------------------------------
@@ -174,6 +177,12 @@ class TBEventDisplay:
         self.vframe.AddFrame(self.toolBar, TOP_X)
 
         # Add picture buttons        
+        self.refreshButton = PictureButton(self, self.toolBar,
+                        picture='Button-Refresh.png',
+                        method='refreshFile',
+                        text='refresh file for new events')
+
+        
         self.enchiladaButton = PictureButton(self, self.toolBar,
                         picture='Enchilada.jpg',
                         method='wholeEnchilada',
@@ -213,24 +222,33 @@ class TBEventDisplay:
                         hotstring='Accumulate',
                         method='toggleAccumulate',
                         text='Accumulate')
+
         #-------------------------------------------------------------------
         # Add a notebook with multiple pages
         #-------------------------------------------------------------------
 
-        self.util = Util()
+        
+        #general bools:
         self.util.accumulate = False   
         self.util.stealthmode = False  
+        self.util.filename = self.filename
+        #WC bools:
+        self.util.WC_showOThits = False
+        self.util.WC_showIThits = True
+        self.util.WC_showQhits = True
+        WCbutons = [('Out-of-time hits','toggleShowOThits','toggleShowOThits', False),('In-time hits','toggleShowIThits','toggleShowIThits', True),('Quality hits','toggleShowQhits','toggleShowQhits', True)]
+
+        self.redraw = True
         self.shutterOpen = False
         self.pageName = 'default'
                  
         self.noteBook = NoteBook(self, self.vframe, 'setPage', width, height)
         # Add pages 
         self.display = {}
-        for pageName, constructor, buttons in [('WF traces',     'TracePlot(canvas)', 
-                                       [('Camera.png','snapCanvas','Take picture')]),
-                          ('WF surface',    'SurfacePlot(canvas)', None),
+        for pageName, constructor, buttons in [('WF traces', 'TracePlot(canvas)', None),
                           ('ADC heatmap',   'ShashlikHeatmap(canvas)', None),
-                          ('Wire chambers', 'WCPlanes(canvas)', None),
+                          ('Wire chambers', 'WCPlanes(canvas)', WCbutons),
+                          ('TDC timing','TDCtiming(canvas)', None),
                           ('3D display',    'Display3D(page)', None)]:
             self.noteBook.Add(pageName, buttons)
             self.noteBook.SetPage(pageName)
@@ -238,11 +256,12 @@ class TBEventDisplay:
             canvas = page.canvas
             print '==> building display: %s' % pageName
             self.display[pageName] = eval(constructor)
-
+            
         #-------------------------------------------------------------------
         # Create a status bar, divided into two parts
         #-------------------------------------------------------------------
         self.statusBar = TGStatusBar(self.vframe, 1, 1, kDoubleBorder)
+        self.statusBar.SetHeight(22)
         status_parts = array('i')
         status_parts.append(23)
         status_parts.append(77)
@@ -250,8 +269,6 @@ class TBEventDisplay:
         self.vframe.AddFrame(self.statusBar, TOP_X)
 
         # Initial state
-
-        self.noteBook.SetPage('Wire chambers')
         self.wcplanes = self.display['Wire chambers']	
         self.ADCcut  = 500
         self.nevents = 0
@@ -279,7 +296,7 @@ class TBEventDisplay:
 
         #DEBUG
         # to debug a display uncomment next two lines
-        self.noteBook.SetPage('Wire chambers')
+        self.noteBook.SetPage('3D display')
         self.displayEvent()
         
     def __del__(self):
@@ -299,26 +316,55 @@ class TBEventDisplay:
 
     def openFile(self):
         dialog = Dialog(gClient.GetRoot(), self.main)
-        filename = dialog.SelectFile(kFDOpen, self.openDir)
+        self.filename = dialog.SelectFile(kFDOpen, self.openDir)
+        self.util.filename = self.filename
         self.openDir = dialog.IniDir()
         self.statusBar.SetText(filename, 1)
 
-        if filename[-5:] != '.root':
+        if self.filename[-5:] != '.root':
             dialog.ShowText("Oops!",
                     "Please select a root file",
                     230, 30)
             return
-        self.__openFile(filename)
+        self.__openFile(self.filename)
+        self.filetime = time.ctime(os.path.getctime(self.filename))
+
 
     def __openFile(self, filename):
+        self.filename = filename
+        self.util.filename = self.filename
         self.closeFile()		
         self.reader = TBFileReader(filename)
         self.nevents= self.reader.entries()
         self.statusBar.SetText('events: %d' % self.nevents, 0)
         self.eventNumber = -1
+        self.util.eventNumber = -1
         self.nextEvent()
         self.wcplanes.CacheWCMeans("meanfile.txt", filename)
+        self.filetime = time.ctime(os.path.getctime(filename))
 
+        
+    def refreshFile(self):
+        try:
+            t = self.filetime
+        except:
+            return
+        if self.filetime == time.ctime(os.path.getctime(self.filename)):
+            print "file up to date"
+            return                 
+        else:      
+            print "refreshing"
+            eventNumber = self.eventNumber
+            self.closeFile()	            
+            self.reader = TBFileReader(self.filename)
+            self.nevents= self.reader.entries()
+            self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents-1), 0)
+            self.filetime = time.ctime(os.path.getctime(self.filename))
+            self.wcplanes.CacheWCMeans("meanfile.txt", self.filename)
+            print "in refresh fashion:"
+            self.eventNumber = eventNumber
+            self.util.eventNumber = eventNumber
+        
     def closeFile(self):
         try:
             if self.reader.file().IsOpen():
@@ -331,11 +377,11 @@ class TBEventDisplay:
         if id==0:
             self.pageName = 'Traces'
         if id==1:
-            self.pageName = 'Surface'
-        if id==2:
             self.pageName = 'Heatmap'
-        if id==3:
+        if id==2:
             self.pageName = 'WC'
+        if id==2:
+            self.pageName = 'TDC'
         if id==4:
             self.pageName = '3D_'
         self.noteBook.SetPage(id)
@@ -408,17 +454,17 @@ class TBEventDisplay:
 
     def wholeEnchilada(self):
         self.debug("begin:wholeEnchilada")
-        rememberAccumulate = self.util.accumulate
         self.util.accumulate = True
-        self.util.stealthmode = True
+        self.util.accumulateButton.SetState(True) 
+        #self.util.stealthmode = True
         self.eventNumber = 0
-        while self.eventNumber<self.nevents-2:
+        while self.eventNumber<10:#self.nevents-2:
             self.readEvent(R_FORWARD)
             self.displayEvent()
+            self.statusBar.Draw()
         self.util.stealthmode = False
         self.readEvent(R_FORWARD)
         self.displayEvent()     
-        self.util.accumulate = rememberAccumulate   
         self.eventNumber = 0
         self.debug("end:wholeEnchilada")
         
@@ -427,7 +473,32 @@ class TBEventDisplay:
         self.shutterOpen = True
         self.displayEvent()
         self.shutterOpen = False
-        self.debug("end:snapCanvas")	
+        self.debug("end:snapCanvas")
+
+
+    def toggleShowOThits(self):
+        self.debug("begin:ShowOThits")
+        self.util.WC_showOThits = not self.util.WC_showOThits
+        self.redraw = True
+        self.displayEvent()
+        self.debug("end:ShowOThits")
+
+    def toggleShowIThits(self):
+        self.debug("begin:ShowIThits")
+        self.util.WC_showIThits = not self.util.WC_showIThits
+        self.redraw = True
+        self.displayEvent()
+        self.debug("end:ShowIThits")
+
+    def toggleShowQhits(self):
+        self.debug("begin:ShowQhits")
+        self.util.WC_showQhits = not self.util.WC_showQhits
+        self.redraw = True
+        self.displayEvent()
+        self.debug("end:ShowQhits")
+
+
+ 
         
     def setDelay(self):
         from string import atof
@@ -491,7 +562,7 @@ class TBEventDisplay:
         # loop over events and apply ADC cut
 
         if   which == R_ONESHOT:
-            self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents),
+            self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents-1),
                                    0)
             self.reader.read(self.eventNumber)
 
@@ -501,8 +572,8 @@ class TBEventDisplay:
         elif which == R_FORWARD:
             while self.eventNumber < self.nevents-1:
                 self.eventNumber += 1
-                self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents),
-                                       0)
+                self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents-1),
+                                       )
                 self.reader.read(self.eventNumber)
 
                 ADCmax =  self.reader.maxPadeADC()
@@ -512,7 +583,7 @@ class TBEventDisplay:
         else:
             while self.eventNumber > 0:
                 self.eventNumber -= 1
-                self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents),
+                self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents-1),
                                        0)
                 self.reader.read(self.eventNumber)
 
@@ -530,6 +601,7 @@ class TBEventDisplay:
         keys = self.noteBook.pages.keys()
         for key in keys:
             self.noteBook.pages[key].redraw = True
+        self.util.eventNumber = self.eventNumber
 
         self.debug("end:readEvent")
     #-----------------------------------------------------------------------
@@ -537,20 +609,18 @@ class TBEventDisplay:
         currentPage = self.noteBook.currentPage
         page = self.noteBook.pages[currentPage]
         self.debug("begin:displayEvent - %s" % page.name)
-
         if self.shutterOpen:
             if not os.path.exists("cached_pdfs"):
                 os.system('mkdir cached_pdfs')
             page.canvas.Print('cached_pdfs/'+self.pageName+str(self.eventNumber)+'.pdf')
             page.redraw = False
             return
-            
-        if not page.redraw and not self.shutterOpen:
+        if not page.redraw and not self.shutterOpen and not self.redraw:
             self.debug("end:displayEvent - DO NOTHING")		
             return
+        self.refreshFile()
         self.display[page.name].Draw(self.reader.event(), self.util)
-        print "displaying with self.util.accumulate = "+str(self.util.accumulate)
-                
-            
+        print "displaying with self.util.eventNumber = "+str(self.util.eventNumber)
+        self.redraw = False
         page.redraw = False
         self.debug("end:displayEvent")		

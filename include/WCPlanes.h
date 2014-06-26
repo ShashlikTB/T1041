@@ -26,6 +26,7 @@ class WCPlanes{
   TH2I *WCO1;
   TH2I *WC2; 
   TH2I *WCO2;
+  TH2I *hEmpty;
   THStack *hStack1;
   THStack *hStack2;
   Int_t WireChamber1Hit, WireChamber2Hit;
@@ -33,11 +34,15 @@ class WCPlanes{
   Int_t Y_pos_WC1, Y_pos_WC2;
   Int_t X_tim_WC1, X_tim_WC2;
   Int_t Y_tim_WC1, Y_tim_WC2;
+  string rootfilename_;
 
   int mean[NTDC];
   int tLow[NTDC]; 
   int tHigh[NTDC]; 
   int tdcRange;
+
+  TH1I* TDC[NTDC];
+  TCanvas C;
 
   bool isFirstEvent;
 

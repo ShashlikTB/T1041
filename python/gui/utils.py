@@ -173,6 +173,33 @@ class CheckButton(TGCheckButton):
             	self.SetToolTipText(text)
             	self.connection = Connection(self, "Clicked()",
                                          object, method)
+
+                if method == "toggleAccumulate":
+                    object.util.accumulateButton = self
+                
+	def __del__(self):
+		pass
+#-----------------------------------------------------------------------------
+
+class RadioButton(TGRadioButton):
+	
+	def __init__(self, object, toolBar,
+		     hotstring,
+		     method,
+		     text='',
+		     layout=kLHintsRight):
+		global buttonNumber
+		buttonNumber += 1
+		number = buttonNumber
+		
+		self.hotstring = hotstring
+		if self.hotstring:
+            		TGRadioButton.__init__(self, toolBar, self.hotstring, number)
+            		toolBar.AddFrame(self,
+                        	         TGLayoutHints(layout, 2, 2, 2, 2))
+            	self.SetToolTipText(text)
+            	self.connection = Connection(self, "Clicked()",
+                                         object, method)
 	def __del__(self):
 		pass
 #-----------------------------------------------------------------------------
@@ -210,15 +237,17 @@ class NoteBook(TGTab):
 		# check for menu items
 		if buttons != None:
 			element.hframe2  = TGHorizontalFrame(element.tab, 1, 1)
-			element.tab.AddFrame(element.hframe2, TOP_X)
+			element.tab.AddFrame(element.hframe2, LEFT_X)
 			element.buttonlist = []
-			for pict, meth, txt in buttons:
-				print "==>", pict, meth, txt
-				element.buttonlist.append(PictureButton(self.object,
+            		print "buttons:", buttons
+			for hstr, meth, txt, state in buttons:
+				print "==>", hstr, meth, txt, state
+				element.buttonlist.append(CheckButton(self.object,
 									element.hframe2,
-									picture=pict,
+									hotstring=hstr,
 									method=meth,
 									text=txt))
+                 		element.buttonlist[-1].SetState(state)
 
 		element.hframe  = TGHorizontalFrame(element.tab, 1, 1)
 		element.tab.AddFrame(element.hframe, TOP_X_Y)
