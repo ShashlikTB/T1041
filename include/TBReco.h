@@ -14,17 +14,24 @@ class WCtrack{
   float GetSlopeX(){return _mx;}
   float GetSlopeY(){return _my;}
   void Project(float z, float &x, float &y);
+  int TimingDifferenceWC1(){return _dt1;}
+  int TimingDifferenceWC2(){return _dt2;}
+  void TablePos(float x_pos, float x_pos_table, float y_pos, float y_pos_table, float &offX, float &offY);
   // flag is a bit mask
   // bit 0: confirmed by project to SC1
   // bit 1: confirmed by project to SC2
   static const int kSC1=1;
   static const int kSC2=2;
   //bool Confirmed(int flag=1){return true;}  // to do 
+  
  private:
   void SetSlopeX();
   void SetSlopeY();
+  void SetTimDiffWC1();
+  void SetTimDiffWC2();
   WCChannel _x1, _y1, _x2, _y2;
   float _mx, _my;  // slopes
+  int _dt1, _dt2; // time difference
 };
 
 
@@ -82,6 +89,7 @@ class CalReco{
  private:
   const TTree *_tbdata;
 };
+
 
 
 #endif
