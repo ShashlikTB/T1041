@@ -16,6 +16,8 @@ WCtrack::WCtrack(WCChannel x1, WCChannel y1, WCChannel x2, WCChannel y2):
   _x1(x1), _y1(y1), _x2(x2), _y2(y2) {
   SetSlopeX();
   SetSlopeY();
+  SetTimDiffWC1();
+  SetTimDiffWC2();
 } 
 
 void WCtrack::Project(float z, float &x, float &y){
@@ -33,11 +35,25 @@ void WCtrack::SetSlopeY(){
   _my = (_y2.GetY()-_y1.GetY())/dWC1toWC2;  
 }
 
+/// getting the X-Y TDCCounts ///
+void WCtrack::SetTimDiffWC1(){
+  _dt1=_x1.GetCount()-_y1.GetCount();
+}
+
+void WCtrack::SetTimDiffWC2(){
+  _dt2=_x2.GetCount()-_y2.GetCount();
+}
+
+/// Account for Table Position in Shashlik Extrapolation ///
+void WCtrack::TablePos(float x_pos, float x_pos_table, float y_pos, float y_pos_table, float &offX, float &offY){
+  offX = x_pos + x_pos_table;
+  offY = y_pos + y_pos_table;
+}
 
 WCReco::WCReco() : _cutsMade(false) {
   TString histname;
   for (Int_t c=0;c<NTDC; c++) {  // storage for the TDC histograms
-    histname.Form("TDC%2d",c+1);
+    histname.Form("TDC%d",c+1); // no space for histname, TDC 1  will now read TDC1 and so on
     _TDC[c]=new TH1I(histname, "Counts for "+histname, 300, 0.0, 300.0);
   }
 }
@@ -75,7 +91,7 @@ void WCReco::FitTDCs(){
     Float_t *tdc_peaks = tspectrum.GetPositionX();
     Float_t early_peak = 9999.;
     for (int ipeak = 0; ipeak < npeaks; ipeak++){
-      if ( tdc_peaks[ipeak] < early_peak ) early_peak = tdc_peaks[ipeak];
+      if ( tdc_peaks[ipeak] < early_peak && tdc_peaks[ipeak] > 25) early_peak = tdc_peaks[ipeak];
     }
     // Fitting the peak with a gaussian
     int maxBin    = _TDC[drawG]->FindBin(early_peak);
@@ -109,6 +125,26 @@ void WCReco::GetTDChists(TH1I** TDC, int nmax){
     TDC[i]=_TDC[i];
   }
 }
+
+float WCReco::GetProjection(Float_t pos1, Float_t pos2,
+                      Float_t WCdist, Float_t projDist){
+  Float_t Delta = pos1 - pos2;
+  Float_t projection = pos1 + (projDist*(Delta/WCdist));
+  return (projection - 64);
+}
+
+
+bool WCReco::ScintConfirm(Float_t Pos1, Float_t Pos2, Float_t WCDist){
+  const float ProjDist1 = -1231.9;          // distance between WC1 and Scin1
+  const float ProjDist2 = -(1231.9+4445.0); // distance between WC1 and Scin2
+  Float_t CheckProjection1 = WCReco::GetProjection(Pos1, Pos2, WCDist, ProjDist1);
+  Float_t CheckProjection2 = WCReco::GetProjection(Pos1, Pos2, WCDist, ProjDist2);
+  if(fabs(CheckProjection1)<=50 && fabs(CheckProjection2)<=50)return true;
+  else return false;
+}
+
+
+
 
 
 void CalCluster::MakeCluster(const vector<CalHit> &calHits, float threshold){

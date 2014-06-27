@@ -23,7 +23,6 @@ class PadeChannel : public TObject {
 	    UInt_t ch_number,  UInt_t eventnum, Int_t *wform);
   void Reset();
   void Dump() const;
-
   // getters
   Int_t GetBoardID() {return _board_id;}
   Int_t GetChannelNum() {return _ch_number;}
@@ -36,10 +35,10 @@ class PadeChannel : public TObject {
   void GetXYZ(float &x, float &y, float &z);
   void GetPedestal(float &ped, float &stdev);
   void GetPedestal(double &ped, double &stdev);
-  Float_t GetNoise();
+  //Float_t GetNoise();
   void GetHist(TH1F* h);
   static PulseFit FitPulse(PadeChannel *pc);
-
+  double GetPedestal();
   // private:
   ULong64_t     _ts;
   UShort_t      _transfer_size;
