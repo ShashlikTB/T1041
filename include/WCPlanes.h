@@ -18,28 +18,32 @@ class WCPlanes{
 
  private:
   TCanvas* c1;
+  vector<WCChannel> hitsX1, hitsY1, hitsX2, hitsY2;
+  float TableX;
+  float TableY;
+  TH2F *Scint1;
+  TH2F *Scint2;
+  TH2F *Shashlik;
+
+
+
   WCReco wcReco;
   TH2I *WC1_Beam;
   TH2I *WC2_Beam;
+  TH2I *WC1_hits;
+  TH2I *WC2_hits;
   TH2F *WC_Shashlik;
-  TH2I *WC1;
-  TH2I *WCO1;
-  TH2I *WC2; 
-  TH2I *WCO2;
+  
   TH2I *hEmpty;
   THStack *hStack1;
   THStack *hStack2;
-  Int_t WireChamber1Hit, WireChamber2Hit;
-  Int_t X_pos_WC1, X_pos_WC2;
-  Int_t Y_pos_WC1, Y_pos_WC2;
-  Int_t X_tim_WC1, X_tim_WC2;
-  Int_t Y_tim_WC1, Y_tim_WC2;
-  string rootfilename_;
+
 
   int mean[NTDC];
   int tLow[NTDC]; 
   int tHigh[NTDC]; 
-  int tdcRange;
+
+
 
   TH1I* TDC[NTDC];
   TCanvas C;

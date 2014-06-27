@@ -46,11 +46,15 @@ struct Util
   bool stealthmode;
   int eventNumber;
 
-  bool WC_showOThits;
   bool WC_showIThits;
   bool WC_showQhits;
 
   TGButton* accumulateButton;
+
+  float x1hit;
+  float y1hit;
+  float x2hit;
+  float y2hit;
 
   std::string filename;
 

@@ -227,16 +227,22 @@ class TBEventDisplay:
         # Add a notebook with multiple pages
         #-------------------------------------------------------------------
 
+    
         
-        #general bools:
+        #general utili struct members:
         self.util.accumulate = False   
         self.util.stealthmode = False  
         self.util.filename = self.filename
         #WC bools:
-        self.util.WC_showOThits = False
         self.util.WC_showIThits = True
         self.util.WC_showQhits = True
-        WCbutons = [('Out-of-time hits','toggleShowOThits','toggleShowOThits', False),('In-time hits','toggleShowIThits','toggleShowIThits', True),('Quality hits','toggleShowQhits','toggleShowQhits', True)]
+        #track struct members:
+        self.util.x1hit = 10
+        self.util.x2hit = 1
+        self.util.y1hit = 10
+        self.util.y2hit = 4
+        
+        WCbutons = [('In-time hits','toggleShowIThits','toggleShowIThits', True),('Quality hits','toggleShowQhits','toggleShowQhits', True)]
 
         self.redraw = True
         self.shutterOpen = False
@@ -476,13 +482,6 @@ class TBEventDisplay:
         self.debug("end:snapCanvas")
 
 
-    def toggleShowOThits(self):
-        self.debug("begin:ShowOThits")
-        self.util.WC_showOThits = not self.util.WC_showOThits
-        self.redraw = True
-        self.displayEvent()
-        self.debug("end:ShowOThits")
-
     def toggleShowIThits(self):
         self.debug("begin:ShowIThits")
         self.util.WC_showIThits = not self.util.WC_showIThits
@@ -619,7 +618,14 @@ class TBEventDisplay:
             self.debug("end:displayEvent - DO NOTHING")		
             return
         self.refreshFile()
-        self.display[page.name].Draw(self.reader.event(), self.util)
+
+        if '3D' not in page.name:
+            self.display[page.name].Draw(self.reader.event(), self.util)
+        else:
+            self.util.stealthmode = True
+            self.display['Wire chambers'].Draw(self.reader.event(), self.util)
+            self.util.stealthmode = False
+            self.display[page.name].Draw(self.reader.event(), self.util)
         print "displaying with self.util.eventNumber = "+str(self.util.eventNumber)
         self.redraw = False
         page.redraw = False
