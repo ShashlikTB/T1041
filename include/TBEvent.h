@@ -69,6 +69,8 @@ public:
   ULong64_t GetPCTime() const {return _pcTime;}
   Int_t GetnTigWC() const {return _nTrigWC;}
   ULong64_t GetWCTime() const {return _wcTime;}
+  Float_t GetTableX() const {return _tableX;}
+  Float_t GetTableY() const {return _tableY;}
   void Dump() const;
   // setters
   void Reset();
@@ -89,8 +91,8 @@ private:
   // beam and detector parameters
   Int_t         _pdgID;                    // particle ID for beam
   Float_t       _nomMomentum;              // beam momentum setting
-  Float_t         _tableX;                   // table position 
-  Float_t         _tableY;                   // table position 
+  Float_t       _tableX;                   // table position 
+  Float_t       _tableY;                   // table position 
   Float_t       _boxTemp;                  // temperature in environmental box
   Float_t       _roomTemp;                 // temperature in test beam area
   
