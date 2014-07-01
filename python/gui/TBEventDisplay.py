@@ -241,9 +241,13 @@ class TBEventDisplay:
         self.util.x2hit = 1
         self.util.y1hit = 10
         self.util.y2hit = 4
+        #3D bools
+        self.util.showWC2 = True
         
         WCbutons = [('In-time hits','toggleShowIThits','toggleShowIThits', True),('Quality hits','toggleShowQhits','toggleShowQhits', True)]
-
+        ThreeDbutons = [('show WC2','toggleShowWC2','toggleShowWC2', True)]
+        
+        
         self.redraw = True
         self.shutterOpen = False
         self.pageName = 'default'
@@ -255,7 +259,7 @@ class TBEventDisplay:
                           ('ADC heatmap',   'ShashlikHeatmap(canvas)', None),
                           ('Wire chambers', 'WCPlanes(canvas)', WCbutons),
                           ('TDC timing','TDCtiming(canvas)', None),
-                          ('3D display',    'Display3D(page)', None)]:
+                          ('3D display',    'Display3D(page)', ThreeDbutons)]:
             self.noteBook.Add(pageName, buttons)
             self.noteBook.SetPage(pageName)
             page = self.noteBook.page
@@ -269,14 +273,18 @@ class TBEventDisplay:
         self.statusBar = TGStatusBar(self.vframe, 1, 1, kDoubleBorder)
         self.statusBar.SetHeight(22)
         status_parts = array('i')
-        status_parts.append(23)
-        status_parts.append(77)
+        status_parts.append(20)
+        status_parts.append(20)
+        status_parts.append(20)
+        status_parts.append(20)
         self.statusBar.SetParts(status_parts, len(status_parts))
+        self.progressBar = ProgressBar(self, self.statusBar)
         self.vframe.AddFrame(self.statusBar, TOP_X)
 
+    
         # Initial state
         self.wcplanes = self.display['Wire chambers']	
-        self.ADCcut  = 500
+        self.ADCcut  = 50
         self.nevents = 0
         self.eventNumber = -1
         self.DELAY  = int(1000*MINDELAY)
@@ -292,7 +300,7 @@ class TBEventDisplay:
         self.main.Resize()
         self.main.MapWindow()
 	
-
+        
         #DEBUG
         # to debug a display uncomment next line
         #filename = "data/test.root"
@@ -325,15 +333,12 @@ class TBEventDisplay:
         self.filename = dialog.SelectFile(kFDOpen, self.openDir)
         self.util.filename = self.filename
         self.openDir = dialog.IniDir()
-        self.statusBar.SetText(filename, 1)
-
         if self.filename[-5:] != '.root':
             dialog.ShowText("Oops!",
                     "Please select a root file",
                     230, 30)
             return
         self.__openFile(self.filename)
-        self.filetime = time.ctime(os.path.getctime(self.filename))
 
 
     def __openFile(self, filename):
@@ -343,9 +348,12 @@ class TBEventDisplay:
         self.reader = TBFileReader(filename)
         self.nevents= self.reader.entries()
         self.statusBar.SetText('events: %d' % self.nevents, 0)
+        self.statusBar.SetText(self.filename[self.filename.rfind('/')+1:], 2)
         self.eventNumber = -1
         self.util.eventNumber = -1
         self.nextEvent()
+        self.progressBar.SetRange(0, self.nevents)
+        self.progressBar.SetPosition(self.eventNumber)
         self.wcplanes.CacheWCMeans("meanfile.txt", filename)
         self.filetime = time.ctime(os.path.getctime(filename))
 
@@ -365,6 +373,7 @@ class TBEventDisplay:
             self.reader = TBFileReader(self.filename)
             self.nevents= self.reader.entries()
             self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents-1), 0)
+            self.statusBar.SetText("good morning, Sam",3)
             self.filetime = time.ctime(os.path.getctime(self.filename))
             self.wcplanes.CacheWCMeans("meanfile.txt", self.filename)
             print "in refresh fashion:"
@@ -495,8 +504,15 @@ class TBEventDisplay:
         self.redraw = True
         self.displayEvent()
         self.debug("end:ShowQhits")
+        
+    def toggleShowWC2(self):
+        self.debug("begin:toggleShowWC2")
+        self.util.toggleShowWC2 = not self.util.toggleShowWC2
+        self.redraw = True
+        self.displayEvent()
+        self.debug("end:toggleShowWC2")
 
-
+        
  
         
     def setDelay(self):
@@ -509,7 +525,7 @@ class TBEventDisplay:
     def setADCcut(self):
         from string import atoi
         dialog = Dialog(gClient.GetRoot(), self.main)
-        self.ADCcut = atoi(dialog.GetInput('Enter ADC cut', '500'))
+        self.ADCcut = atoi(dialog.GetInput('Enter ADC cut', '50'))
         self.statusBar.SetText('ADC cut: %d' % self.ADCcut, 1)
 
     def close(self):
@@ -563,6 +579,7 @@ class TBEventDisplay:
         if   which == R_ONESHOT:
             self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents-1),
                                    0)
+            
             self.reader.read(self.eventNumber)
 
             ADCmax = self.reader.maxPadeADC()
@@ -605,6 +622,8 @@ class TBEventDisplay:
         self.debug("end:readEvent")
     #-----------------------------------------------------------------------
     def displayEvent(self):
+        self.progressBar.Reset()
+        self.progressBar.SetPosition(self.eventNumber)
         currentPage = self.noteBook.currentPage
         page = self.noteBook.pages[currentPage]
         self.debug("begin:displayEvent - %s" % page.name)
