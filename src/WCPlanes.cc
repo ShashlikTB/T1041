@@ -143,40 +143,40 @@ void WCPlanes::Draw(TBEvent* event, Util& util)
   hitsY2=event->GetWChitsY(2,tLow,tHigh);
   
 
-  util.x1hit = 30;
-  util.y1hit = 30;
-  util.x2hit = 30;
-  util.y2hit = 30;
+  util.x1hit = 64;
+  util.y1hit = 64;
+  util.x2hit = 64;
+  util.y2hit = 64;
 
-  bool foundgood = false;
-  for(unsigned h1=0; h1<hitsX1.size(); ++h1)
-    { // loop over X1 
-      for(unsigned h2=0; h2<hitsY1.size(); ++h2){ // loop over Y1
-	for(unsigned h3=0; h3<hitsX2.size(); ++h3){ // loop over X2 
-	  for(unsigned h4=0; h4<hitsY2.size(); ++h4){ // loop over Y2
-	    WCtrack multiTrack(hitsX1[h1], hitsY1[h2], hitsX2[h3], hitsY2[h4]);
-	    float trackX, trackY;
-	    multiTrack.Project(zSC1, trackX, trackY);
-	    if(foundgood) continue;
-	    if(fabs(trackX)>50 || fabs(trackY)>50)continue;
-	    Scint1->Fill(trackX, trackY, 1);
-	    multiTrack.Project(zSC2, trackX, trackY);
-	    if(fabs(trackX)>50 || fabs(trackY)>50)continue;
-	    Scint2->Fill(trackX, trackY, 1);
-	    multiTrack.Project(zWC1, trackX, trackY);
-	    WC1_Beam->Fill(trackX, trackY, 1);
-	    util.x1hit = trackX;
-	    util.y1hit = trackY;
-	    multiTrack.Project(zWC2, trackX, trackY);
-	    WC2_Beam->Fill(trackX, trackY, 1);
-	    util.x2hit = trackX;
-	    util.y2hit = trackY;
-	      
-	    foundgood = true;
-	  }
+  double dxy = 100;
+  for(unsigned h1=0; h1<hitsX1.size(); ++h1){ 
+    for(unsigned h2=0; h2<hitsY1.size(); ++h2){
+      for(unsigned h3=0; h3<hitsX2.size(); ++h3){
+	for(unsigned h4=0; h4<hitsY2.size(); ++h4){ 
+	  WCtrack multiTrack(hitsX1[h1], hitsY1[h2], hitsX2[h3], hitsY2[h4]);
+	  float trackX1, trackY1; float trackX2, trackY2;
+	  multiTrack.Project(zSC1, trackX1, trackY1);
+	  if(fabs(trackX1)>50 || fabs(trackY1)>50)continue;
+	  Scint1->Fill(trackX1, trackY1, 1);
+	  multiTrack.Project(zSC2, trackX1, trackY1);
+	  if(fabs(trackX1)>50 || fabs(trackY1)>50)continue;
+	  Scint2->Fill(trackX1, trackY1, 1);
+	  multiTrack.Project(zWC1, trackX1, trackY1);
+	  multiTrack.Project(zWC2, trackX2, trackY2);
+	  // if (sqrt(pow(trackX2-trackX1,2) + pow(trackY2-trackY1,2))<dxy)
+	  //   {
+	  //     dxy = sqrt(pow(trackX2-trackX1,2) + pow(trackY2-trackY1,2));
+	      util.x1hit = trackX1;
+	      util.y1hit = trackY1;
+	      util.x2hit = trackX2;
+	      util.y2hit = trackY2;
+	      WC1_Beam->Fill(trackX1, trackY1, 1);
+	      WC2_Beam->Fill(trackX2, trackY2, 1);
+	      //}	  
 	}
       }
     }
+  }
 
 
   for(unsigned h1=0; h1<hitsX1.size(); h1++)

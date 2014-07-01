@@ -41,11 +41,13 @@ struct Util
   static
   TGLBEntry* GLBEntry(TGListBox* listbox, std::string str, int id, 
                       std::string font="helvetica-medium-r", int fontsize=14);
-
+  //general bools:
   bool accumulate;
   bool stealthmode;
   int eventNumber;
 
+
+  //WC display bools
   bool WC_showIThits;
   bool WC_showQhits;
 
@@ -55,6 +57,8 @@ struct Util
   float y1hit;
   float x2hit;
   float y2hit;
+  bool showWC2;
+
 
   std::string filename;
 

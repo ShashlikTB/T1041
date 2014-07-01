@@ -11,12 +11,24 @@ from array import array
 import numpy 
 #------------------------------------------------------------------------------
 x_y_scale_factor = 20
+z_WC1 = 0
 z_WC2  = 3476.6 # mm - position of  Wire chamber 2
-dz_Ecal = 253 #length of shashlik in z
-z_Ecal = z_WC2 + 533.4
-transparency = 0
-dz_setup = z_Ecal + dz_Ecal + dz_Ecal
-tracklength = dz_setup + 800 #length of track to draw
+dz_WC  =   20.0 # mm - length in z
+dx1_WC =  128 * x_y_scale_factor # mm - length in x at lower z surface
+dx2_WC =  128 * x_y_scale_factor# mm - length in x at upper z surface
+dy_WC =  128 * x_y_scale_factor
+
+dz_BoxEcal = 253 #length of gap 
+z_Ecal = z_WC2 + 533.4 + dz_BoxEcal #position of front face of Ecal
+dx1_Tower =  56/4 * x_y_scale_factor # mm - length in x of cell
+dx2_Tower =  56/4 * x_y_scale_factor # mm - same thing
+dy_Tower  =  56/4 * x_y_scale_factor # mm - length in y of cell
+dz_Tower  = 113.5  # mm - full length in z (of shashlik)
+
+dz_setup = z_Ecal + 2*dz_BoxEcal + dz_Tower
+transparency = 1
+tracklength = dz_setup + 800 #length of track to dr
+
 class Display3D:
 
     def __init__(self, page):
@@ -30,44 +42,25 @@ class Display3D:
 
         self.geometry = TEveElementList("Testbeam 2014 Geometry")
 
-        # Wire Chambers
-        # 1/2 thickness is Z
-        dx1 =  32 * x_y_scale_factor # mm - half length in x at lower z surface
-        dx2 =  32 * x_y_scale_factor# mm - half length in x at upper z surface
-        dy  =  32 * x_y_scale_factor# mm - half length in y
-        dz  =   20.0 # mm - half length in z
-        z_WC2  = 3476.6 # mm - position of  Wire chamber 2
-        dz_Ecal = 253 #length of shashlik in z
-        z_Ecal = z_WC2 + 533.4
-        transparency = 0
-        dz_setup = z_Ecal + dz_Ecal + dz_Ecal
         tracklength = dz_setup + 800 #length of track to draw
 
         self.wc1 = TEveGeoShape('WC 1')
-        self.wc1.SetShape( TGeoTrd1(dx1, dx2, dy, dz) )
+        self.wc1.SetShape( TGeoTrd1(dx1_WC/2, dx2_WC/2, dy_WC/2, dz_WC/2) )
         self.wc1.SetMainColor(kCyan)
         self.wc1.SetMainTransparency(transparency)
         self.geometry.AddElement(self.wc1)
 
-
-
-        self.wc2 = TEveGeoShape('WC 2')
-        self.wc2.SetShape( TGeoTrd1(dx1, dx2, dy, dz) )
+	self.wc2 = TEveGeoShape('WC 2')
+        self.wc2.SetShape( TGeoTrd1(dx1_WC/2, dx2_WC/2, dy_WC/2, dz_WC/2) )
         self.wc2.SetMainColor(kMagenta)
-        self.wc2.SetMainTransparency(transparency)
-        self.wc2.RefMainTrans().SetPos(0,0, z_WC2)
+       	self.wc2.SetMainTransparency(50)
+       	self.wc2.RefMainTrans().SetPos(0,0, z_WC2)
         self.geometry.AddElement(self.wc2)
-
-        dx1 =  28/4 * x_y_scale_factor # mm - half length in x of cell
-        dx2 =  28/4 * x_y_scale_factor # mm - same thing
-        dy  =  28/4 * x_y_scale_factor # mm - half length in y of cell
-        dz  = 113.5  # mm - half length in z (of shashlik)
-        z0  = 3476.6+533.4+253
 
         # Draw shashlik modules
         color = [kYellow, kBlue]
         kk = -1
-        step = 2*dx1
+        step = dx1_Tower
         xmin =-2*step
         ymin =-2*step
         self.module = []
@@ -80,10 +73,11 @@ class Display3D:
                 if jj == 3: kk += 1
 
                 self.module.append(TEveGeoShape('Shashlik%d%d' % (ii, jj)))
-                self.module[-1].SetShape( TGeoTrd1(dx1, dx2, dy, dz) )
+                self.module[-1].SetShape( TGeoTrd1(dx1_Tower/2, dx2_Tower/2,
+						   dy_Tower/2, dz_Tower/2) )
                 self.module[-1].SetMainColor(color[icolor])
-                self.module[-1].SetMainTransparency(transparency)
-                self.module[-1].RefMainTrans().SetPos(x, y, z0)
+                #self.module[-1].SetMainTransparency(2)
+                self.module[-1].RefMainTrans().SetPos(x, y, z_Ecal)
                 self.geometry.AddElement(self.module[-1])
 
         gEve.AddElement(self.geometry)
@@ -91,17 +85,22 @@ class Display3D:
     def __del__(self):
         pass
 
-    def Show(self):
-        gEve.Redraw3D(kTRUE)
-        refPos = [5.0,60.0,100.0]
-        refPos = numpy.asarray(refPos, dtype=numpy.float64)
-        print "my crazy array is ", refPos
+    def Show(self, util):
+        #gEve.Redraw3D(kTRUE)
+        #refPos = [5.1,60.2,100.3]
+        #refPos = numpy.asarray(refPos, dtype=numpy.float64)
+        #print "my crazy array is ", refPos
         
-        #gEve.GetDefaultGeometry()
-        v = gEve.GetDefaultGLViewer() 
-        v.SetPerspectiveCamera (2,31,100,refPos,10,15)
+        #v= gEve.GetDefaultGLViewer()
+        #v.CurrentCamera().SetCenterVec(70, 1070, 0.09*util.eventNumber)
+        #cam = v.CurrentCamera()
+        #cam.SetCenterVec(70, 1070, 10700)
+        #cam.Configure(0,500,refPos,.1*util.eventNumber, 1.01*util.eventNumber)
+        #cam.UpdateInterest(True)
         #v.SetResetCamerasOnUpdate(kFALSE)
-        gEve.Redraw3D(kTRUE)
+        gEve.Redraw3D(kTRUE)        
+        #gEve.DoRedraw3D()
+        
         
     #----------------------------------------------------------------------
     # Draw hits
@@ -110,9 +109,11 @@ class Display3D:
         from random import uniform
         from random import randint
         
-	elements = self.page.elements
-        elements.DestroyElements()       
- 
+        
+        elements = self.page.elements
+        if not util.accumulate:
+        	elements.DestroyElements()       
+        
         hitx1 = util.x1hit
         hity1 = util.y1hit
         hitx2 = util.x2hit
@@ -128,10 +129,7 @@ class Display3D:
         self.blob2.SetMainColor(kRed)
         self.blob2.RefMainTrans().SetPos(x_y_scale_factor*hitx2,x_y_scale_factor*hity2,z_WC2)
         elements.AddElement(self.blob2)
-        
-        
-        
-        
+
         
         self.track = TEveGeoShape('track')
         self.track.SetShape(TGeoEltu(5,5,tracklength/2))
@@ -146,35 +144,7 @@ class Display3D:
         
         self.track.RefMainTrans().SetRotByAngles(0, thx, thy)
         elements.AddElement(self.track)
-        
-        
-        # mimic WC 1 hits
-        N = randint(2, 10)
-        wc1hits = TEvePointSet(N)
-        wc1hits.SetName("marker1")
-        wc1hits.SetMarkerColor(kGreen)
-        wc1hits.SetMarkerStyle(1)
-        wc1hits.SetMarkerSize(1.5)
-        for ii in xrange(N):
-            x = uniform(-32/4* x_y_scale_factor, 32/4* x_y_scale_factor)
-            y = uniform(-32/4* x_y_scale_factor, 32/4* x_y_scale_factor)
-            z = 0.0
-            wc1hits.SetPoint(ii, x, y, z)
-            elements.AddElement(wc1hits)
-            
-            # mimic WC 2 hits
-        N = randint(2, 10)
-        wc2hits = TEvePointSet(N)
-        wc2hits.SetName("marker1")
-        wc2hits.SetMarkerColor(kGreen)
-        wc2hits.SetMarkerStyle(2)
-        wc2hits.SetMarkerSize(1.5)
-        for ii in xrange(N):
-            x = uniform(-32/4* x_y_scale_factor, 32/4* x_y_scale_factor)
-            y = uniform(-32/4* x_y_scale_factor, 32/4* x_y_scale_factor)
-            z = 3476.6
-            wc2hits.SetPoint(ii, x, y, z)
-        elements.AddElement(wc2hits)
+    
                 
-        self.Show()
+        self.Show(util)
                 

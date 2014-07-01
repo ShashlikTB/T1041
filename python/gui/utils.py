@@ -107,22 +107,19 @@ class MenuBar(TGMenuBar):
 #-----------------------------------------------------------------------------
 class ProgressBar(TGHProgressBar):
 	
-	def __init__(self, object, toolBar, method, seconds=0.2):
+	def __init__(self, object, toolBar, seconds=0.2):
 		TGHProgressBar.__init__(self, toolBar,
-								TGProgressBar.kFancy, 1)
+								TGProgressBar.kFancy, 100)
 		
 		toolBar.AddFrame(self,
-						 TGLayoutHints(kLHintsLeft |
-									   kLHintsExpandX |
-									   kLHintsExpandY,
-									   10, 10, 2, 2))
+						 TGLayoutHints(100, 600, 12, 80))#(nothing,lef,,)
 
 		self.SetBarColor("green")
 		self.SetRange(0, K_PROG_MAX)
 
 		# Set up a timer for progress bars
-		self.timer = TTimer()
-		self.connection = Connection(self.timer, "Timeout()", object, method)
+		#self.timer = TTimer()
+		#self.connection = Connection(self.timer, "Timeout()", object, method)
 
 	def __del__(self):
 		pass
