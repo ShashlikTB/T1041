@@ -65,30 +65,22 @@ void PadeChannel::GetHist(TH1F *h){
   h->SetMinimum(0);
 }
 
-void PadeChannel::GetXYZ(float &x, float &y, float &z){
+void PadeChannel::GetXYZ(double &x, double &y, double &z){
   Mapper *mapper=Mapper::Instance();
   mapper->ChannelXYZ(GetChannelID(),x,y,z);
 }
 
 // trivial pedistal estimation
-void PadeChannel::GetPedestal(float &ped, float &stdev){
+void PadeChannel::GetPedestal(double &ped, double &stdev){
   const int nsamples=10;
-  float sum=0;
-  float sum2=0;
+  double sum=0;
+  double sum2=0;
   for (int i=0;i<PADE_PED_SAMPLES;i++) {sum+=_wform[i]; sum2+=_wform[i]*_wform[i];}
   ped=sum/PADE_PED_SAMPLES;
-  float var =  1.0/(nsamples-1) * (sum2-sum*sum/PADE_PED_SAMPLES);
+  double var =  1.0/(nsamples-1) * (sum2-sum*sum/PADE_PED_SAMPLES);
   stdev = TMath::Sqrt(var);
 }
 
-
-/// hack!  to do remove all floats and stick w/ doubles
-void PadeChannel::GetPedestal(double &ped, double &stdev){
-  float p,s;
-  GetPedestal(p,s);
-  ped=p;
-  stdev=s;
-}
 
 double PadeChannel::GetPedestal(){
 double ped = 0;

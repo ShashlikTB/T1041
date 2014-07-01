@@ -257,5 +257,22 @@ def findWCEvent(fd,tgtevent):
             thisevent=int(wcline.split()[2])
             if thisevent-1==tgtevent: return fd.tell()  # WC/PADE events start at 1/0
             elif thisevent-1>tgtevent: return -1  # past the event number
-        
-        
+
+
+def getTableXY(timeStamp):
+    checkEnv("TBHOME","Source the setup script")
+    tbhome=str(os.getenv("TBHOME"))
+    posFile=tbhome+"/doc/TablePositions.txt"
+    x=-999.0
+    y=-999.0
+    try:
+        inFile=open(posFile, "r")
+        for line in inFile:
+            if line.find(timeStamp)>-1:
+                line=line.split()
+                nf=len(line)
+                x=float(line[nf-2])
+                y=float(line[nf-1])
+    except IOError as e:
+        print "Failed to open file %s due to %s" % (posFile, e)
+    return (x,y)

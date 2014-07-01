@@ -24,16 +24,15 @@ class PadeChannel : public TObject {
   void Reset();
   void Dump() const;
   // getters
-  Int_t GetBoardID() {return _board_id;}
-  Int_t GetChannelNum() {return _ch_number;}
-  Int_t GetChannelID() {return _board_id*100+_ch_number;}
+  UInt_t GetBoardID() {return _board_id;}
+  UInt_t GetChannelNum() {return _ch_number;}
+  UInt_t GetChannelID() {return _board_id*100+_ch_number;}
   Int_t GetChannelIndex();  // index 0--127, following Ledovskoy convention
   UShort_t* GetWform() {return _wform;}
   UInt_t GetMax() {return _max;}
   Int_t GetPeak() {return _peak;}
   Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
-  void GetXYZ(float &x, float &y, float &z);
-  void GetPedestal(float &ped, float &stdev);
+  void GetXYZ(double &x, double &y, double &z);
   void GetPedestal(double &ped, double &stdev);
   //Float_t GetNoise();
   void GetHist(TH1F* h);
@@ -50,6 +49,17 @@ class PadeChannel : public TObject {
   UInt_t        _max;    // max ADC sample
   Int_t         _peak;   // sample number for peak
   Int_t         _flag;
+/*
+  // pulse fit results
+  double _fitPed;
+  double _errPed;
+  double _fitMax;
+  double _errMax;
+  double _fitRise;
+  double _errRise;
+  double _noise;
+  double _chi2;
+*/
 };
 
 

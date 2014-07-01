@@ -121,3 +121,6 @@ $(DICTSWITHLINKDEF)	: $(BLDDIR)/%Dict.cxx : $(INCDIR)/%.h $(INCDIR)/%LinkDef.h
 
 clean:
 	rm -rf $(LIBRARY) $(BLDDIR)/*Dict.* $(BLDDIR)/*.o
+
+cleanall: clean
+	rm -f python/*pyc python/gui/*pyc rootscript/*_C.d rootscript/*.so
