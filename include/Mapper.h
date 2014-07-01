@@ -16,7 +16,7 @@ using namespace std;
 const int NMODULES=16;
 
 // locations in mm, from center of detector
-const float MODULEXY[]={
+const double MODULEXY[]={
    1, 21.0, 21.0,
    2, 7.0, 21.0,
    3, 7.0,  7.0,
@@ -130,9 +130,9 @@ class Mapper{
       _pInstance = new Mapper;
     return _pInstance;
   }
-  void ModuleXY(int module, float &x, float &y) const;
-  void FiberXY(int fiberID, float &x, float &y) const; 
-  void ChannelXYZ(int channelID, float &x, float &y, float &z) const;
+  void ModuleXY(int module, double &x, double &y) const;
+  void FiberXY(int fiberID, double &x, double &y) const; 
+  void ChannelXYZ(int channelID, double &x, double &y, double &z) const;
 
   void SetModuleBins(TH2 *h) const;
   void SetChannelBins(TH2 *h) const;
@@ -153,11 +153,10 @@ class Mapper{
     return _padeMap[channelID]; 
   }
 
-  float* ChannelID2XY(int chanID)
-  {
+  double* ChannelID2XY(int chanID) {
     int fiberID = ChannelID2FiberID(chanID);
-    float x, y;
-    static float  xy[2];
+    double x, y;
+    static double xy[2];
     FiberXY(fiberID, x, y);
     xy[0] = x;
     xy[1] = y;
@@ -175,15 +174,15 @@ class Mapper{
 
 class CalHit{
  public:
- CalHit(int idx, float val): _channelIndex(idx), _val(val) {;}
+ CalHit(int idx, double val): _channelIndex(idx), _val(val) {;}
   int GetChannelIndex() const {return _channelIndex;}
-  float Value() const {return _val;}
-  void GetXYZ(float &x, float&y, float &z) const;
+  double Value() const {return _val;}
+  void GetXYZ(double &x, double &y, double &z) const;
   void Print() const;
-  void SetValue(float val) {_val=val;}
+  void SetValue(double val) {_val=val;}
  private:
   int _channelIndex;
-  float _val;
+  double _val;
 };
 
 

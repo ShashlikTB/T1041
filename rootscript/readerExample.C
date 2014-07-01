@@ -142,7 +142,7 @@ void readerExample(TString file="latest.root"){
     // Use CalHits here and not the loop over PadeChannels above, b/c
     // CalHits are pedestal corrected and our bad channel is remapped to the opposing SIPM
     float max=0;
-    float x,y,z;
+    double x,y,z;
     for (unsigned k=0; k<calhits.size(); k++) { 
       if (calhits[k].Value()>max){
 	max=calhits[k].Value();

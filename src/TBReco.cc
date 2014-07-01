@@ -153,7 +153,7 @@ void CalCluster::MakeCluster(const vector<CalHit> &calHits, float threshold){
   float sumE2=0;
   _Eu=_Ed=0;
   _ECenter=_EIso=0;
-  float x,y,z;
+  double x,y,z;
   for (unsigned j=0; j<calHits.size(); j++){
     float val=calHits[j].Value();
     if (val<threshold) continue;
