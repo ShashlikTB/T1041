@@ -106,13 +106,14 @@ void readerExample(TString file="latest.root"){
   vector<CalHit> calhits, calhitsCalib;
 
   for (Int_t i=0; i< t1041->GetEntries(); i++) {
+
+    if (i%200==0) cout << i << "/" << t1041->GetEntries() << endl;
+    t1041->GetEntry(i);
+
     if (i==0){
       cout << "Table position (x,y) : (" 
 	   << spill->GetTableX() << "," << spill->GetTableY() << ")" << endl;
     }
-
-    if (i%200==0) cout << i << "/" << t1041->GetEntries() << endl;
-    t1041->GetEntry(i);
     
     // loop over PADE channels
     // cout << (dec) << "Spill number: " << event->GetSpillNumber()<<endl;
