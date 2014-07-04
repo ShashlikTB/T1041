@@ -94,15 +94,23 @@ void readerExample(TString file="latest.root"){
   TH1F* hClusterECalib=new TH1F("hClusterECalib","Cluster E (calibrated)", 40, EMIN, EMAX);
 
   // create a pointer to an event object for reading the branch values.
-  TBEvent *event = new TBEvent(); 
+  TBEvent *event = new TBEvent();
+  TBSpill *spill = new TBSpill();
   TBranch *bevent = t1041->GetBranch("tbevent");
+  TBranch *bspill = t1041->GetBranch("tbspill");
   bevent->SetAddress(&event);
+  bspill->SetAddress(&spill);
 
   // loop over events
   CalCluster calCluster, calClusterCalib;
   vector<CalHit> calhits, calhitsCalib;
 
   for (Int_t i=0; i< t1041->GetEntries(); i++) {
+    if (i==0){
+      cout << "Table position (x,y) : (" 
+	   << spill->GetTableX() << "," << spill->GetTableY() << ")" << endl;
+    }
+
     if (i%200==0) cout << i << "/" << t1041->GetEntries() << endl;
     t1041->GetEntry(i);
     
