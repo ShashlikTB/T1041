@@ -99,6 +99,12 @@ void TBSpill::Reset(){
   _nTrigWC=0;
   _wcTime=0;
   _padeHeader.clear();
+  _pdgID=0;
+  _nomMomentum=0;
+  _tableX=-999;
+  _tableY=-999;
+  _boxTemp=0;
+  _roomTemp=0;
 }
 
 void TBSpill::Dump() const {
