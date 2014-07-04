@@ -1,4 +1,4 @@
-# Run reader/RECO exampl
+# Run reader/RECO example
 # this is just a wrapper for the ROOT C++ code
 # will replace w/ a simple GUI
 # Usage: python readerExample.py [file.root]
