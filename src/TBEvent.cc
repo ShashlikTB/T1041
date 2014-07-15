@@ -70,13 +70,6 @@ vector<WCChannel> TBEvent::GetWChitsY(Int_t nwc, Int_t *min, Int_t* max) const{
 
 
 
-
-
-
-
-
-
-
 void WCChannel::Dump() const {
   cout << "TDC# " << (int)_tdcNumber <<  " Wire " << (int)_tdcWire 
        << " Count " << (int)_tdcCount << endl;
@@ -84,11 +77,20 @@ void WCChannel::Dump() const {
 
 
 void TBSpill::SetSpillData(Int_t spillNumber, ULong64_t pcTime, 
-			   Int_t nTrigWC, ULong64_t wcTime){
+			   Int_t nTrigWC, ULong64_t wcTime,
+			   Int_t pdgID, Float_t nomMomentum,
+			   Float_t tableX, Float_t tableY, Float_t boxTemp, 
+			   Float_t roomTemp){
   _spillNumber=spillNumber;
   _pcTime=pcTime;
   _nTrigWC=nTrigWC;
   _wcTime=wcTime;
+  _pdgID=pdgID;
+  _nomMomentum=nomMomentum;
+  _tableX=tableX;
+  _tableY=tableY;
+  _boxTemp=boxTemp;
+  _roomTemp=roomTemp;
 }
 
 void TBSpill::Reset(){
@@ -97,6 +99,12 @@ void TBSpill::Reset(){
   _nTrigWC=0;
   _wcTime=0;
   _padeHeader.clear();
+  _pdgID=0;
+  _nomMomentum=0;
+  _tableX=-999;
+  _tableY=-999;
+  _boxTemp=0;
+  _roomTemp=0;
 }
 
 void TBSpill::Dump() const {
@@ -125,7 +133,7 @@ void TBEvent::GetCalHits(vector<CalHit> &calHits, float* calconstants, float cut
   calHits.clear();
   for (Int_t i=0; i<NPadeChan(); i++){
     int idx=padeChannel[i].GetChannelIndex();
-    float ped,sig;
+    double ped,sig;
     padeChannel[i].GetPedestal(ped,sig);
     float val=padeChannel[i].GetMax()-ped;      
     if (calconstants) val*=calconstants[idx];     // relative calibration
@@ -146,7 +154,7 @@ void TBEvent::GetCalHits(vector<CalHit> &calHits, float* calconstants, float cut
 void TBEvent::GetCalHitsFit(vector<CalHit> &calHits, float* calconstants, float cut){
   calHits.clear();
   PulseFit fit;
-  float ped,sig;
+  double ped,sig;
 
   for (Int_t i=0; i<NPadeChan(); i++){
     int idx=padeChannel[i].GetChannelIndex();

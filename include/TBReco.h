@@ -90,6 +90,12 @@ class CalReco{
   const TTree *_tbdata;
 };
 
-
+/*
+class TBReco{
+  TBReco(TTree *tree);
+  AddWCBranch();
+  AddCalHits(float* calconstants=0, float nsigmaCut=0);
+}
+*/
 
 #endif
