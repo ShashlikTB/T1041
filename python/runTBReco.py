@@ -1,4 +1,4 @@
-# Run reader/RECO example
+# Run reader/RECO exampl
 # this is just a wrapper for the ROOT C++ code
 # will replace w/ a simple GUI
 # Usage: python readerExample.py [file.root]
@@ -18,11 +18,9 @@ print "Processing file:",runDat
 
 LoadLibs("TBLIB","libTB.so")
 
+gROOT.ProcessLine(".L rootscript/runTBReco.C+")
 
-gROOT.ProcessLine(".L rootscript/readerExample.C+")
-
-readerExample(runDat)
-
+runTBReco(runDat)
 
 hit_continue('Hit any key to exit')
 

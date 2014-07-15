@@ -205,10 +205,11 @@ def wcLookup(tgttime, bound=15, filename="wcdb.txt"):
     tgttime=float(tgttime)
     lookval=int(tgttime)/1000   # seek matches w/in 1000 second time range
     try:
-        spills=getoutput("look "+str(lookval)+" "+filename)   # binary search of file
-        if len(spills)==0: return (-1, None)                  # no lines match
+        stat,spills=getstatusoutput("look "+str(lookval)+" "+filename)   # binary search of file
+        if (int(stat)!=0) or len(spills)==0: 
+            return (-1, None)                # no lines match
         spills=spills.split("\n") 
-        for spill in spills:   # seach spills <100 seconds from time in PADE spill header 
+        for spill in spills:   # search spills <100 seconds from time in PADE spill header 
             split = re.split(' +', spill.strip())
             sTime = float(split[0])
             diff = sTime-tgttime
@@ -257,5 +258,22 @@ def findWCEvent(fd,tgtevent):
             thisevent=int(wcline.split()[2])
             if thisevent-1==tgtevent: return fd.tell()  # WC/PADE events start at 1/0
             elif thisevent-1>tgtevent: return -1  # past the event number
-        
-        
+
+
+def getTableXY(timeStamp):
+    checkEnv("TBHOME","Source the setup script")
+    tbhome=str(os.getenv("TBHOME"))
+    posFile=tbhome+"/doc/TablePositions.txt"
+    x=-999.0
+    y=-999.0
+    try:
+        inFile=open(posFile, "r")
+        for line in inFile:
+            if line.find(timeStamp)>-1:
+                line=line.split()
+                nf=len(line)
+                x=float(line[nf-2])
+                y=float(line[nf-1])
+    except IOError as e:
+        print "Failed to open file %s due to %s" % (posFile, e)
+    return (x,y)

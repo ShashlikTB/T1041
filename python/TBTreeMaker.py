@@ -6,6 +6,7 @@
 #
 # Created 04/12/2014 B.Hirosky: Initial release
 # 4/30/2014: BH big cleanup and new command line args
+# 7/1/2014: BH - read table positions file, if present
 ###############################################################################
 
 import os, re, glob, sys, getopt, commands
@@ -71,6 +72,11 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
     if  os.path.isfile(outFile) and keepFlag:
         logger.Info(outFile,"is present, skip processing due to -k flag")
         return
+
+    timeStamp=os.path.basename(outFile).replace("rec_capture_","").replace(".root","")
+    tableX,tableY=getTableXY(timeStamp)
+    logger.Info("Table position:",tableX,tableY)
+    
 
     fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
 
@@ -139,7 +145,8 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
                 logger.Warn("Spill header error detected: Invalid WC time stamp")
                 continue
             tbspill.SetSpillData(padeSpill['number'],int(padeSpill['pctime']),
-                                 padeSpill['nTrigWC'],int(padeSpill['wcTime']))
+                                 padeSpill['nTrigWC'],int(padeSpill['wcTime']),
+                                 0,0,tableX,tableY)
 
             # find associated spill in WC data
             wcSpill=wcLookup(padeSpill['wcTime'])
@@ -343,7 +350,7 @@ if __name__ == '__main__':
     #===========================================================# 
     #  Declare data containers                                  #
     #===========================================================#
-    LoadLibs("TBLIB","PadeChannel.so","TBEvent.so")
+    LoadLibs("TBLIB","libTB.so")
 
     if prof:
         pr = cProfile.Profile()

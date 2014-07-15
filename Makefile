@@ -69,7 +69,7 @@ PYHOME	:= $(shell python-config --prefix)
 PYLIB	:= -L$(PYHOME)/lib
 PYLIBS	:= $(shell python-config --libs)
 LDFLAGS += $(shell root-config --ldflags) $(PYLIB)
-LIBS	:= -lSpectrum -lPyROOT $(ROOTLIBS) $(PYLIBS)
+LIBS	:= -lMathMore -lSpectrum -lPyROOT $(ROOTLIBS) $(PYLIBS)
 
 ifdef DEBUG
 say	:= $(shell echo "CCSRCS:  $(CCSRCS)" >& 2)
@@ -121,3 +121,6 @@ $(DICTSWITHLINKDEF)	: $(BLDDIR)/%Dict.cxx : $(INCDIR)/%.h $(INCDIR)/%LinkDef.h
 
 clean:
 	rm -rf $(LIBRARY) $(BLDDIR)/*Dict.* $(BLDDIR)/*.o
+
+cleanall: clean
+	rm -f python/*pyc python/gui/*pyc rootscript/*_C.d rootscript/*.so

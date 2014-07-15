@@ -30,6 +30,8 @@ class PadeHeader : public TObject{
   UShort_t _trigPtr;
   UShort_t _pTemp;
   UShort_t _sTemp;
+  UShort_t _gainA;     // main gain setting
+  UShort_t _biasA;     // main bias setting
 };
 
 /// for now ASSUME we are only dealing with WC1 and WC2
@@ -57,16 +59,24 @@ class WCChannel : public TObject{
 class TBSpill : public TObject {
   ClassDef(TBSpill,1);  // Spill header info
 public:
- TBSpill(Int_t spillNumber=0, ULong64_t pcTime=0, Int_t nTrigWC=0, ULong64_t wcTime=0) : 
-  _spillNumber(spillNumber), _pcTime(pcTime), _nTrigWC(nTrigWC), _wcTime(wcTime) {;}
+ TBSpill(Int_t spillNumber=0, ULong64_t pcTime=0, Int_t nTrigWC=0, ULong64_t wcTime=0, 
+	 Int_t pdgID=0, Float_t nomMomentum=0, 
+	 Float_t tableX=-999, Float_t tableY=-999, Float_t boxTemp=0, Float_t roomTemp=0) : 
+  _spillNumber(spillNumber), _pcTime(pcTime), 
+    _nTrigWC(nTrigWC), _wcTime(wcTime), _pdgID(pdgID), _nomMomentum(nomMomentum), 
+    _tableX(tableX), _tableY(tableY), _boxTemp(boxTemp), _roomTemp(roomTemp) {;}
   Int_t GetSpillNumber() const {return _spillNumber;}
   ULong64_t GetPCTime() const {return _pcTime;}
   Int_t GetnTigWC() const {return _nTrigWC;}
   ULong64_t GetWCTime() const {return _wcTime;}
+  Float_t GetTableX() const {return _tableX;}
+  Float_t GetTableY() const {return _tableY;}
   void Dump() const;
   // setters
   void Reset();
-  void SetSpillData(Int_t spillNumber, ULong64_t pcTime, Int_t nTrigWC, ULong64_t wcTime);
+  void SetSpillData(Int_t spillNumber, ULong64_t pcTime, Int_t nTrigWC, ULong64_t wcTime,
+		    Int_t pdgID=0, Float_t nomMomentum=0, 
+		    Float_t tableX=-999, Float_t tableY=-999, Float_t boxTemp=0, Float_t roomTemp=0);
   void SetSpillNumber(Int_t s) {_spillNumber=s;}
   void SetPCTime(ULong64_t t) {_pcTime=t;}
   void SetnTrigWC(Int_t n) {_nTrigWC=n;}
@@ -78,6 +88,14 @@ private:
   Int_t         _nTrigWC;
   ULong64_t     _wcTime;                   // WC time read by PADE PC  
   vector<PadeHeader> _padeHeader;
+  // beam and detector parameters
+  Int_t         _pdgID;                    // particle ID for beam
+  Float_t       _nomMomentum;              // beam momentum setting
+  Float_t       _tableX;                   // table position 
+  Float_t       _tableY;                   // table position 
+  Float_t       _boxTemp;                  // temperature in environmental box
+  Float_t       _roomTemp;                 // temperature in test beam area
+  
 };
 
 

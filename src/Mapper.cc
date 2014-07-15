@@ -57,7 +57,7 @@ int Mapper::FiberID2ChannelID(int fiberID) const {
 
 
 // return X-Y coordinate of module from upstream view
-void Mapper::ModuleXY(int module, float &x, float &y) const {
+void Mapper::ModuleXY(int module, double &x, double &y) const {
   module=TMath::Abs(module);
   if ( module <1 || module>16 ){ x=-999; y=-999; }
   else {
@@ -69,7 +69,7 @@ void Mapper::ModuleXY(int module, float &x, float &y) const {
 
 
 // return X-Y coordinate of fiber from upstream view
-void Mapper::FiberXY(int fiberID, float &x, float &y) const{
+void Mapper::FiberXY(int fiberID, double &x, double &y) const{
   Bool_t isUpstream=(fiberID<0);
   int module=fiberID/100;
   int fiber=TMath::Abs(fiberID-module*100);
@@ -87,7 +87,7 @@ void Mapper::FiberXY(int fiberID, float &x, float &y) const{
   }
 }
 
-void Mapper::ChannelXYZ(int channelID, float &x, float &y, float &z) const{
+void Mapper::ChannelXYZ(int channelID, double &x, double &y, double &z) const{
   int fiberID=ChannelID2FiberID(channelID);
   FiberXY(fiberID,x,y);
   if (fiberID<0) z=-1;
@@ -110,7 +110,7 @@ void Mapper::GetModuleMap(TH2I* h, int z) const{
   SetModuleBins(h);
   if (z==-1) h->SetTitle("Module IDs UpStream;X [mm];Y [mm]");
   else h->SetTitle("Module IDs DownStream;X [mm];Y [mm]");
-  float x,y;
+  double x,y;
   for (int i=1; i<=NMODULES; i++){
     ModuleXY(i,x,y);
     h->Fill(x,y,i*z);
@@ -120,7 +120,7 @@ void Mapper::GetModuleMap(TH2I* h, int z) const{
 void Mapper::GetChannelMap(TH2I* h, int z) const{
   h->Reset();
   SetChannelBins(h);
-  float x,y;
+  double x,y;
   int channelID,fiberID;
   for (int i=0; i<NPADECHANNELS/2; i++){
     if (z==1){
@@ -145,7 +145,7 @@ void Mapper::GetChannelIdx(TH2I* h, int z) const{
   h->Reset();
   h->SetMinimum(-1);
   SetChannelBins(h);
-  float x,y;
+  double x,y;
   int channelID,fiberID;
   for (int i=0; i<NPADECHANNELS/2; i++){
     if (z==1){
@@ -166,14 +166,14 @@ void Mapper::GetChannelIdx(TH2I* h, int z) const{
   }
 }
 
-void CalHit::GetXYZ(float &x, float&y, float &z) const{
+void CalHit::GetXYZ(double &x, double &y, double &z) const{
    Mapper *mapper=Mapper::Instance();
    int channelID=mapper->ChannelIndex2ChannelID(_channelIndex);
    mapper->ChannelXYZ(channelID,x,y,z);
 }
 
 void CalHit::Print() const{
-  float x,y,z;
+  double x,y,z;
   GetXYZ(x,y,z);
   cout << "Calhit (index,x,y,z,val) = ( " << _channelIndex << "," 
        << x << "," << y << "," << z << "," << _val << " )" << endl;
