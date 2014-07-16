@@ -143,10 +143,10 @@ void WCPlanes::Draw(TBEvent* event, Util& util)
   hitsY2=event->GetWChitsY(2,tLow,tHigh);
   
 
-  util.x1hit = 30;
-  util.y1hit = 30;
-  util.x2hit = 30;
-  util.y2hit = 30;
+  util.x1hit = 64;
+  util.y1hit = 64;
+  util.x2hit = 64;
+  util.y2hit = 64;
 
   bool foundgood = false;
   for(unsigned h1=0; h1<hitsX1.size(); ++h1)
@@ -178,17 +178,29 @@ void WCPlanes::Draw(TBEvent* event, Util& util)
       }
     }
 
-
+  util.WC1Xallhits.clear();
+  util.WC2Xallhits.clear();
+  util.WC1Yallhits.clear();
+  util.WC2Yallhits.clear();
+  
+  
   for(unsigned h1=0; h1<hitsX1.size(); h1++)
     {
-      for(unsigned h2=0; h2<hitsY1.size(); h2++)
+      for(unsigned h2=0; h2<hitsY1.size(); h2++){
 	WC1_hits->Fill(hitsX1[h1].GetX(), hitsY1[h2].GetY(), 1);
+	if(! util.stealthmode){cout<<"===\n";hitsX1[h1].Dump();hitsY1[h2].Dump();cout<<"===\n"<<endl;}
+	util.WC1Xallhits.push_back(hitsX1[h1].GetX());  util.WC1Yallhits.push_back(hitsY1[h2].GetY());
+      }
     }
+  
   
   for(unsigned h3=0; h3<hitsX2.size(); h3++)
     {
-      for(unsigned h4=0; h4<hitsY2.size(); h4++)
+      for(unsigned h4=0; h4<hitsY2.size(); h4++){
 	WC2_hits->Fill(hitsX2[h3].GetX(), hitsY2[h4].GetY(), 1);
+	if(! util.stealthmode){cout<<"===\n";hitsX2[h3].Dump();hitsY2[h4].Dump();cout<<"===\n"<<endl;}
+	util.WC2Xallhits.push_back(hitsX2[h3].GetX()); util.WC2Yallhits.push_back(hitsY2[h4].GetY());
+      }
     }
 
 
