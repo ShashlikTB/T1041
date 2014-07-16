@@ -29,7 +29,12 @@ class TBFileReader:
 		self.nevents = self.t.GetEntries()
 		self.e = TBEvent() 
 		self.t.SetBranchAddress('tbevent', AddressOf(self.e))
-
+        	self.s = TBSpill()
+        	self.t.SetBranchAddress('tbspill', AddressOf(self.s))
+            	self.t.GetEntry(0)
+            	self.tableX = self.s.GetTableX()
+        	self.tableY = self.s.GetTableY()
+            	self.s.Dump()
 
 	def __del__(self):
 		self.f.Close()
@@ -51,6 +56,7 @@ class TBFileReader:
 		if ii >= self.nevents:
 			return
 		self.t.GetEntry(ii)
+
 
 	def event(self):
 		return self.e

@@ -145,8 +145,7 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
                 logger.Warn("Spill header error detected: Invalid WC time stamp")
                 continue
             tbspill.SetSpillData(padeSpill['number'],int(padeSpill['pctime']),
-                                 padeSpill['nTrigWC'],int(padeSpill['wcTime']),
-                                 0,0,tableX,tableY)
+                                 padeSpill['nTrigWC'],int(padeSpill['wcTime']))
 
             # find associated spill in WC data
             wcSpill=wcLookup(padeSpill['wcTime'])

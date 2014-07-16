@@ -242,10 +242,13 @@ class TBEventDisplay:
         self.util.y1hit = 10
         self.util.y2hit = 4
         #3D bools
-        self.util.showWC2 = True
+        self.util._3D_showWC1 = True
+        self.util._3D_showWC2 = True
+        self.util._3D_isolateClusters = False
         
-        WCbutons = [('In-time hits','toggleShowIThits','toggleShowIThits', True),('Quality hits','toggleShowQhits','toggleShowQhits', True)]
-        ThreeDbutons = [('show WC2','toggleShowWC2','toggleShowWC2', True)]
+        WCbuttons = [('In-time hits','toggleShowIThits','toggleShowIThits', True),('Quality hits','toggleShowQhits','toggleShowQhits', True)]
+        ThreeDbuttons = [('show WC1','toggleShowWC1','toggleShowWC1', True),('show WC2','toggleShowWC2','toggleShowWC2', True),('isolate cluster','toggleIsolateClusters','toggleIsolateCluster', False)]
+        
         
         
         self.redraw = True
@@ -257,9 +260,9 @@ class TBEventDisplay:
         self.display = {}
         for pageName, constructor, buttons in [('WF traces', 'TracePlot(canvas)', None),
                           ('ADC heatmap',   'ShashlikHeatmap(canvas)', None),
-                          ('Wire chambers', 'WCPlanes(canvas)', WCbutons),
+                          ('Wire chambers', 'WCPlanes(canvas)', WCbuttons),
                           ('TDC timing','TDCtiming(canvas)', None),
-                          ('3D display',    'Display3D(page)', ThreeDbutons)]:
+                          ('3D display',    'Display3D(page)', ThreeDbuttons)]:
             self.noteBook.Add(pageName, buttons)
             self.noteBook.SetPage(pageName)
             page = self.noteBook.page
@@ -273,8 +276,9 @@ class TBEventDisplay:
         self.statusBar = TGStatusBar(self.vframe, 1, 1, kDoubleBorder)
         self.statusBar.SetHeight(22)
         status_parts = array('i')
-        status_parts.append(20)
-        status_parts.append(20)
+        status_parts.append(18)
+        status_parts.append(18)
+        status_parts.append(24)
         status_parts.append(20)
         status_parts.append(20)
         self.statusBar.SetParts(status_parts, len(status_parts))
@@ -284,7 +288,7 @@ class TBEventDisplay:
     
         # Initial state
         self.wcplanes = self.display['Wire chambers']	
-        self.ADCcut  = 50
+        self.ADCcut  = 500
         self.nevents = 0
         self.eventNumber = -1
         self.DELAY  = int(1000*MINDELAY)
@@ -292,6 +296,7 @@ class TBEventDisplay:
         self.timer  = TTimer()
         self.timerConnection = Connection(self.timer, 'Timeout()',
                                           self, 'managePlayer')
+        
         self.DEBUG  = DEBUG
         self.DEBUG_COUNT = 0
 
@@ -310,7 +315,7 @@ class TBEventDisplay:
 
         #DEBUG
         # to debug a display uncomment next two lines
-        self.noteBook.SetPage('3D display')
+        self.noteBook.SetPage('ADC heatmap')
         self.displayEvent()
         
     def __del__(self):
@@ -348,13 +353,16 @@ class TBEventDisplay:
         self.reader = TBFileReader(filename)
         self.nevents= self.reader.entries()
         self.statusBar.SetText('events: %d' % self.nevents, 0)
-        self.statusBar.SetText(self.filename[self.filename.rfind('/')+1:], 2)
+        self.statusBar.SetText(self.filename[self.filename.rfind('/')+1:][-32:], 2)
         self.eventNumber = -1
         self.util.eventNumber = -1
         self.nextEvent()
         self.progressBar.SetRange(0, self.nevents)
         self.progressBar.SetPosition(self.eventNumber)
         self.wcplanes.CacheWCMeans("meanfile.txt", filename)
+        self.util.tableX = self.reader.tableX
+        self.util.tableY = self.reader.tableY
+        self.statusBar.SetText('table(x, y) = (%d, %d) ' % (self.util.tableX, self.util.tableY), 1)
         self.filetime = time.ctime(os.path.getctime(filename))
 
         
@@ -373,7 +381,6 @@ class TBEventDisplay:
             self.reader = TBFileReader(self.filename)
             self.nevents= self.reader.entries()
             self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents-1), 0)
-            self.statusBar.SetText("good morning, Sam",3)
             self.filetime = time.ctime(os.path.getctime(self.filename))
             self.wcplanes.CacheWCMeans("meanfile.txt", self.filename)
             print "in refresh fashion:"
@@ -505,12 +512,29 @@ class TBEventDisplay:
         self.displayEvent()
         self.debug("end:ShowQhits")
         
+
     def toggleShowWC2(self):
         self.debug("begin:toggleShowWC2")
-        self.util.toggleShowWC2 = not self.util.toggleShowWC2
+        self.util._3D_showWC2 = not self.util._3D_showWC2
         self.redraw = True
         self.displayEvent()
         self.debug("end:toggleShowWC2")
+
+        
+    def toggleShowWC1(self):
+        self.debug("begin:toggleShowWC2")
+        self.util._3D_showWC1 = not self.util._3D_showWC1
+        self.redraw = True
+        self.displayEvent()
+        self.debug("end:toggleShowWC1")
+
+        
+    def toggleIsolateClusters(self):
+            self.debug("begin:toggleIsolateClusters")
+            self.util._3D_isolateClusters = not self.util._3D_isolateClusters
+            self.redraw = True
+            self.displayEvent()
+            self.debug("end:toggleIsolateClusters")
 
         
  
@@ -526,7 +550,7 @@ class TBEventDisplay:
         from string import atoi
         dialog = Dialog(gClient.GetRoot(), self.main)
         self.ADCcut = atoi(dialog.GetInput('Enter ADC cut', '50'))
-        self.statusBar.SetText('ADC cut: %d' % self.ADCcut, 1)
+        self.statusBar.SetText('table(x, y) = (%d, %d) ' % (self.util.tableX, self.util.tableY), 1)
 
     def close(self):
         gApplication.Terminate()
@@ -582,8 +606,7 @@ class TBEventDisplay:
             
             self.reader.read(self.eventNumber)
 
-            ADCmax = self.reader.maxPadeADC()
-            self.statusBar.SetText('max(ADC): %d' % ADCmax, 1)
+            self.statusBar.SetText('table(x, y) = (%d, %d) ' % (self.util.tableX, self.util.tableY), 1)
 
         elif which == R_FORWARD:
             while self.eventNumber < self.nevents-1:
@@ -593,7 +616,8 @@ class TBEventDisplay:
                 self.reader.read(self.eventNumber)
 
                 ADCmax =  self.reader.maxPadeADC()
-                self.statusBar.SetText('max(ADC): %d' % ADCmax, 1)
+                #self.statusBar.SetText('max(ADC): %d' % ADCmax, 1)
+                self.statusBar.SetText('table(x, y) = (%d, %d) ' % (self.util.tableX, self.util.tableY), 1)
                 if ADCmax < self.ADCcut: continue
                 break
         else:
@@ -604,7 +628,8 @@ class TBEventDisplay:
                 self.reader.read(self.eventNumber)
 
                 ADCmax =  self.reader.maxPadeADC()
-                self.statusBar.SetText('max(ADC): %d' % ADCmax, 1)
+                #self.statusBar.SetText('max(ADC): %d' % ADCmax, 1)
+                self.statusBar.SetText('table(x, y) = (%d, %d) ' % (self.util.tableX, self.util.tableY), 1)
                 if ADCmax < self.ADCcut: continue				
                 break			
 
@@ -624,13 +649,18 @@ class TBEventDisplay:
     def displayEvent(self):
         self.progressBar.Reset()
         self.progressBar.SetPosition(self.eventNumber)
-        currentPage = self.noteBook.currentPage
-        page = self.noteBook.pages[currentPage]
+        pageNumber = self.noteBook.pageNumber
+        page = self.noteBook.pages[pageNumber]
         self.debug("begin:displayEvent - %s" % page.name)
         if self.shutterOpen:
             if not os.path.exists("cached_pdfs"):
                 os.system('mkdir cached_pdfs')
-            page.canvas.Print('cached_pdfs/'+self.pageName+str(self.eventNumber)+'.pdf')
+
+            if '3D' in page.name:
+                gEve.GetDefaultGLViewer().SavePicture('cached_pdfs/'+self.pageName+str(self.eventNumber)+'.png')
+            else:
+                page.canvas.Print('cached_pdfs/'+self.pageName+str(self.eventNumber)+'.pdf')
+            
             page.redraw = False
             return
         if not page.redraw and not self.shutterOpen and not self.redraw:
@@ -643,9 +673,11 @@ class TBEventDisplay:
         else:
             self.util.stealthmode = True
             self.display['Wire chambers'].Draw(self.reader.event(), self.util)
+            self.display['ADC heatmap'].Draw(self.reader.event(), self.util)
             self.util.stealthmode = False
             self.display[page.name].Draw(self.reader.event(), self.util)
         print "displaying with self.util.eventNumber = "+str(self.util.eventNumber)
+        print "list of canvases", gROOT.GetListOfCanvases()
         self.redraw = False
         page.redraw = False
         self.debug("end:displayEvent")		
