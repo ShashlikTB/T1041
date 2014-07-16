@@ -107,22 +107,19 @@ class MenuBar(TGMenuBar):
 #-----------------------------------------------------------------------------
 class ProgressBar(TGHProgressBar):
 	
-	def __init__(self, object, toolBar, method, seconds=0.2):
+	def __init__(self, object, toolBar, seconds=0.2):
 		TGHProgressBar.__init__(self, toolBar,
-								TGProgressBar.kFancy, 1)
+								TGProgressBar.kFancy, 100)
 		
 		toolBar.AddFrame(self,
-						 TGLayoutHints(kLHintsLeft |
-									   kLHintsExpandX |
-									   kLHintsExpandY,
-									   10, 10, 2, 2))
+						 TGLayoutHints(100, 600, 12, 80))#(nothing,lef,,)
 
 		self.SetBarColor("green")
 		self.SetRange(0, K_PROG_MAX)
 
 		# Set up a timer for progress bars
-		self.timer = TTimer()
-		self.connection = Connection(self.timer, "Timeout()", object, method)
+		#self.timer = TTimer()
+		#self.connection = Connection(self.timer, "Timeout()", object, method)
 
 	def __del__(self):
 		pass
@@ -217,7 +214,7 @@ class NoteBook(TGTab):
 		self.names = {}
 		self.width = width
 		self.height= height
-		self.currentPage = 0
+		self.pageNumber = 0
 		self.page = None
 		
 	def __del__(self):
@@ -286,17 +283,17 @@ class NoteBook(TGTab):
 		# re-color previous tab to the
 		# TGMainframe's default color
 
-		tab = self.GetTabTab(self.currentPage)
+		tab = self.GetTabTab(self.pageNumber)
 		tab.ChangeBackground(self.GetDefaultFrameBackground())
 
 		# Now change tab and re-color tab
 
 		if self.pages.has_key(id):
-			self.currentPage = id
+			self.pageNumber = id
 			
 		elif self.names.has_key(id):
-			self.currentPage = self.names[id]
+			self.pageNumber = self.names[id]
 
-		self.page = self.pages[self.currentPage]
-		self.GetTabTab(self.currentPage).ChangeBackground(YELLOW)
-		self.SetTab(self.currentPage)
+		self.page = self.pages[self.pageNumber]
+		self.GetTabTab(self.pageNumber).ChangeBackground(YELLOW)
+		self.SetTab(self.pageNumber)
