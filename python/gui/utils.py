@@ -214,7 +214,7 @@ class NoteBook(TGTab):
 		self.names = {}
 		self.width = width
 		self.height= height
-		self.currentPage = 0
+		self.pageNumber = 0
 		self.page = None
 		
 	def __del__(self):
@@ -283,17 +283,17 @@ class NoteBook(TGTab):
 		# re-color previous tab to the
 		# TGMainframe's default color
 
-		tab = self.GetTabTab(self.currentPage)
+		tab = self.GetTabTab(self.pageNumber)
 		tab.ChangeBackground(self.GetDefaultFrameBackground())
 
 		# Now change tab and re-color tab
 
 		if self.pages.has_key(id):
-			self.currentPage = id
+			self.pageNumber = id
 			
 		elif self.names.has_key(id):
-			self.currentPage = self.names[id]
+			self.pageNumber = self.names[id]
 
-		self.page = self.pages[self.currentPage]
-		self.GetTabTab(self.currentPage).ChangeBackground(YELLOW)
-		self.SetTab(self.currentPage)
+		self.page = self.pages[self.pageNumber]
+		self.GetTabTab(self.pageNumber).ChangeBackground(YELLOW)
+		self.SetTab(self.pageNumber)

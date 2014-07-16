@@ -26,6 +26,9 @@
 #include <TGWindow.h>
 #include <TGListBox.h>
 #include <TGFileDialog.h>
+#include "TCanvas.h"
+#include "TPaletteAxis.h"
+#include "TColor.h"
 //-----------------------------------------------------------------------------
 
 /// Simple wrapper around TGFileDialog.
@@ -41,13 +44,11 @@ struct Util
   static
   TGLBEntry* GLBEntry(TGListBox* listbox, std::string str, int id, 
                       std::string font="helvetica-medium-r", int fontsize=14);
-  //general bools:
+
   bool accumulate;
   bool stealthmode;
   int eventNumber;
 
-
-  //WC display bools
   bool WC_showIThits;
   bool WC_showQhits;
 
@@ -57,10 +58,25 @@ struct Util
   float y1hit;
   float x2hit;
   float y2hit;
-  bool showWC2;
+  
+  std::vector< float > WC1Xallhits;
+  std::vector< float > WC1Yallhits;
+  std::vector< float > WC2Xallhits;
+  std::vector< float > WC2Yallhits;
 
 
-  std::string filename;
+  float tableX;
+  float tableY;
+
+  bool _3D_showWC1;
+  bool _3D_showWC2;
+  bool _3D_isolateClusters;
+  
+  std::vector<int> colorsDownstream;
+  std::vector<int> colorsUpstream;
+
+
+  //std::string filename;
 
 
 };
