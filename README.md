@@ -101,3 +101,11 @@ shrink a git repository
 merge into master branch
 * http://stackoverflow.com/questions/5601931/best-and-safest-way-to-merge-a-git-branch-into-master
 
+merge a single file from a branch
+* git checkout otherbranch myfile.txt
+
+diff of 2 directories, listing filenames only
+* diff -ENwburq DIR1 DIR2 | grep -v \\.git
+
+Git diff of two branches, listing filenames only
+* git diff --name-status master..branchName
