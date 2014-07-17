@@ -109,3 +109,7 @@ diff of 2 directories, listing filenames only
 
 Git diff of two branches, listing filenames only
 * git diff --name-status master..branchName
+
+Branching tips
+* https://github.com/Kunena/Kunena-Forum/wiki/Create-a-new-branch-with-git-and-manage-branches
+
