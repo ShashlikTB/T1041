@@ -205,10 +205,11 @@ def wcLookup(tgttime, bound=15, filename="wcdb.txt"):
     tgttime=float(tgttime)
     lookval=int(tgttime)/1000   # seek matches w/in 1000 second time range
     try:
-        spills=getoutput("look "+str(lookval)+" "+filename)   # binary search of file
-        if len(spills)==0: return (-1, None)                  # no lines match
+        stat,spills=getstatusoutput("look "+str(lookval)+" "+filename)   # binary search of file
+        if (int(stat)!=0) or len(spills)==0: 
+            return (-1, None)                # no lines match
         spills=spills.split("\n") 
-        for spill in spills:   # seach spills <100 seconds from time in PADE spill header 
+        for spill in spills:   # search spills <100 seconds from time in PADE spill header 
             split = re.split(' +', spill.strip())
             sTime = float(split[0])
             diff = sTime-tgttime

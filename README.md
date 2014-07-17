@@ -92,12 +92,4 @@ update/add:
 check it in:
 * git push origin master
 
-checkout remote branch
-* http://stackoverflow.com/questions/1783405/checkout-remote-git-branch
-
-shrink a git repository
-* http://stevelorek.com/how-to-shrink-a-git-repository.html
-
-merge into master branch
-* http://stackoverflow.com/questions/5601931/best-and-safest-way-to-merge-a-git-branch-into-master
 
