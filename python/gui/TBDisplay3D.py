@@ -43,21 +43,6 @@ class Display3D:
         self.geometry = TEveElementList("Testbeam 2014 Geometry")
 
         tracklength = dz_setup + 800 #length of track to draw
-        '''
-        self.wc1 = TEveGeoShape('WC 1')
-        self.wc1.SetShape( TGeoTrd1(dx1_WC/2, dx2_WC/2, dy_WC/2, dz_WC/2) )
-        self.wc1.SetMainColor(kCyan)
-        self.wc1.SetMainTransparency(20)
-        self.geometry.AddElement(self.wc1)
-
-        
-	self.wc2 = TEveGeoShape('WC 2')
-        self.wc2.SetShape( TGeoTrd1(dx1_WC/2, dx2_WC/2, dy_WC/2, dz_WC/2) )
-        self.wc2.SetMainColor(kMagenta)
-       	self.wc2.SetMainTransparency(50)
-       	self.wc2.RefMainTrans().SetPos(0,0, z_WC2)
-        self.geometry.AddElement(self.wc2)
-        '''
 
         gEve.AddElement(self.geometry)
         self.first = True
@@ -88,9 +73,9 @@ class Display3D:
         	elements.DestroyElements()       
         
         
-        hitx1 = util.x1hit * x_y_scale_factor
+        hitx1 = -util.x1hit * x_y_scale_factor #left-handed coordinate system!
         hity1 = util.y1hit * x_y_scale_factor
-        hitx2 = util.x2hit * x_y_scale_factor
+        hitx2 = -util.x2hit * x_y_scale_factor #left-handed coordinate system!
         hity2 = util.y2hit * x_y_scale_factor
 
         tableX = util.tableX * x_y_scale_factor
@@ -101,14 +86,14 @@ class Display3D:
             blob = TEveGeoShape('blobby'+str(hit1+1))
             blob.SetShape(TGeoSphere(0,50.0))
             blob.SetMainColor(kBlue)
-            blob.RefMainTrans().SetPos(x_y_scale_factor*util.WC1Xallhits[hit1],x_y_scale_factor* util.WC1Yallhits[hit1], 0)
+            blob.RefMainTrans().SetPos(-x_y_scale_factor*util.WC1Xallhits[hit1],x_y_scale_factor* util.WC1Yallhits[hit1], 0)
             elements.AddElement(blob)
         
         for hit2 in range(0,util.WC2Xallhits.size()):
             blob = TEveGeoShape('blobbby'+str(hit2+1))
             blob.SetShape(TGeoSphere(0,50.0))
             blob.SetMainColor(kBlue)
-            blob.RefMainTrans().SetPos(x_y_scale_factor*util.WC2Xallhits[hit2],x_y_scale_factor* util.WC2Yallhits[hit2], z_WC2)
+            blob.RefMainTrans().SetPos(-x_y_scale_factor*util.WC2Xallhits[hit2],x_y_scale_factor* util.WC2Yallhits[hit2], z_WC2)
             elements.AddElement(blob)
 
 
@@ -168,7 +153,7 @@ class Display3D:
 
         self.module = []
         for ii in xrange(8):
-            x = xmin + (ii+0.5)*step
+            x = -(xmin + (ii+0.5)*step)
             for jj in xrange(8):
                 y = ymin + (jj+0.5)*step
                 self.module.append(TEveGeoShape('Shashlik%d%d' % (ii, jj)))
@@ -186,7 +171,7 @@ class Display3D:
 
         self.module = []
         for ii in xrange(8):
-            x = xmin + (ii+0.5)*step
+            x = -(xmin + (ii+0.5)*step)
             for jj in xrange(8):
                 y = ymin + (jj+0.5)*step
                 self.module.append(TEveGeoShape('Shashlik%d%d' % (ii+100, jj+100)))
