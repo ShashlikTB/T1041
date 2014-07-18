@@ -94,7 +94,7 @@ Int_t PadeChannel::GetChannelIndex(){
   return mapper->ChannelID2ChannelIndex(GetChannelID());
 }
 
-PulseFit PadeChannel::FitPulse(PadeChannel *pc){ 
+PulseFit PadeChannel::FitPulse(PadeChannel *pc, bool laserShape){ 
   static bool first=true;
   static TF1 *func;
   if (first){
