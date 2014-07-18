@@ -36,7 +36,7 @@ class PadeChannel : public TObject {
   void GetPedestal(double &ped, double &stdev);
   //Float_t GetNoise();
   void GetHist(TH1F* h);
-  static PulseFit FitPulse(PadeChannel *pc);
+  static PulseFit FitPulse(PadeChannel *pc, bool laserShape=false);
   double GetPedestal();
   // private:
   ULong64_t     _ts;
