@@ -18,11 +18,11 @@
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TMath.h>
-#include "../include/TBReco.h"
-#include "../include/WC.h"
-#include "../include/TBEvent.h"
-#include "../include/calConstants.h"
-#include "../include/Mapper.h"
+#include "TBReco.h"
+#include "WC.h"
+#include "TBEvent.h"
+#include "calConstants.h"
+#include "Mapper.h"
 
 using std::cout;
 using std::endl;

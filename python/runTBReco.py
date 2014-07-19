@@ -1,14 +1,12 @@
-# Run reader/RECO exampl
+# Run RECO tools
 # this is just a wrapper for the ROOT C++ code
-# will replace w/ a simple GUI
-# Usage: python readerExample.py [file.root]
+# Usage: python runTBReco.py [file.root]
 # Created 4/20/2014 B.Hirosky: Initial release
 
-import os, re, glob, sys, array
+import sys
 from ROOT import *
 from TBUtils import *
 
-logger=Logger()
 
 if len(sys.argv)<2:
     runDat="latest.root"
@@ -19,7 +17,6 @@ print "Processing file:",runDat
 LoadLibs("TBLIB","libTB.so")
 
 gROOT.ProcessLine(".L rootscript/runTBReco.C+")
-
 runTBReco(runDat)
 
 hit_continue('Hit any key to exit')
