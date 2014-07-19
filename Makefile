@@ -18,11 +18,11 @@ $(shell mkdir -p build/lib)
 # sources for which dictionaries are to be created, 
 # but without the use of LinkDefs
 SRCSNOLINKDEF	:= WCPlanes.cc Connection.cc Slot.cc Util.cc Dialog.cc\
-Mapper.cc
+Mapper.cc CalReco.cc
 
 # sources for which dictionaries are to be created, 
 # using LinkDefs
-SRCSWITHLINKDEF:= TBEvent.cc waveInterface.cc PadeChannel.cc
+SRCSWITHLINKDEF:= TBEvent.cc waveInterface.cc PadeChannel.cc TBRecHit.cc
 # ----------------------------------------------------------------------------
 SRCSNOLINKDEF	:= $(patsubst %.cc,$(SRCDIR)/%.cc,$(SRCSNOLINKDEF))
 DICTSNOLINKDEF	:= $(patsubst $(SRCDIR)/%.cc,$(BLDDIR)/%Dict.cxx,$(SRCSNOLINKDEF))
@@ -123,4 +123,4 @@ clean:
 	rm -rf $(LIBRARY) $(BLDDIR)/*Dict.* $(BLDDIR)/*.o
 
 cleanall: clean
-	rm -f python/*pyc python/gui/*pyc rootscript/*_C.d rootscript/*.so
+	rm -f python/*pyc python/gui/*pyc rootscript/*_C.d rootscript/*.so *~ */*~

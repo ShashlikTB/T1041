@@ -2,6 +2,8 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TBranch.h>
+#include "include/TBEvent.h"
+#include "include/CalReco.h"
 
 void runTBReco(TString rawFile, TString recFile=""){
   if (recFile=="") {
@@ -12,19 +14,26 @@ void runTBReco(TString rawFile, TString recFile=""){
   TTree *rawTree=(TTree*)tfRaw->Get("t1041");
 
   // turn on raw data branches in case we reco'd this file before, drop others
+  TBEvent *tbevent=new TBEvent();
+  rawTree->SetBranchAddress("tbevent",&tbevent);
   rawTree->SetBranchStatus("*",0);
   rawTree->SetBranchStatus("tbevent",1);
   rawTree->SetBranchStatus("tbspill",1);
 
   TFile *tfRec=new TFile(recFile,"recreate");
-  TTree *recTree=(TTree*)rawTree->Clone();
-  
-  Float_t pt;
-  TBranch *calHits=recTree->Branch("pt",&pt,"pt/F");
+  TTree *recTree=(TTree*)rawTree->CloneTree();
+
+
+  CalReco *calreco=new CalReco();
+  calreco->Process(recTree);
+  //  Float_t pt;
+  //  TBranch *calHits=recTree->Branch("pt",&pt,"pt/F");
 
   // finish
+  recTree->Write();
   tfRec->Write();
-  tfRec->Print();
+  recTree->Print();
+
   
   delete tfRec;
   delete tfRaw;
