@@ -23,10 +23,16 @@ int CalReco::Process(TTree *recTree){
   for (int i=0; i<recTree->GetEntries(); i++){
     rechits->clear();  
     recTree->GetEntry(i);
+    double ped,sig;
+
     for (Int_t nch=0; nch<event->NPadeChan(); nch++){
-      hit.Clear();
       PadeChannel pc=event->GetPadeChan(nch);
-      hit.SetChannelIndex(pc.GetChannelIndex());
+      pc.GetPedestal(ped,sig);
+      float val=pc.GetMax()-ped;
+      if (val>0 && val/sig>_nSigmaCut) continue;
+      hit.Clear();
+      hit.Init(&pc);
+      hit.FitPulse(&pc);
       rechits->push_back(hit);
     }
     brp->Fill();
