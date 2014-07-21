@@ -1,8 +1,9 @@
 #include <iostream>
 #include "TString.h"
 #include "TFile.h"
-#include "../include/TBEvent.h"
-#include "../include/shashlik.h"
+#include "TBEvent.h"
+#include "PadeChannel.h"
+#include "Mapper.h"
 #include "TTree.h"
 #include "TBranch.h"
 #include "TF1.h"

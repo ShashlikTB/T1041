@@ -11,7 +11,9 @@ else: runDat=sys.argv[1]
 
 
 print "Processing file:",runDat
-LoadLibs("TBLIB","PadeChannel.so","TBEvent.so")
+LoadLibs("TBLIB","libTB.so")
+gSystem.SetIncludePath("-I\"$TBHOME/include\"")
+
 gROOT.ProcessLine(".L rootscript/waveViewer.C+")
 
 print "To kill use: kill",os.getpid(),";fg"
