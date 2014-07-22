@@ -34,7 +34,6 @@ class PadeChannel : public TObject {
   Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
   void GetXYZ(double &x, double &y, double &z);
   void GetPedestal(double &ped, double &stdev);
-  //Float_t GetNoise();
   void GetHist(TH1F* h);
   static PulseFit FitPulse(PadeChannel *pc, bool laserShape=false);
   double GetPedestal();

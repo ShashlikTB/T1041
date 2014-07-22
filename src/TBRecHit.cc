@@ -2,18 +2,16 @@
 #include "Mapper.h"
 
 
-TBRecHit::TBRecHit(PadeChannel *pc){
-  Clear();
-  if (pc) Init(pc);
+TBRecHit::TBRecHit(PadeChannel *pc, Float_t zsp, UInt_t options){
+  _zsp=zsp;
+  if (options&kNoFit) {
+    _status|=kNoFit;
+    Init(pc,false);
+  }
+  else Init(pc);
 }
 
-void TBRecHit::Init(PadeChannel *pc){
-  SetChannelIndex(pc->GetChannelIndex());
-  if (_status&kNoFit) return;
-}
-
-void TBRecHit::Clear(Option_t *o){
-  TObject::Clear(o);
+void TBRecHit::Init(PadeChannel *pc,  Float_t zsp){
   _channelIndex=-1;
   _maxADC=-1;
   _pedestal=-999;
@@ -24,13 +22,25 @@ void TBRecHit::Clear(Option_t *o){
   _tRiseError=0;
   _ndof=0;
   _status=0;
+  _zsp=zsp;
+  if (!pc) return;
+  SetChannelIndex(pc->GetChannelIndex());
+  _maxADC=pc->GetMax();
+  double ped,sig;
+  pc->GetPedestal(ped,sig);
+  _pedestal=ped;
+  _noise=sig;
+  if (_status&kNoFit) return;
+  FitPulse(pc);
 }
+
 
 void TBRecHit::GetXYZ(double &x, double &y, double &z) const {
   Mapper *mapper=Mapper::Instance();
   int channelID=mapper->ChannelIndex2ChannelID(_channelIndex);
   mapper->ChannelXYZ(channelID,x,y,z);
 }
+
 void TBRecHit::GetXYZ(float &x, float &y, float &z) const {
   double p[3];
   GetXYZ(p[0],p[1],p[2]);
@@ -40,6 +50,10 @@ void TBRecHit::GetXYZ(float &x, float &y, float &z) const {
 }
 
 void TBRecHit::FitPulse(PadeChannel *pc){
+  if ( (_maxADC-_pedestal) / _noise < _zsp ) {
+    _status|=kZSP;
+    return;
+  }
   PulseFit fit=PadeChannel::FitPulse(pc);
   _pedestal=fit.pedestal;
   _noise=fit.noise;

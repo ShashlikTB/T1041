@@ -21,32 +21,36 @@ class TBRecHit : public TObject {
     kSaturated=16,     // saturated channel
     kPileup=32,        // multiple peaks detected
     kMirrored=64,      // channel was replaced w/ TBRecHit from opposing channel
-    kUnknown=128           
+    kZSP=128,          // signal is below ZSP threshold
+    kUnknown=256           
   };
-  TBRecHit(PadeChannel *pc=0);
-  void Clear(Option_t *o="");  // reset all values
-  void Init(PadeChannel *pc);
+  TBRecHit(PadeChannel *pc=0, Float_t zsp=0, UInt_t options=0);
+  void Init(PadeChannel *pc=0,  Float_t zsp=0);
   Int_t ChannelIndex() const {return _channelIndex;}
   void FitPulse(PadeChannel *pc);
   void GetXYZ(double &x, double &y, double &z) const;
   void GetXYZ(float &x, float &y, float &z) const;
-  float AMax() const {return _aMaxValue;}
-  float TRise() const {return _tRiseValue;}
   unsigned short MaxADC() const {return _maxADC;}
-  int status() const {return _status;}
+  Float_t AMax() const {return _aMaxValue;}
+  Float_t TRise() const {return _tRiseValue;}
+  Float_t Pedestal() const {return _pedestal;}
+  Float_t NoiseRMS() const {return _noise;}
+  Float_t Chi2() const {return _chi2;}
+  UInt_t Status() const {return _status;}
   void SetChannelIndex(Int_t idx) {_channelIndex=idx;} 
   void SetOptNoFit() {_status&=kNoFit;}
  private:
   Short_t _channelIndex;   // channel index, S.L. convention
   UShort_t _maxADC;        // max value of ADC samples (in expected signal region)
-  Float_t _pedestal;       // from aveage of samples before peak
+  Float_t _pedestal;       // from average of samples before peak
   Float_t _noise;          // RMS of pedistal samples
   Float_t _aMaxValue;      // Peak from fit to pulse shape
   Float_t _tRiseValue;
-  Float_t _aMaxError;       // beginning of pulse from fit
+  Float_t _aMaxError;      // beginning of pulse from fit
   Float_t _tRiseError;    
   Float_t _chi2;            
   Float_t _ndof;
+  Float_t _zsp;            // nSigma zero suppression
   UInt_t _status;
 };
 	       

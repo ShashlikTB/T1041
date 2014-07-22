@@ -20,20 +20,18 @@ int CalReco::Process(TTree *recTree){
   recTree->SetBranchAddress("tbevent",&event);
 
   // loop over the raw data tree
-  for (int i=0; i<recTree->GetEntries(); i++){
+  int nEvents=recTree->GetEntries();
+  for (int i=0; i<nEvents; i++){
+    if ( i % (nEvents/200) == 1) 
+      cout << "CalReco: Processing event " << i << " / " << nEvents << endl;
     rechits->clear();  
     recTree->GetEntry(i);
-    double ped,sig;
 
     for (Int_t nch=0; nch<event->NPadeChan(); nch++){
       PadeChannel pc=event->GetPadeChan(nch);
-      pc.GetPedestal(ped,sig);
-      float val=pc.GetMax()-ped;
-      if (val>0 && val/sig>_nSigmaCut) continue;
-      hit.Clear();
-      hit.Init(&pc);
-      hit.FitPulse(&pc);
-      rechits->push_back(hit);
+      hit.Init(&pc, _nSigmaCut);
+      if ( (hit.Status() & TBRecHit::kZSP) ==0 ) 
+	rechits->push_back(hit);  // only save hits 
     }
     brp->Fill();
   }

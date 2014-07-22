@@ -24,10 +24,8 @@ void runTBReco(TString rawFile, TString recFile=""){
   TTree *recTree=(TTree*)rawTree->CloneTree();
 
 
-  CalReco *calreco=new CalReco();
+  CalReco *calreco=new CalReco(3);   // 3 sigma cut for pulse fitting
   calreco->Process(recTree);
-  //  Float_t pt;
-  //  TBranch *calHits=recTree->Branch("pt",&pt,"pt/F");
 
   // finish
   recTree->Write();
