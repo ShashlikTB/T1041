@@ -113,3 +113,6 @@ Git diff of two branches, listing filenames only
 Branching tips
 * https://github.com/Kunena/Kunena-Forum/wiki/Create-a-new-branch-with-git-and-manage-branches
 
+BFG Repo Cleaner
+* http://rtyley.github.io/bfg-repo-cleaner/
+
