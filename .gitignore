@@ -1,1 +1,4 @@
-tmp
+tmp/
+wcdb.txt
+latest.root
+latest_reco.root
