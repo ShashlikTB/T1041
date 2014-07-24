@@ -71,6 +71,11 @@ struct Util
   bool _3D_showWC1;
   bool _3D_showWC2;
   bool _3D_isolateClusters;
+
+  bool showBoard112;
+  bool showBoard113;
+  bool showBoard115;
+  bool showBoard116;
   
   std::vector<int> colorsDownstream;
   std::vector<int> colorsUpstream;

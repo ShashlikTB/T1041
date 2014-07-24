@@ -36,10 +36,12 @@ def ShashlikFaces(object, c1, event, util):
 		c1.SetRightMargin(3.9)
 		c1.SetLeftMargin(-0.2)
 
-		object.hMapFront= TH2F('hMap1','Upstream Face (ADC counts)' , 8,-28,28,8,-28,28)
-		object.hMapBack = TH2F('hMap2','Downstream Face (ADC counts)',8,-28,28,8,-28,28)
+		object.hMapFront= TH2F('hMap1','Upstream Face ADC - evt '+str(util.eventNumber) , 8,-28,28,8,-28,28)
+		object.hMapBack = TH2F('hMap2','Downstream Face ADC - evt '+str(util.eventNumber),8,-28,28,8,-28,28)
 		object.hMapReset = True
-       		print "defining accumulate for the first time"	 
+
+    	object.hMapFront.SetTitle('Upstream Face ADC - evt '+str(util.eventNumber) )
+    	object.hMapBack.SetTitle('Downstream Face ADC - evt '+str(util.eventNumber))
 	hMapFront = object.hMapFront
 	hMapBack  = object.hMapBack
 	
@@ -61,7 +63,7 @@ def ShashlikFaces(object, c1, event, util):
         	pade = event.GetPadeChan(i)
                 if not util.stealthmode:
                     pade.Dump()
-        	maxADC = getWFmax(pade)
+        	maxADC = pade.GetMax()
                 chanID = pade.GetChannelID()
         	xy = mymap.ChannelID2XY(chanID)
         	x,y = xy[0], xy[1]
@@ -72,14 +74,14 @@ def ShashlikFaces(object, c1, event, util):
 		pade = event.GetPadeChan(i)
                 if not util.stealthmode:
                     pade.Dump()
-        	maxADC = getWFmax(pade)
+        	maxADC = pade.GetMax()
         	chanID = pade.GetChannelID();   
         	xy = mymap.ChannelID2XY(chanID)
         	x,y = xy[0], xy[1]
         	hMapBack.Fill(x, y, maxADC)
             #hMapBack.SetAxisRange(hMapBack.GetMinimum()-1,hMapBack.GetMaximum()+1,"Z")
-    
-	if not util.stealthmode or True:
+
+	if not util.stealthmode:
 		gStyle.SetPalette(1)
         	gStyle.SetOptStat(0)
 		HistoSamStyleHeat(hMapFront)
@@ -105,7 +107,6 @@ def ShashlikFaces(object, c1, event, util):
                     for j in range(1,9):
                         util.colorsDownstream.push_back(paletteDownstream.GetBinColor(i,j))
                         util.colorsUpstream.push_back(paletteUpstream.GetBinColor(i,j))
-
                 
         
 def HistoSamStyleHeat(histo):

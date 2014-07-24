@@ -18,25 +18,24 @@ class TDCtiming:
 def tdcWorkHorse(object, c1, event, util):
 
     try:
+        object.tdcfile.Close()
         o = object.names
     except:
         c1.Divide(4,4)
-    
-    print "getting stuff done"
-    file = TFile('tdc_dists.root')
-    object.names = [k.GetName() for k in file.GetListOfKeys()]
+    object.tdcfile = TFile('tdc_dists.root')
+    object.names = [k.GetName() for k in object.tdcfile.GetListOfKeys()]
     names = object.names
     gStyle.SetOptStat(0)
     t = TLatex()
     t.SetTextSize(0.15)
     for i in range(0,len(names)):
         c1.cd(i+1);
-        histo = file.Get(names[i])
+        histo = object.tdcfile.Get(names[i])
         HistoSamStyleTDC(histo)       
         histo.Draw();
-        t.DrawLatex(175, histo.GetMaximum()*0.75, 'TDC '+str(i+1))  
+        t.DrawLatex(175, histo.GetMaximum()*0.75, 'TDC '+str(i+1)) 
     c1.Update()
-    file.Close()
+
 
 
 

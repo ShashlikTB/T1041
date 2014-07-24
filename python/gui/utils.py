@@ -264,9 +264,9 @@ class NoteBook(TGTab):
 			element.viewer  = TGLEmbeddedViewer(element.hframe)
 			element.hframe.AddFrame(element.viewer.GetFrame(),
 						TOP_X_Y)
-			TEveManager.Create(kFALSE)
+			TEveManager.Create(kFALSE, 'l')
 			element.canvas = TEveViewer("TB2014 Viewer")
-			TEveManager.Create(kTRUE)
+			#TEveManager.Create(kTRUE)
 			
 			element.canvas.SetGLViewer(element.viewer,
 						   element.viewer.GetFrame())

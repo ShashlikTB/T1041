@@ -19,6 +19,7 @@ from gui.TBFileReader import TBFileReader
 from gui.TBWaveFormPlots import TracePlot, SurfacePlot
 from gui.TBShashlikFaces import ShashlikHeatmap
 from gui.TDCtiming import TDCtiming
+from gui.TBFiberADC import FiberADC
 from gui.TBDisplay3D import Display3D
 #------------------------------------------------------------------------------
 WIDTH        = 1000            # Width of GUI in pixels
@@ -177,10 +178,10 @@ class TBEventDisplay:
         self.vframe.AddFrame(self.toolBar, TOP_X)
 
         # Add picture buttons        
-        self.refreshButton = PictureButton(self, self.toolBar,
-                        picture='Button-Refresh.png',
-                        method='refreshFile',
-                        text='refresh file for new events')
+        #self.refreshButton = PictureButton(self, self.toolBar,
+        #                picture='Button-Refresh.png',
+        #                method='refreshFile',
+        #                text='refresh file for new events')
 
         
         self.enchiladaButton = PictureButton(self, self.toolBar,
@@ -218,10 +219,16 @@ class TBEventDisplay:
                         method='snapCanvas',
                         text='snap this canvas')
 
+        self.cycleButton = PictureButton(self, self.toolBar,
+                        picture='Bicycle.jpg',
+                        method='cycleTabs',
+                        text='snap this canvas')
+
         self.accumulateButton = CheckButton(self, self.toolBar,
                         hotstring='Accumulate',
                         method='toggleAccumulate',
                         text='Accumulate')
+
 
         #-------------------------------------------------------------------
         # Add a notebook with multiple pages
@@ -229,10 +236,15 @@ class TBEventDisplay:
 
     
         
-        #general utili struct members:
+        #general util struct members:
         self.util.accumulate = False   
         self.util.stealthmode = False  
         self.util.filename = self.filename
+        #WC trace bools:
+        self.util.showBoard112 = True
+        self.util.showBoard113 = True
+        self.util.showBoard115 = True
+        self.util.showBoard116 = True
         #WC bools:
         self.util.WC_showIThits = True
         self.util.WC_showQhits = True
@@ -245,21 +257,23 @@ class TBEventDisplay:
         self.util._3D_showWC1 = True
         self.util._3D_showWC2 = True
         self.util._3D_isolateClusters = False
-        
+
+        WFbuttons = [('Board 112','toggleShowBoard112','toggleShowBoard112',True),('Board 113','toggleShowBoard113','toggleShowBoard113',True),('Board 115','toggleShowBoard115','toggleShowBoard115',True),('Board 116','toggleShowBoard116','toggleShowBoard116',True)]
         WCbuttons = [('In-time hits','toggleShowIThits','toggleShowIThits', True),('Quality hits','toggleShowQhits','toggleShowQhits', True)]
         ThreeDbuttons = [('show WC1','toggleShowWC1','toggleShowWC1', True),('show WC2','toggleShowWC2','toggleShowWC2', True),('isolate cluster','toggleIsolateClusters','toggleIsolateCluster', False)]
         
         
         
-        self.redraw = True
+        self.reraw = True
         self.shutterOpen = False
         self.pageName = 'default'
                  
         self.noteBook = NoteBook(self, self.vframe, 'setPage', width, height)
         # Add pages 
         self.display = {}
-        for pageName, constructor, buttons in [('WF traces', 'TracePlot(canvas)', None),
+        for pageName, constructor, buttons in [('WF traces', 'TracePlot(canvas)', WFbuttons),
                           ('ADC heatmap',   'ShashlikHeatmap(canvas)', None),
+                          ('ADC fibers', 'FiberADC(canvas)', None), 
                           ('Wire chambers', 'WCPlanes(canvas)', WCbuttons),
                           ('TDC timing','TDCtiming(canvas)', None),
                           ('3D display',    'Display3D(page)', ThreeDbuttons)]:
@@ -390,6 +404,7 @@ class TBEventDisplay:
     def closeFile(self):
         try:
             if self.reader.file().IsOpen():
+                #gSystem.Exit()
                 self.reader.file().Close()
                 del self.reader
         except:
@@ -401,10 +416,12 @@ class TBEventDisplay:
         if id==1:
             self.pageName = 'Heatmap'
         if id==2:
+            self.pageName = 'Fibers'
+        if id==3:
             self.pageName = 'WC'
-        if id==2:
-            self.pageName = 'TDC'
         if id==4:
+            self.pageName = 'TDC'
+        if id==5:
             self.pageName = '3D_'
         self.noteBook.SetPage(id)
         if self.eventNumber >= 0:
@@ -448,6 +465,21 @@ class TBEventDisplay:
         self.timer.Start(self.DELAY, kFALSE)
         self.mutex.UnLock()
         self.debug('end:forwardPlayer')
+
+    def cycleTabs(self):
+        self.debug('begin:cycleTabs')
+        self.mutex.Lock()
+        if self.noteBook.pageNumber == 5:#len(self.noteBook.pages)-1:
+            self.noteBook.pageNumber = 0
+        self.timer.Start(self.DELAY*5, kFALSE)
+        self.noteBook.pageNumber+=1
+        self.noteBook.SetPage(self.noteBook.pageNumber)
+        self.displayEvent()
+        self.forward = True
+        self.cycle = True
+        self.mutex.UnLock()
+        self.debug('end:cycleTabs')
+        
         
     def rewindPlayer(self):
         self.debug('begin:rewindPlayer')
@@ -461,10 +493,13 @@ class TBEventDisplay:
         self.debug('begin:stopPlayer')
         self.mutex.Lock()
         self.timer.Stop()
+        self.cycle = False
         self.mutex.UnLock()
         self.debug('end:stopPlayer - STOP REQUESTED')
 
     def managePlayer(self):
+        if self.cycle:
+            self.cycleTabs()
         if self.forward:
             self.nextEvent()
         else:
@@ -497,6 +532,33 @@ class TBEventDisplay:
         self.shutterOpen = False
         self.debug("end:snapCanvas")
 
+    def toggleShowBoard112(self):
+            self.debug("begin:toggleShowBoard112")
+            self.util.showBoard112 = not self.util.showBoard112
+            self.redraw = True
+            self.displayEvent()
+            self.debug("end:toggleShowBoard112")
+
+    def toggleShowBoard113(self):
+            self.debug("begin:toggleShowBoard113")
+            self.util.showBoard113 = not self.util.showBoard113
+            self.redraw = True
+            self.displayEvent()
+            self.debug("end:toggleShowBoard113")
+            
+    def toggleShowBoard115(self):
+            self.debug("begin:toggleShowBoard115")
+            self.util.showBoard115 = not self.util.showBoard115
+            self.redraw = True
+            self.displayEvent()
+            self.debug("end:toggleShowBoard115")
+
+    def toggleShowBoard116(self):
+            self.debug("begin:toggleShowBoard116")
+            self.util.showBoard116 = not self.util.showBoard116
+            self.redraw = True
+            self.displayEvent()
+            self.debug("end:toggleShowBoard116")
 
     def toggleShowIThits(self):
         self.debug("begin:ShowIThits")
@@ -553,7 +615,9 @@ class TBEventDisplay:
         self.statusBar.SetText('table(x, y) = (%d, %d) ' % (self.util.tableX, self.util.tableY), 1)
 
     def close(self):
-        gApplication.Terminate()
+        gSystem.Abort()
+        gApplication.Terminate(0)
+        #gApplication.Close()
 
     def usage(self):
         dialog = Dialog(gClient.GetRoot(), self.main)
@@ -566,6 +630,7 @@ class TBEventDisplay:
         #dialog.SetText('About', ABOUT)
 
     def exit(self):
+        gEve.CloseEveWindow()
         self.close()
 
     def notdone(self):
@@ -653,13 +718,17 @@ class TBEventDisplay:
         page = self.noteBook.pages[pageNumber]
         self.debug("begin:displayEvent - %s" % page.name)
         if self.shutterOpen:
-            if not os.path.exists("cached_pdfs"):
-                os.system('mkdir cached_pdfs')
+            if not os.path.exists("pdfs_"+self.filename[self.filename.rfind('/')+1:-5]):
+                os.system('mkdir pdfs_'+self.filename[self.filename.rfind('/')+1:-5])
 
             if '3D' in page.name:
-                gEve.GetDefaultGLViewer().SavePicture('cached_pdfs/'+self.pageName+str(self.eventNumber)+'.png')
+                pdfname = 'pdfs_'+self.filename[self.filename.rfind('/')+1:-5]+\
+                  '/'+self.pageName+str(self.eventNumber)+'.png'
+                gEve.GetDefaultGLViewer().SavePictureScale(pdfname,1.0)
             else:
-                page.canvas.Print('cached_pdfs/'+self.pageName+str(self.eventNumber)+'.pdf')
+                pdfname = 'pdfs_'+self.filename[self.filename.rfind('/')+1:-5]+\
+                  '/'+self.pageName+str(self.eventNumber)+'.pdf'
+                page.canvas.Print(pdfname)
             
             page.redraw = False
             return
@@ -671,13 +740,14 @@ class TBEventDisplay:
         if '3D' not in page.name:
             self.display[page.name].Draw(self.reader.event(), self.util)
         else:
+            self.display['ADC heatmap'].Draw(self.reader.event(), self.util)
             self.util.stealthmode = True
             self.display['Wire chambers'].Draw(self.reader.event(), self.util)
-            self.display['ADC heatmap'].Draw(self.reader.event(), self.util)
             self.util.stealthmode = False
             self.display[page.name].Draw(self.reader.event(), self.util)
+            #if 'TDC' in page.name:
+            #self.tdcfile.Close()
         print "displaying with self.util.eventNumber = "+str(self.util.eventNumber)
-        print "list of canvases", gROOT.GetListOfCanvases()
         self.redraw = False
         page.redraw = False
         self.debug("end:displayEvent")		

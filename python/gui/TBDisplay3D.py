@@ -34,17 +34,6 @@ class Display3D:
     def __init__(self, page):
 
         self.page = page
-
-        # Coordinates:
-        # +z to the right, in direction of beam
-        # +x into the page
-        # +y vertically upwards
-
-        self.geometry = TEveElementList("Testbeam 2014 Geometry")
-
-        tracklength = dz_setup + 800 #length of track to draw
-
-        gEve.AddElement(self.geometry)
         self.first = True
 
     def __del__(self):
@@ -69,9 +58,10 @@ class Display3D:
             for i in range(130):
             	elements.LastChild().Destroy()
         
-        if not util.accumulate:
-        	elements.DestroyElements()       
-        
+        if not util.accumulate:   
+            elements.DestroyElements()   
+
+            
         
         hitx1 = -util.x1hit * x_y_scale_factor #left-handed coordinate system!
         hity1 = util.y1hit * x_y_scale_factor
@@ -81,38 +71,39 @@ class Display3D:
         tableX = util.tableX * x_y_scale_factor
         tableY = util.tableY * x_y_scale_factor
 
-
+        
         for hit1 in range(0,util.WC1Xallhits.size()):
-            blob = TEveGeoShape('blobby'+str(hit1+1))
+            blob = TEveGeoShape(str(hit1+1)+'blobby'+str(util.eventNumber))
             blob.SetShape(TGeoSphere(0,50.0))
             blob.SetMainColor(kBlue)
             blob.RefMainTrans().SetPos(-x_y_scale_factor*util.WC1Xallhits[hit1],x_y_scale_factor* util.WC1Yallhits[hit1], 0)
             elements.AddElement(blob)
         
         for hit2 in range(0,util.WC2Xallhits.size()):
-            blob = TEveGeoShape('blobbby'+str(hit2+1))
+            blob = TEveGeoShape(str(hit2+1)+'blobbby'+str(util.eventNumber))
             blob.SetShape(TGeoSphere(0,50.0))
             blob.SetMainColor(kBlue)
             blob.RefMainTrans().SetPos(-x_y_scale_factor*util.WC2Xallhits[hit2],x_y_scale_factor* util.WC2Yallhits[hit2], z_WC2)
             elements.AddElement(blob)
-
-
-        self.blob1 = TEveGeoShape('blob1')
+        
+        
+        self.blob1 = TEveGeoShape('blob1_'+str(util.eventNumber))
         self.blob1.SetShape(TGeoSphere(0,50.0))
         self.blob1.SetMainColor(kRed)
         self.blob1.RefMainTrans().SetPos(hitx1, hity1, 0)
         elements.AddElement(self.blob1)
-        self.blob2 = TEveGeoShape('blob2')
+        self.blob2 = TEveGeoShape('blob2_'+str(util.eventNumber))
         self.blob2.SetShape(TGeoSphere(0,50.0))
         self.blob2.SetMainColor(kRed)
         self.blob2.RefMainTrans().SetPos(hitx2, hity2,z_WC2)
         elements.AddElement(self.blob2)
+        
 
         
         #elements.AddElement(TEveElement(util.mycanv))
-
         
-        self.track = TEveGeoShape('track')
+        
+        self.track = TEveGeoShape('track_'+str(util.eventNumber))
         self.track.SetShape(TGeoEltu(5,5,tracklength/2))
         self.track.SetMainColor(kYellow)
         thx = atan((hitx1-hitx2)/z_WC2)
@@ -125,38 +116,40 @@ class Display3D:
         
         self.track.RefMainTrans().SetRotByAngles(0, thx, thy)
         elements.AddElement(self.track)
-
-        self.wc1 = TEveGeoShape('WC 1')
+        
+        
+        self.wc1 = TEveGeoShape('WC1_'+str(util.eventNumber))
         self.wc1.SetShape( TGeoTrd1(dx1_WC/2, dx2_WC/2, dy_WC/2, dz_WC/2) )
         self.wc1.SetMainColor(kCyan)
-        self.wc1.SetMainTransparency(20)
+        self.wc1.SetMainTransparency(30)
         if util._3D_showWC1:
             elements.AddElement(self.wc1)
-
             
-        self.wc2 = TEveGeoShape('WC 2')
+
+         
+        self.wc2 = TEveGeoShape('WC2_'+str(util.eventNumber))
         self.wc2.SetShape( TGeoTrd1(dx1_WC/2, dx2_WC/2, dy_WC/2, dz_WC/2) )
         self.wc2.SetMainColor(kMagenta)
        	self.wc2.SetMainTransparency(50)
        	self.wc2.RefMainTrans().SetPos(0,0, z_WC2)
         if util._3D_showWC2:
             elements.AddElement(self.wc2)
-
-        
+            
+          
 
         # Draw shashlik modules
         step = dx1_Tower/2
         xmin =-4*step + tableX
         ymin =-4*step + tableY
 
-
+        
 
         self.module = []
         for ii in xrange(8):
             x = -(xmin + (ii+0.5)*step)
             for jj in xrange(8):
                 y = ymin + (jj+0.5)*step
-                self.module.append(TEveGeoShape('Shashlik%d%d' % (ii, jj)))
+                self.module.append(TEveGeoShape('ShashlikUp%d%d_%d' % (ii, jj, util.eventNumber)))
                 self.module[-1].SetShape( TGeoTrd1(dx1_Tower/4, dx2_Tower/4,
 						   dy_Tower/4, dz_Tower/4) )
                 #self.module[-1].SetMainColor(color[icolor])
@@ -167,14 +160,15 @@ class Display3D:
                     self.module[-1].SetMainColor(0)
                     self.module[-1].SetMainTransparency(100)
                 elements.AddElement(self.module[-1])
+                
 
-
+        
         self.module = []
         for ii in xrange(8):
             x = -(xmin + (ii+0.5)*step)
             for jj in xrange(8):
                 y = ymin + (jj+0.5)*step
-                self.module.append(TEveGeoShape('Shashlik%d%d' % (ii+100, jj+100)))
+                self.module.append(TEveGeoShape('ShashlikD%d%d_%d' % (ii, jj, util.eventNumber)))
                 self.module[-1].SetShape( TGeoTrd1(dx1_Tower/4, dx2_Tower/4,
 						   dy_Tower/4, dz_Tower/4) )
                 #self.module[-1].SetMainColor(color[icolor])
@@ -185,7 +179,9 @@ class Display3D:
                     self.module[-1].SetMainTransparency(100)
                 self.module[-1].RefMainTrans().SetPos(x, y, z_Ecal+dz_Tower/2)
                 elements.AddElement(self.module[-1])
-
+                
+        
+        
         self.Show(util)
 
     

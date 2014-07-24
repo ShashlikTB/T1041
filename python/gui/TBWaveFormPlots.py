@@ -21,7 +21,7 @@ class TracePlot:
         self.step      = 6.5
         self.offset    = self.nchannels*self.step/2
 
-        nsamples  = self.nsamples
+        nsamples  = self.nsamples - 50
         nchannels = self.nchannels
 
         # cache wave form histograms in parent object
@@ -36,7 +36,7 @@ class TracePlot:
                          'sample number','',
                          nsamples, 0, nsamples)
             self.h[ii].SetMinimum(-500)
-            self.h[ii].SetMaximum( 500)
+            self.h[ii].SetMaximum( 2500)
             self.h[ii].SetLineColor(color[kk])
         h = self.h
 
@@ -47,7 +47,7 @@ class TracePlot:
         #----------------------------------------------------------------------
         # fill
         #----------------------------------------------------------------------
-        nsamples  = self.nsamples
+        nsamples  = self.nsamples - 50
         nchannels = self.nchannels
         step      = self.step
         offset    = self.offset
@@ -66,21 +66,24 @@ class TracePlot:
         gStyle.SetOptStat(0)
 
         self.canvas.cd()
-        option = 'hist'
+        option = 'hist same'
+        h[0].Reset()
+        h[0].Draw('hist')
         for ii in xrange(nchannels):
             channel  = event.GetPadeChan(ii)
+            board = channel.GetBoardID()
+            boardwalk = [str(112*util.showBoard112),str(113*util.showBoard113),str(115*util.showBoard115),str(116*util.showBoard116)]
+            if not str(board) in boardwalk:
+                continue
             pedestal = channel.GetPedestal()
             wform    = channel.GetWform()
             yoffset  = offset - step * ii
-            ymax = 0.0
             for jj in xrange(nsamples):
                 ibinx = jj+1				
                 y = wform[jj] - pedestal
                 h[ii].SetBinContent(ibinx, y - yoffset)
-                if y > ymax: ymax = y
-
             h[ii].Draw(option)
-            option = 'hist same'
+
         self.canvas.Update()
 
 #------------------------------------------------------------------------------
