@@ -123,4 +123,6 @@ clean:
 	rm -rf $(LIBRARY) $(BLDDIR)/*Dict.* $(BLDDIR)/*.o
 
 cleanall: clean
-	rm -f python/*pyc python/gui/*pyc rootscript/*_C.d rootscript/*.so *~ */*~
+	rm -f python/*pyc python/gui/*pyc rootscript/*_C.d 
+	rm -f rootscript/*.so *~ */*~ 
+	rm -rf tmp build
