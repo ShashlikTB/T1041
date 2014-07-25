@@ -1,3 +1,6 @@
+#ifndef FIBERMAP_H
+#define FIBERMAP_H
+
 // look-up table of detector fibers to pade channels
 // naming conventions
 //   PADE channels - boardID*100+channel_number
@@ -138,3 +141,5 @@ const int FIBERMAP[]={
 	11831,	1603,		11607,	-1604,
 	11829,	1604,		11605,	-1603
 };
+
+#endif
