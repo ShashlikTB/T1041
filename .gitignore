@@ -1,4 +1,10 @@
 tmp/
+build/
 wcdb.txt
 latest.root
 latest_reco.root
+*pyc
+*.d
+*.so
+*~
+*.gch

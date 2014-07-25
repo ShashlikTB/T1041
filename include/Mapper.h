@@ -71,6 +71,7 @@ class Mapper{
   int ChannelID2FiberID(int channelID) const;
   int FiberID2ChannelID(int fiberID) const;
   void ChannelID2ModuleFiber(int channelID, int &moduleID, int &fiberID) const;
+  void ChannelIndex2ModuleFiber(int channelIndex, int &moduleID, int &fiberID) const;
   int ChannelID2ChannelIndex(int channelID) const;
   int ChannelIndex2ChannelID(int channelIndex) const;
 

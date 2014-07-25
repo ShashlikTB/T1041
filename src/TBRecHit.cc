@@ -3,41 +3,41 @@
 
 
 TBRecHit::TBRecHit(PadeChannel *pc, Float_t zsp, UInt_t options){
-  _zsp=zsp;
+  nzsp=zsp;
   if (options&kNoFit) {
-    _status|=kNoFit;
+    status|=kNoFit;
     Init(pc,false);
   }
   else Init(pc);
 }
 
 void TBRecHit::Init(PadeChannel *pc,  Float_t zsp){
-  _channelIndex=-1;
-  _maxADC=-1;
-  _pedestal=-999;
-  _noise=-999;
-  _aMaxValue=-999;
-  _tRiseValue=-1;
-  _aMaxError=0;
-  _tRiseError=0;
-  _ndof=0;
-  _status=0;
-  _zsp=zsp;
+  channelIndex=-1;
+  maxADC=-1;
+  pedestal=-999;
+  noise=-999;
+  aMaxValue=-999;
+  tRiseValue=-1;
+  aMaxError=0;
+  tRiseError=0;
+  ndof=0;
+  status=0;
+  nzsp=zsp;
   if (!pc) return;
   SetChannelIndex(pc->GetChannelIndex());
-  _maxADC=pc->GetMax();
+  maxADC=pc->GetMax();
   double ped,sig;
   pc->GetPedestal(ped,sig);
-  _pedestal=ped;
-  _noise=sig;
-  if (_status&kNoFit) return;
+  pedestal=ped;
+  noise=sig;
+  if (status&kNoFit) return;
   FitPulse(pc);
 }
 
 
 void TBRecHit::GetXYZ(double &x, double &y, double &z) const {
   Mapper *mapper=Mapper::Instance();
-  int channelID=mapper->ChannelIndex2ChannelID(_channelIndex);
+  int channelID=mapper->ChannelIndex2ChannelID(channelIndex);
   mapper->ChannelXYZ(channelID,x,y,z);
 }
 
@@ -49,19 +49,32 @@ void TBRecHit::GetXYZ(float &x, float &y, float &z) const {
   z=p[2];
 }
 
+
+Int_t TBRecHit::GetChannelID() const{
+  Mapper *mapper=Mapper::Instance();
+  return mapper->ChannelIndex2ChannelID(channelIndex);
+}
+
+void TBRecHit::GetModuleFiber(int &moduleID, int &fiberID) const{
+  Mapper *mapper=Mapper::Instance();
+  mapper->ChannelIndex2ModuleFiber(channelIndex,moduleID,fiberID);
+}
+
 void TBRecHit::FitPulse(PadeChannel *pc){
-  if ( (_maxADC-_pedestal) / _noise < _zsp ) {
-    _status|=kZSP;
+  if ( (maxADC-pedestal) / noise < nzsp ) {
+    status|=kZSP;
     return;
   }
   PulseFit fit=PadeChannel::FitPulse(pc);
-  _pedestal=fit.pedestal;
-  _noise=fit.noise;
-  _aMaxValue=fit.aMaxValue;
-  _tRiseValue=fit.tRiseValue;
-  _chi2=fit.chi2Peak;
-  _ndof=fit.ndofPeak;
-  if (fit.status>0) _status|=kPoorFit;
+  pedestal=fit.pedestal;
+  noise=fit.noise;
+  aMaxValue=fit.aMaxValue;
+  tRiseValue=fit.tRiseValue;
+  aMaxError=fit.aMaxError;
+  tRiseError=fit.tRiseError;
+  chi2=fit.chi2Peak;
+  ndof=fit.ndofPeak;
+  if (fit.status>0) status|=kPoorFit;
 }
 
 std::ostream& operator<<(std::ostream& s, const TBRecHit& hit) {
