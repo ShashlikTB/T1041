@@ -8,7 +8,7 @@ from ROOT import *
 from TBUtils import *
 
 
-LoadLibs("TBLIB","PadeChannel.so","TBEvent.so")
+LoadLibs("TBLIB","libTB.so")
 
 
 gROOT.ProcessLine(".L rootscript/testChannelMap.C+")

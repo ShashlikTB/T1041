@@ -28,10 +28,10 @@ class PadeHeader : public TObject{
   UShort_t _events;
   UShort_t _memReg;
   UShort_t _trigPtr;
-  UShort_t _pTemp;
-  UShort_t _sTemp;
-  UShort_t _gainA;     // main gain setting
-  UShort_t _biasA;     // main bias setting
+  UShort_t _pTemp;    // temperature on PADE board
+  UShort_t _sTemp;    // temperature on SIPM board
+  UShort_t _gainA;    // LNA [bits 1:0]  PGA [bits 3:2]  VGA [bits 15:4]
+  UShort_t _biasA;    // main bias setting
 };
 
 /// for now ASSUME we are only dealing with WC1 and WC2
@@ -91,11 +91,10 @@ private:
   // beam and detector parameters
   Int_t         _pdgID;                    // particle ID for beam
   Float_t       _nomMomentum;              // beam momentum setting
-  Float_t       _tableX;                   // table position 
-  Float_t       _tableY;                   // table position 
+  Float_t       _tableX;                   // table position
+  Float_t       _tableY;                   // table position
   Float_t       _boxTemp;                  // temperature in environmental box
   Float_t       _roomTemp;                 // temperature in test beam area
-  
 };
 
 

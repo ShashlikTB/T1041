@@ -30,6 +30,7 @@ class PadeChannel : public TObject {
   Int_t GetChannelIndex();  // index 0--127, following Ledovskoy convention
   UShort_t* GetWform() {return _wform;}
   UInt_t GetMax() {return _max;}
+  float GetMaxCalib();
   Int_t GetPeak() {return _peak;}
   Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
   void GetXYZ(double &x, double &y, double &z);

@@ -26,32 +26,35 @@ class TBRecHit : public TObject {
   };
   TBRecHit(PadeChannel *pc=0, Float_t zsp=0, UInt_t options=0);
   void Init(PadeChannel *pc=0,  Float_t zsp=0);
-  Int_t ChannelIndex() const {return _channelIndex;}
+  Int_t ChannelIndex() const {return channelIndex;}
+  Int_t GetChannelID() const;  // returns board_id*100+ch_number
+  void GetModuleFiber(int &moduleID, int &fiberID) const;
   void FitPulse(PadeChannel *pc);
   void GetXYZ(double &x, double &y, double &z) const;
   void GetXYZ(float &x, float &y, float &z) const;
-  unsigned short MaxADC() const {return _maxADC;}
-  Float_t AMax() const {return _aMaxValue;}
-  Float_t TRise() const {return _tRiseValue;}
-  Float_t Pedestal() const {return _pedestal;}
-  Float_t NoiseRMS() const {return _noise;}
-  Float_t Chi2() const {return _chi2;}
-  UInt_t Status() const {return _status;}
-  void SetChannelIndex(Int_t idx) {_channelIndex=idx;} 
-  void SetOptNoFit() {_status&=kNoFit;}
+  unsigned short MaxADC() const {return maxADC;}
+  Float_t AMax() const {return aMaxValue;}
+  Float_t TRise() const {return tRiseValue;}
+  Float_t Pedestal() const {return pedestal;}
+  Float_t NoiseRMS() const {return noise;}
+  Float_t Chi2() const {return chi2;}
+  Float_t NZsp() const {return nzsp;}
+  UInt_t Status() const {return status;}
+  void SetChannelIndex(Int_t idx) {channelIndex=idx;} 
+  void SetOptNoFit() {status&=kNoFit;}
  private:
-  Short_t _channelIndex;   // channel index, S.L. convention
-  UShort_t _maxADC;        // max value of ADC samples (in expected signal region)
-  Float_t _pedestal;       // from average of samples before peak
-  Float_t _noise;          // RMS of pedistal samples
-  Float_t _aMaxValue;      // Peak from fit to pulse shape
-  Float_t _tRiseValue;
-  Float_t _aMaxError;      // beginning of pulse from fit
-  Float_t _tRiseError;    
-  Float_t _chi2;            
-  Float_t _ndof;
-  Float_t _zsp;            // nSigma zero suppression
-  UInt_t _status;
+  Short_t channelIndex;   // channel index, S.L. convention
+  UShort_t maxADC;        // max value of ADC samples (in expected signal region)
+  Float_t pedestal;       // from average of samples before peak
+  Float_t noise;          // RMS of pedistal samples
+  Float_t aMaxValue;      // Peak from fit to pulse shape
+  Float_t tRiseValue;
+  Float_t aMaxError;      // beginning of pulse from fit
+  Float_t tRiseError;    
+  Float_t chi2;            
+  Float_t ndof;
+  Float_t nzsp;            // nSigma zero suppression
+  UInt_t status;
 };
 	       
 std::ostream& operator<<(std::ostream& s, const TBRecHit& hit);

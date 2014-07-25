@@ -32,6 +32,14 @@ void Mapper::ChannelID2ModuleFiber(int channelID, int &moduleID, int &fiberID) c
   moduleID=fiberID/100;
 }
 
+void Mapper::ChannelIndex2ModuleFiber(int channelIndex, int &moduleID, int &fiberID) const{
+  int channelID=ChannelIndex2ChannelID(channelIndex);
+  std::map<int,int>::const_iterator search=_padeMap.find(channelID);
+  fiberID=search->second;
+  moduleID=fiberID/100;
+}
+
+
 int Mapper::ChannelID2ChannelIndex(int channelID) const {
   int module,fiberID;
   ChannelID2ModuleFiber(channelID,module,fiberID);

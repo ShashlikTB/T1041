@@ -4,7 +4,7 @@
 // 5/1/2014 BH: update to mapping in mm units
 
 #include "TH2I.h"
-#include "../include/shashlik.h"
+#include "../include/Mapper.h"
 #include "TStyle.h"
 #include "TCanvas.h"
 #include <iostream>

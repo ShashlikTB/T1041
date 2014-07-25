@@ -1,4 +1,5 @@
 #include "PadeChannel.h"
+#include "calConstants.h"
 #include "Mapper.h"
 
 void PadeChannel::Reset(){
@@ -187,4 +188,10 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc, bool laserShape){
   //    ndof       - Not needed. Use ndofPeak instead
 
   return result;
+}
+
+
+float PadeChannel::GetMaxCalib(){
+  int idx=GetChannelIndex();
+  return _max*CalConstants[idx];
 }
