@@ -7,7 +7,7 @@
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "../include/TBEvent.h"
-#include "../include/shashlik.h"
+#include "../include/Mapper.h"
 
 const int MAXADC=4095;
 
@@ -76,7 +76,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
     t1041->GetEntry(i);
     for (Int_t j = 0; j < event->NPadeChan(); j++){
       PadeChannel pch = event->GetPadeChan(j);
-      float ped,sig;
+      double ped,sig;
       pch.GetPedestal(ped,sig);
       UShort_t max = pch.GetMax()-ped;
       Int_t maxTime = pch.GetPeak();
@@ -87,7 +87,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
       int moduleID,fiberID;
       mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
 
-      float x,y;
+      double x,y;
       mapper->ModuleXY(moduleID,x,y);
       if (moduleID<0) {
 	hModU->Fill(x, y, max);
