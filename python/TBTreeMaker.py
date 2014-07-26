@@ -21,7 +21,7 @@ from TBUtils import *
 DEBUG_LEVEL = 0
 NMAX = 1000000   # stop after NMAX events
 MASTERID = 112   
-MAXPERSPILL=126  # do not process more that this many events per spill ( mem overwrite issue )
+MAXPERSPILL=1000  # do not process more that this many events per spill ( mem overwrite issue )
 
 ###########################
 
