@@ -1,9 +1,17 @@
 # very rudimentary code to display wave forms 
 # Created 4/13/2014 B.Hirosky: Initial release
 
-import os, re, glob, sys, array
+import sys, signal
 from ROOT import *
 from TBUtils import *
+
+# Register signal handler to stop cleanly on ctrl-C.
+def signal_handler(signal, frame):
+    print
+    print 'signal_handler: received ctrl-C, exiting...'
+    sys.exit(0)
+
+signal.signal(signal.SIGINT,signal_handler)
 
 if len(sys.argv)<2:
     runDat="latest.root"

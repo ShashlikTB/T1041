@@ -35,6 +35,7 @@ def usage():
     print "      -r DIR         : Process all padefiles in DIR, and all subdirectories"
     print "                       Overrides all files given on command line list"
     print "      -k             : Keep existing root files, only process new inputs"
+    print "      -l             : Copy logger messages to [root file basename].log"
     print "      -o DIR         : Output dir, instead of default = location of input file" 
     print 
     sys.exit()
@@ -66,12 +67,18 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
     #  Declare new file and tree with branches                              #
     #=======================================================================#
     outFile=padeDat.replace(".bz2","").replace(".txt",".root")
+
     if not outDir=="":
         outFile=outDir+"/"+os.path.basename(outFile)
 
     if  os.path.isfile(outFile) and keepFlag:
         logger.Info(outFile,"is present, skip processing due to -k flag")
         return
+
+    if logToFile:
+        logFile=padeDat.replace(".bz2","").replace(".txt",".log")
+        logger.Info("Writing logger output to file:",logFile)
+        logger.SetLogFile(logFile)
 
     timeStamp=os.path.basename(outFile).replace("rec_capture_","").replace(".root","")
     tableX,tableY=getTableXY(timeStamp)
@@ -312,7 +319,7 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:o:kp")
+        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:o:klp")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
@@ -321,6 +328,7 @@ if __name__ == '__main__':
     recurse=False
     keepFlag=False
     prof=False
+    logToFile=False
     outDir=""
     for o, a in opts:
         if o == "-n": NEventLimit=int(a)
@@ -330,6 +338,7 @@ if __name__ == '__main__':
             inputDir=a
             recurse=True
         elif o == "-k": keepFlag=True
+        elif o == "-l": logToFile=True
         elif o == "-p": prof=True
         elif o == "-o": outDir=a
 

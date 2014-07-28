@@ -46,19 +46,27 @@ class Logger():
         self.RED='\033[91m'
         self.COL_OFF='\033[0m'
         self.max=max
+        self.logfile=""
+        self.stdout=sys.stdout
         print "Init logger, max print count =",max
+    def SetLogFile(self,logfile):
+        self.logfile=logfile
+        self.stdout = open(self.logfile, 'w') # output socket
     def Info(self,*arg):
-        msg=ccat(*arg)
-        sys.stdout.write("Info: "+msg+"\n")   
+        msg="Info: "+ccat(*arg)+"\n"
+        sys.stdout.write(msg)   
+        self.stdout.write("Info: "+msg+"\n")   
     def Warn(self,*arg):
-        msg=ccat(*arg)
+        msg="Warning: "+ccat(*arg)+"\n"
         if msg in self.warnings: self.warnings[msg]=self.warnings[msg]+1
         else: self.warnings[msg]=1
         if self.warnings[msg]<=self.max: 
-            sys.stdout.write(self.RED+"Warning: "+msg+"\n"+self.COL_OFF)
+            sys.stdout.write(self.RED+msg+self.COL_OFF)
+            self.stdout.write(msg)
     def Fatal(self,*arg):
-        msg=ccat(*arg)
-        sys.stdout.write(self.RED+"**FATAL**: "+msg+"\n"+self.COL_OFF)
+        msg="**FATAL**: "+ccat(*arg)+"\n"
+        sys.stdout.write(self.RED+msg+self.COL_OFF)
+        self.stdout.write(msg)
         sys.exit(1)
     def Summary(self):
         print
