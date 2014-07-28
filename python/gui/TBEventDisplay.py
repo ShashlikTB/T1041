@@ -242,9 +242,9 @@ class TBEventDisplay:
         self.util.filename = self.filename
         #WC trace bools:
         self.util.showBoard112 = True
-        self.util.showBoard113 = True
         self.util.showBoard115 = True
         self.util.showBoard116 = True
+        self.util.showBoard117 = True
         #WC bools:
         self.util.WC_showIThits = True
         self.util.WC_showQhits = True
@@ -258,7 +258,7 @@ class TBEventDisplay:
         self.util._3D_showWC2 = True
         self.util._3D_isolateClusters = False
 
-        WFbuttons = [('Board 112','toggleShowBoard112','toggleShowBoard112',True),('Board 113','toggleShowBoard113','toggleShowBoard113',True),('Board 115','toggleShowBoard115','toggleShowBoard115',True),('Board 116','toggleShowBoard116','toggleShowBoard116',True)]
+        WFbuttons = [('Board 117','toggleShowBoard117','toggleShowBoard117',True),('Board 116','toggleShowBoard116','toggleShowBoard116',True),('Board 115','toggleShowBoard115','toggleShowBoard115',True),('Board 112','toggleShowBoard112','toggleShowBoard112',True)]
         WCbuttons = [('In-time hits','toggleShowIThits','toggleShowIThits', True),('Quality hits','toggleShowQhits','toggleShowQhits', True)]
         ThreeDbuttons = [('show WC1','toggleShowWC1','toggleShowWC1', True),('show WC2','toggleShowWC2','toggleShowWC2', True),('isolate cluster','toggleIsolateClusters','toggleIsolateCluster', False)]
         
@@ -539,26 +539,26 @@ class TBEventDisplay:
             self.displayEvent()
             self.debug("end:toggleShowBoard112")
 
-    def toggleShowBoard113(self):
-            self.debug("begin:toggleShowBoard113")
-            self.util.showBoard113 = not self.util.showBoard113
-            self.redraw = True
-            self.displayEvent()
-            self.debug("end:toggleShowBoard113")
-            
     def toggleShowBoard115(self):
             self.debug("begin:toggleShowBoard115")
             self.util.showBoard115 = not self.util.showBoard115
             self.redraw = True
             self.displayEvent()
             self.debug("end:toggleShowBoard115")
-
+            
     def toggleShowBoard116(self):
             self.debug("begin:toggleShowBoard116")
             self.util.showBoard116 = not self.util.showBoard116
             self.redraw = True
             self.displayEvent()
             self.debug("end:toggleShowBoard116")
+
+    def toggleShowBoard117(self):
+            self.debug("begin:toggleShowBoard117")
+            self.util.showBoard117 = not self.util.showBoard117
+            self.redraw = True
+            self.displayEvent()
+            self.debug("end:toggleShowBoard117")
 
     def toggleShowIThits(self):
         self.debug("begin:ShowIThits")

@@ -118,9 +118,9 @@ BFG Repo Cleaner
 
 Adding indivudual files from remote fork
 
- * git remote add <some name> remote-uri
- * git fetch <some name>
- * git diff [--name-only] HEAD <some name>/master
- * git checkout <some name>/master <file to add>
+ * git remote add \<some name\> remote-uri
+ * git fetch \<some name\>
+ * git diff [--name-only] HEAD \<some name>\/master
+ * git checkout <some name>/master \<file to add\>
 
 

@@ -17,7 +17,6 @@ class FiberADC:
         
 		
 def MakePlots(object, c1, event, util):
-    print "FiberADC called"
     try:
         o = object.hMapADCvsFiber
         p = object.hMapCHI2vsFiber
@@ -28,7 +27,7 @@ def MakePlots(object, c1, event, util):
         gStyle.SetPalette(1)
         gStyle.SetOptStat(0)
 
-        object.hMapADCvsFiber = TH2F('hMapADCfiber','ADC Samples Vs. Fiber', 128,0,128,4000,0,4000)
+        object.hMapADCvsFiber = TH2F('hMapADCfiber','ADC Samples Vs. Fiber', 128,0,128,3000,0,3000)
         object.hMapCHI2vsFiber = TH2F('hMapADCvsFiber','Chi2 Vs. Fiber', 128,0,128,25,0,10000)
         HistoSamStyle(object.hMapADCvsFiber)
         HistoSamStyle(object.hMapCHI2vsFiber)
@@ -57,6 +56,7 @@ def MakePlots(object, c1, event, util):
     if not util.stealthmode:
         gStyle.SetTitleSize(.08,"t"); 
         c1.cd(1)
+        c1.SetLogz()
         hMapADCvsFiber.Draw('COLZ')
         c1.cd(2)
         hMapCHI2vsFiber.Draw('COLZ')

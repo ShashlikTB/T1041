@@ -71,6 +71,10 @@ class Display3D:
         tableX = util.tableX * x_y_scale_factor
         tableY = util.tableY * x_y_scale_factor
 
+        if abs(util.tableX) > 28:
+            tableX = 0
+        if abs(util.tableY) > 28:
+            tableY = 0
         
         for hit1 in range(0,util.WC1Xallhits.size()):
             blob = TEveGeoShape(str(hit1+1)+'blobby'+str(util.eventNumber))
@@ -142,23 +146,21 @@ class Display3D:
         xmin =-4*step + tableX
         ymin =-4*step + tableY
 
-        
-
         self.module = []
         for ii in xrange(8):
             x = -(xmin + (ii+0.5)*step)
             for jj in xrange(8):
                 y = ymin + (jj+0.5)*step
-                self.module.append(TEveGeoShape('ShashlikUp%d%d_%d' % (ii, jj, util.eventNumber)))
+                self.module.append(TEveGeoShape('ShashlikUp%d_%d_%d' % (ii, jj, util.eventNumber)))
                 self.module[-1].SetShape( TGeoTrd1(dx1_Tower/4, dx2_Tower/4,
 						   dy_Tower/4, dz_Tower/4) )
                 #self.module[-1].SetMainColor(color[icolor])
                 color = util.colorsUpstream[8*ii+jj]
                 self.module[-1].SetMainColor(color)
-                self.module[-1].RefMainTrans().SetPos(x, y, z_Ecal)
                 if util._3D_isolateClusters and (color==53 or color==55 or color==58 or color==60):
                     self.module[-1].SetMainColor(0)
                     self.module[-1].SetMainTransparency(100)
+                self.module[-1].RefMainTrans().SetPos(x, y, z_Ecal)
                 elements.AddElement(self.module[-1])
                 
 
@@ -168,7 +170,7 @@ class Display3D:
             x = -(xmin + (ii+0.5)*step)
             for jj in xrange(8):
                 y = ymin + (jj+0.5)*step
-                self.module.append(TEveGeoShape('ShashlikD%d%d_%d' % (ii, jj, util.eventNumber)))
+                self.module.append(TEveGeoShape('ShashlikD%d_%d_%d' % (ii, jj, util.eventNumber)))
                 self.module[-1].SetShape( TGeoTrd1(dx1_Tower/4, dx2_Tower/4,
 						   dy_Tower/4, dz_Tower/4) )
                 #self.module[-1].SetMainColor(color[icolor])
@@ -179,8 +181,14 @@ class Display3D:
                     self.module[-1].SetMainTransparency(100)
                 self.module[-1].RefMainTrans().SetPos(x, y, z_Ecal+dz_Tower/2)
                 elements.AddElement(self.module[-1])
-                
-        
+
+        block = TEveGeoShape('BalanceBlock')
+        block.SetShape(TGeoTrd1(dx1_Tower/4, dx2_Tower/4,
+						   dy_Tower/4, dz_Tower/4))
+        block.SetMainColor(0)
+        block.SetMainTransparency(100)
+        block.RefMainTrans().SetPos(0, 0, z_Ecal+dz_Tower + z_Ecal)
+        elements.AddElement(block)
         
         self.Show(util)
 

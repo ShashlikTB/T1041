@@ -21,7 +21,7 @@ class TracePlot:
         self.step      = 6.5
         self.offset    = self.nchannels*self.step/2
 
-        nsamples  = self.nsamples - 50
+        nsamples  = self.nsamples
         nchannels = self.nchannels
 
         # cache wave form histograms in parent object
@@ -47,7 +47,7 @@ class TracePlot:
         #----------------------------------------------------------------------
         # fill
         #----------------------------------------------------------------------
-        nsamples  = self.nsamples - 50
+        nsamples  = self.nsamples
         nchannels = self.nchannels
         step      = self.step
         offset    = self.offset
@@ -72,7 +72,7 @@ class TracePlot:
         for ii in xrange(nchannels):
             channel  = event.GetPadeChan(ii)
             board = channel.GetBoardID()
-            boardwalk = [str(112*util.showBoard112),str(113*util.showBoard113),str(115*util.showBoard115),str(116*util.showBoard116)]
+            boardwalk = [str(112*util.showBoard112),str(115*util.showBoard115),str(116*util.showBoard116),str(117*util.showBoard117)]
             if not str(board) in boardwalk:
                 continue
             pedestal = channel.GetPedestal()
