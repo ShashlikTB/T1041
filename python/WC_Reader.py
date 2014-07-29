@@ -16,7 +16,7 @@ else: runDat=sys.argv[1]
 
 print "Processing file:",runDat
 
-LoadLibs("TBLIB","TBEvent.so","TBReco.so")
+LoadLibs("TBLIB","libTB.so")
 
 
 gROOT.ProcessLine(".L dqm/WC_Reader.C+")

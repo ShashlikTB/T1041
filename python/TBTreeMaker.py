@@ -367,6 +367,7 @@ if __name__ == '__main__':
 
     count=1
     for padeDat in fileList:
+        if not (padeDat.endswith(".bz2") or padeDat.endswith(".txt")): continue
         print "="*60
         print "Processing File ===>",padeDat,count,"/",len(fileList)
         print "="*60

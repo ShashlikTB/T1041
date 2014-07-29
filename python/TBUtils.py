@@ -55,14 +55,14 @@ class Logger():
     def Info(self,*arg):
         msg="Info: "+ccat(*arg)+"\n"
         sys.stdout.write(msg)   
-        self.stdout.write("Info: "+msg+"\n")   
+        if (self.logfile !=""): self.stdout.write("Info: "+msg+"\n")   
     def Warn(self,*arg):
         msg="Warning: "+ccat(*arg)+"\n"
         if msg in self.warnings: self.warnings[msg]=self.warnings[msg]+1
         else: self.warnings[msg]=1
         if self.warnings[msg]<=self.max: 
             sys.stdout.write(self.RED+msg+self.COL_OFF)
-            self.stdout.write(msg)
+            if (self.logfile !=""): self.stdout.write(msg)
     def Fatal(self,*arg):
         msg="**FATAL**: "+ccat(*arg)+"\n"
         sys.stdout.write(self.RED+msg+self.COL_OFF)
