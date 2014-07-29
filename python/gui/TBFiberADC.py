@@ -82,7 +82,7 @@ def HistoSamStyle(histo):
 def getWFmax(pade):
 	max = 0
 	wform = pade.GetWform()
-	for iwf in range(0,120):
+	for iwf in range(0,PadeChannel().N_PADE_SAMPLES): 
 		number = pade.GetWform()[iwf]
 		if number > max:
 			max = number

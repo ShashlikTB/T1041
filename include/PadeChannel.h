@@ -4,16 +4,10 @@
 #include <TH1F.h>
 #include "pulseShapeForFit.h"
 
-
-/// TODO ad these as status data members
-const Int_t N_PADE_SAMPLES=120;     // fixed in FW
-//const Int_t PADE_THRESHOLD=100;
-const Int_t PADE_PED_SAMPLES=10;
-
-// approximate sample times for board 112, 113, 115, 116  !! too hacky, needs improvement
-const Int_t PADE_SAMPLE_TIMES[4]={27,21,14,17};
-const Int_t PADE_SAMPLE_RANGE=3;  // +-3 count window = ~5sigma
-
+  // approximate sample times for board 112, 115, 116, 117  
+  // !! too hacky, needs improvement
+  static const Int_t PADE_SAMPLE_TIMES[4]={31,29,36,32};  // peaking time, defined after porch!
+  const Int_t PADE_SAMPLE_RANGE=4; // +-4 count window b/c above is guesstimate
 
 class PadeChannel : public TObject {
   ClassDef(PadeChannel,1); 
@@ -32,12 +26,19 @@ class PadeChannel : public TObject {
   UInt_t GetMax() {return _max;}
   float GetMaxCalib();
   Int_t GetPeak() {return _peak;}
-  Int_t __SAMPLES() const {return  N_PADE_SAMPLES;}
+  Int_t __SAMPLES() const {return N_PADE_SAMPLES;}
+  Int_t __DATASIZE() const {return N_PADE_DATA;}
   void GetXYZ(double &x, double &y, double &z);
   void GetPedestal(double &ped, double &stdev);
   void GetHist(TH1F* h);
   static PulseFit FitPulse(PadeChannel *pc, bool laserShape=false);
   double GetPedestal();
+
+  static const Int_t N_PADE_DATA=120;     // fixed in FW
+  static const Int_t N_PADE_PORCH=16;     // diagnostic info in data payload
+  static const Int_t N_PADE_SAMPLES=N_PADE_DATA-N_PADE_PORCH;
+  static const Int_t PADE_PED_SAMPLES=20;
+
   // private:
   ULong64_t     _ts;
   UShort_t      _transfer_size;

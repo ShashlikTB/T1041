@@ -225,11 +225,11 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
         lastPacket=pade_hw_counter
 
         # fetch ADC samples (to do clear event from here on error)
-        samples=array("i",[0xFFF]*padeChannel.__SAMPLES())
+        samples=array("i",[0xFFF]*padeChannel.__DATASIZE())
         nsamples=len(waveform)
-        if nsamples != padeChannel.__SAMPLES():
+        if nsamples != padeChannel.__DATASIZE():
             logger.Warn("Incorrect number of ADC samples, expected",
-                        padeChannel.__SAMPLES(),"found:",nsamples,"Board:", pade_board_id)
+                        padeChannel.__DATASIZE(),"found:",nsamples,"Board:", pade_board_id)
             continue
         else:
             isSaturated = "FFF" in waveform

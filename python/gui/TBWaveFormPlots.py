@@ -16,7 +16,7 @@ class TracePlot:
 
     def __init__(self, canvas):
         self.canvas = canvas
-        self.nsamples  = 120
+        self.nsamples  = PadeChannel().N_PADE_SAMPLES
         self.nchannels = 128
         self.step      = 6.5
         self.offset    = self.nchannels*self.step/2
@@ -93,7 +93,7 @@ class SurfacePlot:
 
     def __init__(self, canvas):
         self.canvas = canvas
-        self.nsamples  = 120
+        self.nsamples  = PadeChannel().N_PADE_SAMPLES
         self.nchannels = 128
         nsamples  = self.nsamples
         nchannels = self.nchannels

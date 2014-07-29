@@ -28,11 +28,11 @@ void waveViewer(TString fdat, Int_t board=-1, Int_t channel=-1){
   TTree *t1041 = (TTree*)f->Get("t1041"); 
   TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
-
   TCanvas *c=new TCanvas();
   c->cd();
   PulseFit fit;
-  TH1F *hw=new TH1F("hw","waveform",120,0,120);
+  TH1F *hw=new TH1F("hw","waveform",
+		    PadeChannel::N_PADE_SAMPLES,0,PadeChannel::N_PADE_SAMPLES);
   for (Int_t i=0; i<t1041->GetEntriesFast(); i++) {
     t1041->GetEntry(i);
     for (Int_t j=0; j<event->NPadeChan(); j++){
@@ -41,8 +41,10 @@ void waveViewer(TString fdat, Int_t board=-1, Int_t channel=-1){
       if (channel>0 && (int)pch.GetChannelID()!=channel) continue;
       // pch.GetHist(hw);
       // hw->Draw();
+
       fit=PadeChannel::FitPulse(&pch);
       pch.GetHist(hw);
+      pch.Dump();
       hw->Draw();
       fit.func.Draw("same");
       c->Update();

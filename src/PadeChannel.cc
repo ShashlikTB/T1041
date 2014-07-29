@@ -37,16 +37,18 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   // HACK, needs improvement
   // find in-time window
   int idx=_board_id-112;   // BAD practice!
-  if (idx>1) idx--;
+  if (idx>1) idx-=2;   
   int tmin=PADE_SAMPLE_TIMES[idx]-PADE_SAMPLE_RANGE;
   int tmax=PADE_SAMPLE_TIMES[idx]+PADE_SAMPLE_RANGE;
   
   /// todo add ped calculation here
   for (int i=0; i<N_PADE_SAMPLES; i++) {
-    _wform[i]=wform[i];
-    if (i<=tmin || i>tmax) continue;  
-    if ((unsigned)wform[i]>_max) {
-      _max=wform[i];
+    int dataIdx=i+N_PADE_PORCH;
+    _wform[i]=wform[dataIdx];
+    // max/min from start of data (not samples)
+    if (i<=tmin || i>tmax) continue; 
+    if (_wform[i]>_max) {
+      _max=_wform[i];
       _peak=i;  // sample number for peak
     }
   }
@@ -96,6 +98,7 @@ Int_t PadeChannel::GetChannelIndex(){
 }
 
 PulseFit PadeChannel::FitPulse(PadeChannel *pc, bool laserShape){ 
+  cout << "hello!!"<<endl;
   static bool first=true;
   static TF1 *func;
   if (first){

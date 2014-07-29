@@ -64,7 +64,7 @@ class TBFileReader:
 
 
     def maxPadeADC(self):
-        nsamples  = 120
+        nsamples  = PadeChannel().N_PADE_SAMPLES
         nchannels = self.e.NPadeChan()
         ymax = 0
         for ii in xrange(nchannels):
