@@ -38,6 +38,7 @@ class PadeChannel : public TObject {
   static const Int_t N_PADE_PORCH=16;     // diagnostic info in data payload
   static const Int_t N_PADE_SAMPLES=N_PADE_DATA-N_PADE_PORCH;
   static const Int_t PADE_PED_SAMPLES=20;
+  static const ULong64_t START_PORCH16=635421671607690753;
 
   // private:
   ULong64_t     _ts;
@@ -50,17 +51,7 @@ class PadeChannel : public TObject {
   UInt_t        _max;    // max ADC sample
   Int_t         _peak;   // sample number for peak
   Int_t         _flag;
-/*
-  // pulse fit results
-  double _fitPed;
-  double _errPed;
-  double _fitMax;
-  double _errMax;
-  double _fitRise;
-  double _errRise;
-  double _noise;
-  double _chi2;
-*/
+
 };
 
 

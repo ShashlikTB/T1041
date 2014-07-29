@@ -2,6 +2,7 @@
 #include "calConstants.h"
 #include "Mapper.h"
 
+
 void PadeChannel::Reset(){
   _ts=0;
   _transfer_size=0;
@@ -41,6 +42,15 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   int tmin=PADE_SAMPLE_TIMES[idx]-PADE_SAMPLE_RANGE;
   int tmax=PADE_SAMPLE_TIMES[idx]+PADE_SAMPLE_RANGE;
   
+  // another evil hack - this handles the start of testbeam2 data where the first
+  // 32 wave form samples are not valid wave data
+  if (_ts<START_PORCH16) { // shift wform array by 16 counts, widen peak search window
+    for (int i=0; i<N_PADE_DATA-16; i++) wform[i]=wform[i+16];
+    for (int i=N_PADE_DATA-16; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-17];
+    tmin=30;
+    tmax=60;
+  }
+
   /// todo add ped calculation here
   for (int i=0; i<N_PADE_SAMPLES; i++) {
     int dataIdx=i+N_PADE_PORCH;
