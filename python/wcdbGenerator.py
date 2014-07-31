@@ -1,4 +1,4 @@
-import argparse 
+import argparse, getopt,sys
 import bz2
 import re
 import glob
@@ -85,42 +85,51 @@ def generateSpillDB(wcHandle, dbHandle, filename):
 		outputLine = "%s    %s    %s    %s    %s\r\n" % (spill['unixtime'], spill['date'], spill['time'], os.path.abspath(filename), spill['pos'])
 		dbHandle.write(outputLine)
 
+def usage():
+    print
+    print "Usage: python TBNtupleMaker [OPTION] [PADE_FILE] [PADE_FILE] ..."
+    print "      -d DIR         : Process all padefiles in DIR"
+    print "                       Overrides all files given on command line list"
+    print "      -x extension   : Filename extension to use"
+    print "      -o DIR         : Output dir, instead of default = PWD" 
+    print "      -f             : force regenerating the database"
+    print 
+    sys.exit()
+
 def main():
-	# Argparse Definitions 
 
-	parser = argparse.ArgumentParser(description='Test Beam Wire Chamber DB Generator')
-	parser.add_argument('-f', metavar='-f', type=str, nargs=1, default=None,
-			    help="Filename or Pathname to process")
-	parser.add_argument('-x', metavar='extension', type=str, nargs=1, 
-			    default = ['*.bz2'],
-			    help="Filename extension to use")
-	parser.add_argument('--force', action = 'store_true',
-			    help="force regenerating the database")
-	parser.add_argument('-output', metavar='o', type=str, nargs=1, 
-			    default = ['wcdb.txt'],
-			    help="Filename of output database")
+        try:
+                opts, args = getopt.getopt(sys.argv[1:], "d:x:o:f")
+        except getopt.GetoptError as err: usage()
+
+        extension=".bz2"
+        force=False
+        location="."  # location of input files
+        dbfile="wcdb.txt"
+        for o, a in opts:
+                if o == "-d":
+                        location=a
+                        print "Reading WC data in",a
+                elif o == "-x":
+                        extension=a  
+                elif o == "-o":
+                        dbfile=a
+                elif o == "-f": force=True
 
 
-	args = parser.parse_args()
+
 	dbHandle = None 
 	prevReadFiles = None 
-	if args.force:
-		dbHandle = open(args.output[0], 'w')
+	if force:
+		dbHandle = open(dbfile, 'w')
 	else: 
 		try:
-			handle = open(args.output[0], 'r')
+			handle = open(dbfile, 'r')
 			prevReadFiles = findPrevReadFiles(handle)
-			dbHandle = open(args.output[0], 'a')
+			dbHandle = open(dbfile, 'a')
 		except IOError: 
-			print "Couldn't open db file %s, regenerating" % args.output[0]
-			dbHandle = open(args.output[0], 'w')
-
-
-
-	if args.f is None: 
-		location = os.path.curdir
-	else:
-		location = args.f[0]
+			print "Couldn't open db file %s, regenerating" % dbfile
+			dbHandle = open(dbfile, 'w')
 
 	if os.path.isfile(location):
 	    filename = location
@@ -137,8 +146,10 @@ def main():
 	    generateSpillDB(wcHandle, dbHandle)
 	elif os.path.isdir(location): 
 	    absPath =  os.path.abspath(location)
-	    joinedPath = os.path.join(absPath, args.x[0])
-	    files = glob.glob(joinedPath)
+#	    joinedPath = os.path.join(absPath, location)
+#	    files = glob.glob(joinedPath)
+            files = glob.glob(absPath+"/t1041*")
+            print location,absPath,files
 
 	    #Generate a list of tuples containing the filename and file modification time 
 	    sortedFiles = []
@@ -148,7 +159,7 @@ def main():
 	    #Sort the files by the file modification time 
 	    sortedFiles = sorted(sortedFiles, key=itemgetter(1))
 	    for filename,mtime in sortedFiles:
-                if args.force or not prevReadFiles or (prevReadFiles and filename not in prevReadFiles):
+                if force or not prevReadFiles or (prevReadFiles and filename not in prevReadFiles):
 			if not "t1041_" in filename: continue  # not a WC file
 			if filename.endswith(".bz2"):
 				try:
