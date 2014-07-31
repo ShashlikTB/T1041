@@ -1,4 +1,4 @@
-import argparse, getopt,sys
+import getopt,sys
 import bz2
 import re
 import glob
