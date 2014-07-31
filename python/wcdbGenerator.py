@@ -148,7 +148,7 @@ def main():
 	    absPath =  os.path.abspath(location)
 #	    joinedPath = os.path.join(absPath, location)
 #	    files = glob.glob(joinedPath)
-            files = glob.glob(absPath+"/t1041*")
+            files = glob.glob(absPath+"/t1041*dat*")
             print location,absPath,files
 
 	    #Generate a list of tuples containing the filename and file modification time 
