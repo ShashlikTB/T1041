@@ -34,7 +34,7 @@ def usage():
     print "                       Overrides all files given on command line list"
     print "      -r DIR         : Process all padefiles in DIR, and all subdirectories"
     print "                       Overrides all files given on command line list"
-    print "      -k             : Keep existing root files, only process new inputs"
+    print "      -f             : Overwrite existing root files"
     print "      -l             : Copy logger messages to [root file basename].log"
     print "      -o DIR         : Output dir, instead of default = location of input file" 
     print 
@@ -52,7 +52,7 @@ def fillTree(tree, eventDict, tbspill):
             tree[0].Fill()
 
 
-def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
+def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
 
     logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 
@@ -71,8 +71,8 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
     if not outDir=="":
         outFile=outDir+"/"+os.path.basename(outFile)
 
-    if  os.path.isfile(outFile) and keepFlag:
-        logger.Info(outFile,"is present, skip processing due to -k flag")
+    if  os.path.isfile(outFile) and not forceFlag:
+        logger.Info(outFile,"is present, skip processing. Use -f flag to override")
         return
 
     if logToFile:
@@ -236,11 +236,13 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
             if (isSaturated):
                 logger.Warn("ADC shows saturation. Board:",
                             pade_board_id,"channel:",pade_ch_number)
+            porch=15
+            if pade_ts<"635421671607690753" : porch=32   # hack!
             for i in range(nsamples): 
                 samples[i]=int(waveform[i],16)
-                if (samples[i]>4095):
+                if samples[i]>4095 and i>=porch:
                     logger.Warn("Invalid ADC reading > 0xFFF", 
-                                pade_board_id,"channel:",pade_ch_number)
+                                pade_board_id,"channel:",pade_ch_number,i,porch)
 
         writeChan=True   # now assume channel is good to write, until proven guilty
         # new event condition in master
@@ -319,14 +321,14 @@ def filler(padeDat, NEventLimit=NMAX, keepFlag=False, outDir=""):
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:o:klp")
+        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:o:flp")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
     fileList=[]
     inputDir=""
     recurse=False
-    keepFlag=False
+    forceFlag=False
     prof=False
     logToFile=False
     outDir=""
@@ -337,7 +339,7 @@ if __name__ == '__main__':
         elif o == "-r":
             inputDir=a
             recurse=True
-        elif o == "-k": keepFlag=True
+        elif o == "-f": forceFlag=True
         elif o == "-l": logToFile=True
         elif o == "-p": prof=True
         elif o == "-o": outDir=a
@@ -371,7 +373,7 @@ if __name__ == '__main__':
         print "="*60
         print "Processing File ===>",padeDat,count,"/",len(fileList)
         print "="*60
-        filler(padeDat,NEventLimit,keepFlag,outDir)
+        filler(padeDat,NEventLimit,forceFlag,outDir)
         count=count+1
         print "="*60
         print "Finished File ===>",padeDat

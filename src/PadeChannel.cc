@@ -43,10 +43,10 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   int tmax=PADE_SAMPLE_TIMES[idx]+PADE_SAMPLE_RANGE;
   
   // another evil hack - this handles the start of testbeam2 data where the first
-  // 32 wave form samples are not valid wave data
-  if (_ts<START_PORCH16) { // shift wform array by 16 counts, widen peak search window
-    for (int i=0; i<N_PADE_DATA-16; i++) wform[i]=wform[i+16];
-    for (int i=N_PADE_DATA-16; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-17];
+  // 32 waveform samples are not valid wave data.  The current porch is 15 samples
+  if (_ts<START_PORCH15) { // shift wform array by 17 counts, widen peak search window
+    for (int i=0; i<N_PADE_DATA-17; i++) wform[i]=wform[i+17];
+    for (int i=N_PADE_DATA-17; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-18];
     tmin=30;
     tmax=60;
   }

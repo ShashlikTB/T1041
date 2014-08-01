@@ -38,7 +38,7 @@ class PadeChannel : public TObject {
   static const Int_t N_PADE_PORCH=15;     // diagnostic info in data payload
   static const Int_t N_PADE_SAMPLES=N_PADE_DATA-N_PADE_PORCH;
   static const Int_t PADE_PED_SAMPLES=20;
-  static const ULong64_t START_PORCH16=635421671607690753;
+  static const ULong64_t START_PORCH15=635421671607690753;
 
   // private:
   ULong64_t     _ts;
