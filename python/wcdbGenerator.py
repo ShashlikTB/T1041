@@ -161,14 +161,14 @@ def main():
 	    for filename,mtime in sortedFiles:
                 if force or not prevReadFiles or (prevReadFiles and filename not in prevReadFiles):
 			if not "t1041_" in filename: continue  # not a WC file
-			if filename.endswith(".bz2"):
+			if filename.endswith(".dat.bz2"):
 				try:
 					wcHandle = bz2.BZ2File(filename, "r")
 					logger.Info("Processing %s" % filename)
 					generateSpillDB(wcHandle, dbHandle, filename)
 				except IOError as e:
 					logger.Warn("Unable to open %s, %s" % (filename, e))
-			else: 
+			elif filename.endswith(".dat"): 
 				try:
 					wcHandle = open(filename, "r")
 					logger.Info("Processing %s" % filename)
