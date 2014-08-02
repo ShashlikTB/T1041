@@ -108,7 +108,6 @@ Int_t PadeChannel::GetChannelIndex(){
 }
 
 PulseFit PadeChannel::FitPulse(PadeChannel *pc, bool laserShape){ 
-  cout << "hello!!"<<endl;
   static bool first=true;
   static TF1 *func;
   if (first){

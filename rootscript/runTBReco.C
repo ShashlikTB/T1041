@@ -2,13 +2,18 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TBranch.h>
+#include <TSystem.h>
 #include "include/TBEvent.h"
 #include "include/CalReco.h"
 
-void runTBReco(TString rawFile, TString recFile=""){
+void runTBReco(TString rawFile, TString recFile="", TString outdir=""){
   if (recFile=="") {
     recFile=rawFile;
     recFile.ReplaceAll(".root","_reco.root");
+    if (outdir != ""){
+      recFile=gSystem->BaseName(recFile);
+      recFile=outdir+"/"+recFile;
+    }
   }
   TFile *tfRaw=new TFile(rawFile);
   TTree *rawTree=(TTree*)tfRaw->Get("t1041");
