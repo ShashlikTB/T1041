@@ -12,9 +12,5 @@ if [ -e /usr/bin/root ] ; then
 fi
 
 
-HOST=`hostname`
-if [ "$host" == "heprocks-head.phys.virginia.edu" ] ; then
-  alias python=/raids/nas0/tba9h/tools/bin/python2.7
-fi
 
 
