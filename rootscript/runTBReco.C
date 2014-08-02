@@ -29,7 +29,7 @@ void runTBReco(TString rawFile, TString recFile="", TString outdir=""){
   TTree *recTree=(TTree*)rawTree->CloneTree();
 
 
-  CalReco *calreco=new CalReco(3);   // 3 sigma cut for pulse fitting
+  CalReco *calreco=new CalReco(2);   // 2 sigma cut for pulse fitting
   calreco->Process(recTree);
 
   // finish

@@ -10,6 +10,26 @@
 #include <iostream>
 using namespace std;
 
+/* Overview of Mapping for the Shashlik Testbeam
+There are many mapping schemes (alas!)
+
+ModuleID:
+  Run from -16...-1 (upstream face) 1..16 (downstream face)
+FiberNumber 1..4 
+  Numbered CCW from the lower right corner of a module viewed from upstream
+FiberID: 
+  = ModuleID*100-FiberNumber [upstream face]
+  = ModuleID*100+FiberNumber [downstream face]
+Pade BoardID = 112,115,116,117 for testbeam2
+Pade ChannelNumber 0..31 ADC channels (groups of 8 correspond to physical ADCs)
+ChannelID:
+  = BoardID*100+ChannelNumber
+ChannelIndex 0..127 (good for histogram x-axis)
+  = -1*ModuleID+(FiberNumber-1)  [upstream face]
+  = ModuleID+(FiberNumber-1)     [downstream face]
+ */
+
+
 /* Module x,y positions are relative to the center of the detector 
    Looking downstream: +x is to the right, +y is up
 */
@@ -36,7 +56,7 @@ const double MODULEXY[]={
    16, 21.0, -21.0
 };
 
-// x,y offsets of fiber placements from center of module
+// x,y offsets of fiber placements from center of module (not acurate!)
 const float FIBER_OFFSET_X=3.5;
 const float FIBER_OFFSET_Y=3.5;
 const float MIN_EDGE_X=-28;
@@ -46,7 +66,8 @@ const float MAX_EDGE_Y=28;
 
 
 // bad channel map (PADE Channel, UTC time remove, UTC time return)
-const unsigned long BADCHANMAP[]={11316, 1397186943, 0}; // stuck lower bit(s)
+// not yet defined for testbeam2
+// const unsigned long BADCHANMAP[]={11316, 1397186943, 0}; // stuck lower bit(s)
 
 
 // mapping functions

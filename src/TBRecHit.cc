@@ -80,7 +80,7 @@ void TBRecHit::FitPulse(PadeChannel *pc){
 std::ostream& operator<<(std::ostream& s, const TBRecHit& hit) {
   double x,y,z;
   hit.GetXYZ(x,y,z);
-  return s << "TBRecHit (index,x,y,z,aMax,tRise) " 
-	   << hit.ChannelIndex() << "," << x << "," << y << "," << z
-	   << hit.AMax() << "," << hit.TRise();
+  return s << "TBRecHit (index,x,y,z,aMax,tRise,Chi2) " 
+	   << hit.ChannelIndex() << "," << x << "," << y << "," << z<<","
+	   << hit.AMax() << "," << hit.TRise() << "," << hit.Chi2();
 }

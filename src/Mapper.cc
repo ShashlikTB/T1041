@@ -44,8 +44,8 @@ int Mapper::ChannelID2ChannelIndex(int channelID) const {
   int module,fiberID;
   ChannelID2ModuleFiber(channelID,module,fiberID);
   int fiber=TMath::Abs(fiberID)%5;
-  if (module<0) return 4*(TMath::Abs(module)-1) + (fiber-1);
-  else return 64 + 4*(module-1) + (fiber-1);
+  if (module<0) return 4*(TMath::Abs(module)-1) + (fiber-1);  // front/upsteam channels
+  else return 64 + 4*(module-1) + (fiber-1);                  // rear/downstream 
 }
 
 int Mapper::ChannelIndex2ChannelID(int channelIndex) const{

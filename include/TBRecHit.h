@@ -28,6 +28,8 @@ class TBRecHit : public TObject {
   void Init(PadeChannel *pc=0,  Float_t zsp=0);
   Int_t ChannelIndex() const {return channelIndex;}
   Int_t GetChannelID() const;  // returns board_id*100+ch_number
+  Int_t GetBoardID() const {return  GetChannelID()/100;}
+  Int_t GetChannelNumber() const {return GetChannelID()-GetBoardID()*100;}
   void GetModuleFiber(int &moduleID, int &fiberID) const;
   void FitPulse(PadeChannel *pc);
   void GetXYZ(double &x, double &y, double &z) const;
@@ -43,7 +45,7 @@ class TBRecHit : public TObject {
   void SetChannelIndex(Int_t idx) {channelIndex=idx;} 
   void SetOptNoFit() {status&=kNoFit;}
  private:
-  Short_t channelIndex;   // channel index, S.L. convention
+  UShort_t channelIndex;   // channel index, S.L. convention
   UShort_t maxADC;        // max value of ADC samples (in expected signal region)
   Float_t pedestal;       // from average of samples before peak
   Float_t noise;          // RMS of pedistal samples
