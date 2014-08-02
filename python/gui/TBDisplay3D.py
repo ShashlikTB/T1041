@@ -187,7 +187,7 @@ class Display3D:
 						   dy_Tower/4, dz_Tower/4))
         block.SetMainColor(0)
         block.SetMainTransparency(100)
-        block.RefMainTrans().SetPos(0, 0, z_Ecal+dz_Tower + z_Ecal)
+        block.RefMainTrans().SetPos(0, 0, z_Ecal+dz_Tower + z_Ecal/2)
         elements.AddElement(block)
         
         self.Show(util)

@@ -6,22 +6,22 @@ import gui.utils
 
 
 class ShashlikHeatmap:
-	def __init__(self, canvas):
-		self.canvas = canvas
-	def __del__(self):
-		pass
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self.first = True
+    def __del__(self):
+        pass
 
-	def Draw(self, event, util):
-		ShashlikFaces(self, self.canvas, event, util)
+    def Draw(self, event, util):
+        ShashlikFaces(self, self.canvas, event, util)
+
         
 		
 def ShashlikFaces(object, c1, event, util):
     print "ShashlikeFaces called"
-    try:
-        o = object.hMapFront
-        t = object.hMapBack
-    except:
-
+    #object.hMapFront.SetTitle('Upstream Face ADC - evt '+str(util.eventNumber)) 
+    #object.hMapBack.SetTitle('Downstream Face ADC - evt '+str(util.eventNumber))
+    if object.first:
         c1.cd()
         c1.SetRightMargin(0.18)
         c1.SetLeftMargin(0.1)
@@ -36,14 +36,19 @@ def ShashlikFaces(object, c1, event, util):
         c1.SetRightMargin(3.9)
         c1.SetLeftMargin(-0.2)
 
+    if object.first or util.needsAboost:
         object.hMapFront= TH2F('hMap1','Upstream Face ADC - evt '+str(util.eventNumber) , 8,-28,28,8,-28,28)
         object.hMapBack = TH2F('hMap2','Downstream Face ADC - evt '+str(util.eventNumber),8,-28,28,8,-28,28)
+        HistoSamStyleHeat(object.hMapFront)
+        HistoSamStyleHeat(object.hMapBack)
         object.hMapReset = True
+        object.first = False
+        util.needsAboost = False
 
-        object.hMapFront.SetTitle('Upstream Face ADC - evt '+str(util.eventNumber) )
-        object.hMapBack.SetTitle('Downstream Face ADC - evt '+str(util.eventNumber))
     hMapFront = object.hMapFront
     hMapBack  = object.hMapBack
+    hMapFront.SetTitle('Upstream Face ADC - evt '+str(util.eventNumber))
+    hMapBack.SetTitle('Downstream Face ADC - evt '+str(util.eventNumber))
 
     if util.accumulate==True:
         object.hMapReset = False
@@ -51,25 +56,22 @@ def ShashlikFaces(object, c1, event, util):
     if util.accumulate==False:
         print "resetting"
         object.hMapReset = True
-
     if object.hMapReset:
         hMapFront.Reset()
         hMapBack.Reset()
-
     mymap = Mapper.Instance()
     print "*** mymap %s" % mymap
-    
     
     for i in range(0,128):
         pade = event.GetPadeChan(i)
         chanID = pade.GetChannelID()
         fiber = mymap.ChannelID2FiberID(chanID)
-        if not (fiber > 0):
+        if not (fiber < 0):
             continue
-        if not util.stealthmode:
-            pade.Dump()
-        #maxADC = pade.GetMax()
-        maxADC = getWFmax(pade)
+        #if not util.stealthmode:
+            #pade.Dump()
+        maxADC = pade.GetMax()
+        #maxADC = getWFmax(pade)
         xy = mymap.ChannelID2XY(chanID)
         x,y = xy[0], xy[1]
         hMapFront.Fill(x, y, maxADC)
@@ -80,12 +82,12 @@ def ShashlikFaces(object, c1, event, util):
         pade = event.GetPadeChan(i)
         chanID = pade.GetChannelID()
         fiber = mymap.ChannelID2FiberID(chanID)
-        if not (fiber < 0):
+        if not (fiber > 0):
             continue
-        if not util.stealthmode:
-            pade.Dump()
-        #maxADC = pade.GetMax()
-        maxADC = getWFmax(pade)
+        #if not util.stealthmode:
+            #pade.Dump()
+        maxADC = pade.GetMax()
+        #maxADC = getWFmax(pade)
         chanID = pade.GetChannelID();   
         xy = mymap.ChannelID2XY(chanID)
         x,y = xy[0], xy[1]
@@ -95,8 +97,6 @@ def ShashlikFaces(object, c1, event, util):
     if not util.stealthmode:
         gStyle.SetPalette(1)
         gStyle.SetOptStat(0)
-        HistoSamStyleHeat(hMapFront)
-        HistoSamStyleHeat(hMapBack)
         c1.cd(1)
         hMapFront.Draw('COLZ text')
         c1.cd(2)
@@ -120,7 +120,6 @@ def ShashlikFaces(object, c1, event, util):
             for j in range(1,9):
                 util.colorsDownstream.push_back(paletteDownstream.GetBinColor(i,j))
                 util.colorsUpstream.push_back(paletteUpstream.GetBinColor(i,j))
-                
         
 def HistoSamStyleHeat(histo):
 	LabelSize = 0.045

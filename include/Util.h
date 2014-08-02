@@ -80,6 +80,8 @@ struct Util
   std::vector<int> colorsDownstream;
   std::vector<int> colorsUpstream;
 
+  bool needsAboost;
+
 
   //std::string filename;
 

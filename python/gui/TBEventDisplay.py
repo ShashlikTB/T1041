@@ -217,12 +217,12 @@ class TBEventDisplay:
         self.snapCanvasButton = PictureButton(self, self.toolBar,
                         picture='Camera.png',
                         method='snapCanvas',
-                        text='snap this canvas')
+                        text='pdf this canvas')
 
         self.cycleButton = PictureButton(self, self.toolBar,
                         picture='Bicycle.jpg',
                         method='cycleTabs',
-                        text='snap this canvas')
+                        text='cycle (auto-pilot)')
 
         self.accumulateButton = CheckButton(self, self.toolBar,
                         hotstring='Accumulate',
@@ -257,6 +257,7 @@ class TBEventDisplay:
         self.util._3D_showWC1 = True
         self.util._3D_showWC2 = True
         self.util._3D_isolateClusters = False
+        self.util.needsAboost = False
 
         WFbuttons = [('Board 117','toggleShowBoard117','toggleShowBoard117',True),('Board 116','toggleShowBoard116','toggleShowBoard116',True),('Board 115','toggleShowBoard115','toggleShowBoard115',True),('Board 112','toggleShowBoard112','toggleShowBoard112',True)]
         WCbuttons = [('In-time hits','toggleShowIThits','toggleShowIThits', True),('Quality hits','toggleShowQhits','toggleShowQhits', True)]
@@ -302,7 +303,7 @@ class TBEventDisplay:
     
         # Initial state
         self.wcplanes = self.display['Wire chambers']	
-        self.ADCcut  = 500
+        self.ADCcut  = 50
         self.nevents = 0
         self.eventNumber = -1
         self.DELAY  = int(1000*MINDELAY)
@@ -325,7 +326,7 @@ class TBEventDisplay:
         #filename = "data/test.root"
 
         if filename != None: self.__openFile(filename)
-	else: self.__openFile('data/test.root')	
+        else: self.__openFile('data/protons.root')	
 
         #DEBUG
         # to debug a display uncomment next two lines
@@ -384,22 +385,23 @@ class TBEventDisplay:
         try:
             t = self.filetime
         except:
+            print 'file is up to date'
             return
         if self.filetime == time.ctime(os.path.getctime(self.filename)):
             print "file up to date"
             return                 
         else:      
             print "refreshing"
-            eventNumber = self.eventNumber
-            self.closeFile()	            
+            eventNumber = self.eventNumber  
+            #self.closeFile()	            
             self.reader = TBFileReader(self.filename)
             self.nevents= self.reader.entries()
-            self.statusBar.SetText('event: %d / %d' % (self.eventNumber, self.nevents-1), 0)
+            self.statusBar.SetText('event: %d / %d' % (eventNumber, self.nevents-1), 0)
             self.filetime = time.ctime(os.path.getctime(self.filename))
             self.wcplanes.CacheWCMeans("meanfile.txt", self.filename)
-            print "in refresh fashion:"
             self.eventNumber = eventNumber
             self.util.eventNumber = eventNumber
+            self.util.needsAboost = True
         
     def closeFile(self):
         try:
@@ -735,6 +737,7 @@ class TBEventDisplay:
         if not page.redraw and not self.shutterOpen and not self.redraw:
             self.debug("end:displayEvent - DO NOTHING")		
             return
+        
         self.refreshFile()
 
         if '3D' not in page.name:
@@ -745,8 +748,7 @@ class TBEventDisplay:
             self.display['Wire chambers'].Draw(self.reader.event(), self.util)
             self.util.stealthmode = False
             self.display[page.name].Draw(self.reader.event(), self.util)
-            #if 'TDC' in page.name:
-            #self.tdcfile.Close()
+
         print "displaying with self.util.eventNumber = "+str(self.util.eventNumber)
         self.redraw = False
         page.redraw = False
