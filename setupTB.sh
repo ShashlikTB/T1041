@@ -11,3 +11,10 @@ if [ -e /usr/bin/root ] ; then
   if [ -z $ROOTSYS ] ; then export ROOTSYS="." ; fi
 fi
 
+
+HOST=`hostname`
+if [ "$host" == "heprocks-head.phys.virginia.edu" ] ; then
+  alias python=/raids/nas0/tba9h/tools/bin/python2.7
+fi
+
+
