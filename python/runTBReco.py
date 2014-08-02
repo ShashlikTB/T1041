@@ -29,9 +29,9 @@ for o, a in opts:
         print "Sending output to directory",outDir
 
 
-if len(args)<2:
+if len(args)<1:
     runDat="latest.root"
-else: runDat=sys.argv[1]
+else: runDat=args[0]
 
 
 print "Processing file:",runDat
