@@ -7,6 +7,10 @@
 // a precise analysis, until you have verified and (ideally) improved the supplied library
 // code
 
+
+// NOTE: this is becoming depricated.  CPU-intensive fitting can be found in 
+// TBRecHits in the RECO files
+
 #include <TString.h>
 #include <TFile.h>
 #include <TTree.h>
@@ -35,7 +39,7 @@ void readerExample(TString file="latest.root"){
   TTree *t1041 = (TTree*) f->Get("t1041");
  
   TString outname=file;
-  outname.ReplaceAll(".root","_reco.root");
+  outname.ReplaceAll(".root","_out.root");
   TFile *tfo=new TFile(outname,"recreate");
 
   //// Use WCReco to find definition of in-time hits ////

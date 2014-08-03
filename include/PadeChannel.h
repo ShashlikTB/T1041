@@ -23,8 +23,8 @@ class PadeChannel : public TObject {
   UInt_t GetChannelID() {return _board_id*100+_ch_number;}
   Int_t GetChannelIndex();  // index 0--127, following Ledovskoy convention
   UShort_t* GetWform() {return _wform;}
-  UInt_t GetMax() {return _max;}
-  float GetMaxCalib();
+  UInt_t GetMax() {return _max;}  // NOT PEDESTAL Subtracted!
+  float GetMaxCalib();            // PEDESTAL Subtracted!
   Int_t GetPeak() {return _peak;}
   Int_t __SAMPLES() const {return N_PADE_SAMPLES;}
   Int_t __DATASIZE() const {return N_PADE_DATA;}
@@ -38,7 +38,10 @@ class PadeChannel : public TObject {
   static const Int_t N_PADE_PORCH=15;     // diagnostic info in data payload
   static const Int_t N_PADE_SAMPLES=N_PADE_DATA-N_PADE_PORCH;
   static const Int_t PADE_PED_SAMPLES=20;
-  static const ULong64_t START_PORCH15=635421671607690753;
+  // discard 15 WF samples from here (otherwise discard 32)
+  static const ULong64_t START_PORCH15=635421671607690753; 
+  // unless time <= END_TBEAM1, then discard none
+  static const ULong64_t END_TBEAM1=635337576077954884;
 
   // private:
   ULong64_t     _ts;

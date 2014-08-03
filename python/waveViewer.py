@@ -17,7 +17,7 @@ gSystem.SetIncludePath("-I\"$TBHOME/include\"")
 
 gROOT.ProcessLine(".L rootscript/waveViewer.C+")
 
-print "To kill use: kill",os.getpid(),";fg"
+print "To kill use: control-\ or kill",os.getpid(),";fg"
 
 # show all waveforms in file
 waveViewer(runDat)

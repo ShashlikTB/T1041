@@ -205,5 +205,5 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc, bool laserShape){
 
 float PadeChannel::GetMaxCalib(){
   int idx=GetChannelIndex();
-  return _max*CalConstants[idx];
+  return (_max-GetPedestal())*CalConstants[idx];
 }

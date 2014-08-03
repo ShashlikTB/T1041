@@ -83,7 +83,7 @@ class Logger():
         print "="*40        
 
 
-# hack to pass immutable data types by reference (under consideration)
+# hack to pass immutable data types "by reference" (under consideration)
 class pyref():  
     def __init__(self,data):
         self.data=[data]
