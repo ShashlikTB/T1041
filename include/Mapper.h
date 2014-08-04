@@ -37,24 +37,45 @@ ChannelIndex 0..127 (good for histogram x-axis)
 const int NMODULES=16;
 
 // locations in mm, from center of detector
+/* const double MODULEXY[]={ */
+/*    1, 21.0, 21.0, */
+/*    2, 7.0, 21.0, */
+/*    3, 7.0,  7.0, */
+/*    4, 21.0, 7.0, */
+/*    5, -7.0, 21.0, */
+/*    6, -7.0,  7.0, */
+/*    7, -7.0, -7.0, */
+/*    8,  7.0, -7.0, */
+/*    9,  21.0, -7.0, */
+/*    10,-21.0, 21.0,  */
+/*    11,-21.0, 7.0, */
+/*    12,-21.0, -7.0, */
+/*    13,-21.0, -21.0, */
+/*    14, -7.0, -21.0, */
+/*    15,  7.0, -21.0, */
+/*    16, 21.0, -21.0 */
+/* }; */
 const double MODULEXY[]={
-   1, 21.0, 21.0,
-   2, 7.0, 21.0,
-   3, 7.0,  7.0,
-   4, 21.0, 7.0,
-   5, -7.0, 21.0,
-   6, -7.0,  7.0,
-   7, -7.0, -7.0,
-   8,  7.0, -7.0,
-   9,  21.0, -7.0,
-   10,-21.0, 21.0, 
-   11,-21.0, 7.0,
-   12,-21.0, -7.0,
-   13,-21.0, -21.0,
-   14, -7.0, -21.0,
-   15,  7.0, -21.0,
-   16, 21.0, -21.0
+   1, -21.0,  21.0,
+   2,  -7.0,  21.0,
+   3,   7.0,  21.0,
+   4,  21.0,  21.0,
+   5, -21.0,   7.0,
+   6,  -7.0,   7.0,
+   7,   7.0,   7.0,
+   8,  21.0,   7.0,
+   9, -21.0,  -7.0,
+  10,  -7.0,  -7.0,
+  11,   7.0,  -7.0,
+  12,  21.0,  -7.0,
+  13, -21.0, -21.0,
+  14,  -7.0, -21.0,
+  15,   7.0, -21.0,
+  16,  21.0, -21.0,
 };
+
+
+
 
 // x,y offsets of fiber placements from center of module (not acurate!)
 const float FIBER_OFFSET_X=3.5;
@@ -87,7 +108,7 @@ class Mapper{
   void GetModuleMap(TH2I* h, int z=1 /*-1 for upstream*/ ) const;
   void GetChannelMap(TH2I* h, int z=1 /*-1 for upstream*/ ) const;
   void GetChannelIdx(TH2I* h, int z=1 /*-1 for upstream*/ ) const;
-
+  void SetEpoch(unsigned long ts);
   bool validChannel(int boardID, int channelNum) const;
   int ChannelID2FiberID(int channelID) const;
   int FiberID2ChannelID(int fiberID) const;
@@ -114,11 +135,13 @@ class Mapper{
 
  private:
   static Mapper* _pInstance;
+  static const int *FIBERMAP;
   map<int,int> _padeMap;  // map pade channels to fibers
   map<int,int> _fiberMap; // map fiber to pade channel
 
   Mapper();
   Mapper(Mapper const&){;}              // copy constructor is private
+  void MakeMaps();
 };
 
 class CalHit{

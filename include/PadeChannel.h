@@ -33,6 +33,7 @@ class PadeChannel : public TObject {
   void GetHist(TH1F* h);
   static PulseFit FitPulse(PadeChannel *pc, bool laserShape=false);
   double GetPedestal();
+  int GetPorch(ULong64_t ts=0) const;
 
   static const Int_t N_PADE_DATA=120;     // fixed in FW
   static const Int_t N_PADE_PORCH=15;     // diagnostic info in data payload

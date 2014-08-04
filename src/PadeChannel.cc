@@ -34,6 +34,7 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   _ch_number = ch_number;
   _eventnum = eventnum;
   _max=0;
+  
 
   // HACK, needs improvement
   // find in-time window
@@ -207,3 +208,12 @@ float PadeChannel::GetMaxCalib(){
   int idx=GetChannelIndex();
   return (_max-GetPedestal())*CalConstants[idx];
 }
+
+
+int PadeChannel::GetPorch(ULong64_t ts) const{
+  if (!ts) ts=_ts;
+  if (ts <= END_TBEAM1) return 0;
+  else if (ts<START_PORCH15) return 32;
+  else return 15;
+}
+

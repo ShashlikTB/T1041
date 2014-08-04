@@ -23,9 +23,10 @@ void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size,
 			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform){
 
   Mapper *mapper=Mapper::Instance();
+  mapper->SetEpoch(ts);
   if (!mapper->validChannel(board_id, ch_number)){ // sanity check 
     cerr << "Warning: channel ID error, board:channel " 
-	 << board_id << ":" << ch_number << endl;
+	 << board_id << ":" << ch_number << " ts= " << ts << endl;
   }
   PadeChannel pc;  // todo make constructor w/ fill inputs
   pc.Fill(ts, transfer_size, board_id, hw_counter, ch_number, eventnum, wform);

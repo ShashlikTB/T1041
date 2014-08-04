@@ -208,10 +208,38 @@ def getWCspills(fWC):
 
 
 # WC Database lookup
-# match WC spills w/in 15 seconds of timestamp given by PADE
+# match WC spills w/in PAST 45 seconds of WC timestamp read by PADE
 def wcLookup(tgttime, bound=15, filename="wcdb.txt"):
-    tgttime=float(tgttime)
-    lookval=int(tgttime)/1000   # seek matches w/in 1000 second time range
+    print "tgttime",tgttime
+    lookval=int(tgttime)/100   # seek matches w/in 100 second time range
+    try:
+        stat,spills=getstatusoutput("look "+str(lookval)+" "+filename)   # binary search of file
+        if (int(stat)!=0) or len(spills)==0: 
+            return (-1, None)                # no lines match
+        spills=spills.split("\n") 
+        for spill in spills:   # search spills <100 seconds from time in PADE spill header 
+            print spill
+            split = re.split(' +', spill.strip())
+            sTime = float(split[0]) # spill time from WC controller
+            diff = tgttime-sTime    # PADE read time - WC DAQ read time
+            print "diff",diff
+            if diff<0:        # Moved past the spill in the db file
+                print "miss!"
+                return (-1, None)
+            if diff <= bound:   # fuzzy time match
+                print "hit!"
+                return( int(split[4]),split[3] )  # byte offset and filename
+
+    except IOError as e:
+        print "Failed to open file %s due to %s" % (filename, e)
+
+    return (-1,None)
+
+
+# WC Database lookup [old version]
+# match WC spills w/in 15 seconds of timestamp given by PADE
+def wcLookup_(tgttime, bound=15, filename="wcdb.txt"):
+    lookval=long(tgttime)/1000   # seek matches w/in 1000 second time range
     try:
         stat,spills=getstatusoutput("look "+str(lookval)+" "+filename)   # binary search of file
         if (int(stat)!=0) or len(spills)==0: 
@@ -231,9 +259,9 @@ def wcLookup(tgttime, bound=15, filename="wcdb.txt"):
 
     return (-1,None)
 
-# WC Database lookup [old version]
+# WC Database lookup [older version]
 # match WC spills w/in 15 seconds of timestamp given by PADE
-def wcLookup_(tgttime, bound=15, filename="wcdb.txt"):
+def wcLookup__(tgttime, bound=15, filename="wcdb.txt"):
     tgttime=float(tgttime)
     try:
         handle = open(filename, 'r')        
@@ -285,3 +313,5 @@ def getTableXY(timeStamp):
     except IOError as e:
         print "Failed to open file %s due to %s" % (posFile, e)
     return (x,y)
+
+

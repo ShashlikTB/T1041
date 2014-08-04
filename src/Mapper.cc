@@ -1,6 +1,26 @@
 #include "Mapper.h"
 
+// defaulf map based on initial 4 PADE cards of July 2014 Test Beam  
 Mapper::Mapper(){  // Private so that it cannot be called
+  FIBERMAP=FIBERMAP_JULY14;
+  // fill maps
+  MakeMaps();
+}
+
+void Mapper::SetEpoch(unsigned long ts){  // redundant data here, clean this up
+  if (ts<=635337576077954884L && FIBERMAP!=FIBERMAP_APRIL14){
+    FIBERMAP=FIBERMAP_APRIL14;
+    MakeMaps(); 
+  }
+  else if (ts>635337576077954884L && FIBERMAP!=FIBERMAP_JULY14){
+    FIBERMAP=FIBERMAP_JULY14;
+    MakeMaps(); 
+  }
+}
+
+void Mapper::MakeMaps(){
+  _padeMap.clear();
+  _fiberMap.clear();
   // fill maps
   for (int i=0; i<NPADECHANNELS*2; i+=2){
     int channelID=FIBERMAP[i];
@@ -10,7 +30,7 @@ Mapper::Mapper(){  // Private so that it cannot be called
     else
       _padeMap[channelID]=fiberID;
     _fiberMap[fiberID]=channelID;
-  }
+  } 
 }
 
 bool Mapper::validChannel(int boardID, int channelNum) const{
@@ -189,3 +209,4 @@ void CalHit::Print() const{
 
 
 Mapper* Mapper::_pInstance=NULL;
+const int *Mapper::FIBERMAP=0;

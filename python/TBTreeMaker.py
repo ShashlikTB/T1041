@@ -151,8 +151,8 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
                 skipToNextSpill=True
                 logger.Warn("Spill header error detected: Invalid WC time stamp")
                 continue
-            tbspill.SetSpillData(padeSpill['number'],int(padeSpill['pctime']),
-                                 padeSpill['nTrigWC'],int(padeSpill['wcTime']),
+            tbspill.SetSpillData(padeSpill['number'],long(padeSpill['pctime']),
+                                 padeSpill['nTrigWC'],long(padeSpill['wcTime']),
                                  0,0,tableX,tableY)
 
             # find associated spill in WC data
@@ -236,8 +236,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
             if (isSaturated):
                 logger.Warn("ADC shows saturation. Board:",
                             pade_board_id,"channel:",pade_ch_number)
-            porch=15
-            if pade_ts<"635421671607690753" : porch=32   # hack!
+            porch=padeChannel.GetPorch(long(pade_ts))  # samples to skip
             for i in range(nsamples): 
                 samples[i]=int(waveform[i],16)
                 if samples[i]>4095 and i>=porch:

@@ -1,4 +1,6 @@
-// Created 4/12/2014 B.Hirosky: Initial release
+
+//Created 4/12/2014 B.Hirosky: Initial release
+
 
 #ifndef TBEVENT_H
 #define TBEVENT_H
@@ -97,7 +99,7 @@ private:
   Float_t       _roomTemp;                 // temperature in test beam area
 };
 
-
+/// Storage container for raw data from test beam
 class TBEvent : public TObject {
   ClassDef(TBEvent,1);  //Event structure
 public:
