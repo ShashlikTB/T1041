@@ -22,7 +22,7 @@ int CalReco::Process(TTree *recTree){
   // loop over the raw data tree
   int nEvents=recTree->GetEntries();
   for (int i=0; i<nEvents; i++){
-    if ( i % (nEvents/50) == 1) 
+    if ( i % TMath::Max(1,(nEvents/50)) == 0) 
       cout << "CalReco: Processing event " << i << " / " << nEvents << endl;
     rechits->clear();  
     recTree->GetEntry(i);
