@@ -1,6 +1,6 @@
 # Created 4/12/2014 B.Hirosky: Initial release
 
-import sys, os, bz2, inspect, re, time, collections
+import sys, os, bz2, inspect, re, time, collections, StringIO
 from commands import getoutput,getstatusoutput
 from ROOT import *
 
@@ -66,22 +66,25 @@ class Logger():
     def Fatal(self,*arg):
         msg="**FATAL**: "+ccat(*arg)+"\n"
         sys.stdout.write(self.RED+msg+self.COL_OFF)
-        self.stdout.write(msg)
+        if (self.logfile !=""): self.stdout.write(msg)
         sys.exit(1)
     def Summary(self):
-        print
-        print "="*40
-        print " WARNING Summary"
-        print "="*40
-        print 
-        if len(self.warnings)==0: print "No Warnings reported"
+        output = StringIO.StringIO()
+        print >>output
+        print >>output,"="*40
+        print >>output," WARNING Summary"
+        print >>output,"="*40
+        print >>output
+        if len(self.warnings)==0: print >>output,"No Warnings reported"
         else:
             owarn = collections.OrderedDict(sorted(self.warnings.items()))
-            for a in owarn: print "(%5d) %s" % (owarn[a],a)
-        print "="*40
-        print " WARNING Summary (end)"
-        print "="*40        
-
+            for a in owarn: print >>output,"(%5d) %s" % (owarn[a],a)
+        print >>output,"="*40
+        print >>output," WARNING Summary (end)"
+        print >>output,"="*40  
+        print output.getvalue()
+        if (self.logfile !=""): self.stdout.write(output.getvalue())
+        output.close()
 
 # hack to pass immutable data types "by reference" (under consideration)
 class pyref():  

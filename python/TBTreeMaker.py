@@ -76,7 +76,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
         return
 
     if logToFile:
-        logFile=padeDat.replace(".bz2","").replace(".txt",".log")
+        logFile=outFile.replace(".root",".log")
         logger.Info("Writing logger output to file:",logFile)
         logger.SetLogFile(logFile)
 
