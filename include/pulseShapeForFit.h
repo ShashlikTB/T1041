@@ -16,6 +16,9 @@ struct PulseFit{
   TF1 func;
 };
 
+std::ostream& operator<<(std::ostream& s, const PulseFit& f);
+
+
 double funcPulse(double *x, double *par);
 
 

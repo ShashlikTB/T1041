@@ -209,7 +209,7 @@ def getWCspills(fWC):
 
 # WC Database lookup
 # match WC spills w/in PAST 45 seconds of WC timestamp read by PADE
-def wcLookup(tgttime, bound=15, filename="wcdb.txt"):
+def wcLookup(tgttime, bound=45, filename="wcdb.txt"):
     print "tgttime",tgttime
     lookval=int(tgttime)/100   # seek matches w/in 100 second time range
     try:

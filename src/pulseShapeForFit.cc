@@ -26,3 +26,10 @@ double funcPulse(double *x, double *par){
 }
 
 	
+std::ostream& operator<<(std::ostream& s, const PulseFit& f){
+  return s<<"pedestal, noise, AMax, TRise, Chi2, ndof, Chi2Peak, ndofPeak, status ) = "
+	  << f.pedestal << ", " << f.noise << ", " << f.aMaxValue << ", "
+	  << f.tRiseValue << ", " << f.chi2 << ", " f.ndof << ", "
+	  << f.chi2Peak << ", " << f.ndofPeak << ", " << f.status;
+}
+
