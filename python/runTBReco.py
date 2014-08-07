@@ -37,6 +37,7 @@ else: runDat=args[0]
 print "Processing file:",runDat
 
 LoadLibs("TBLIB","libTB.so")
+gSystem.SetIncludePath("-I\"$TBHOME/include\"")
 
 
 

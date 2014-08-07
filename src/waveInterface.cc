@@ -480,7 +480,6 @@ void waveInterface::openFileDialog() {
 
   _filename = fileInfo->fFilename; 
   loadRootFile(); 
-
 }
 
 void waveInterface::Go() { 

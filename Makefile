@@ -18,11 +18,11 @@ $(shell mkdir -p build/lib)
 # sources for which dictionaries are to be created, 
 # but without the use of LinkDefs
 SRCSNOLINKDEF	:= WCPlanes.cc Connection.cc Slot.cc Util.cc Dialog.cc\
-Mapper.cc CalReco.cc
+Mapper.cc CalReco.cc TrackReco.cc
 
 # sources for which dictionaries are to be created, 
 # using LinkDefs
-SRCSWITHLINKDEF:= TBEvent.cc waveInterface.cc PadeChannel.cc TBRecHit.cc
+SRCSWITHLINKDEF:= TBEvent.cc waveInterface.cc PadeChannel.cc TBRecHit.cc TBTrack.cc
 # ----------------------------------------------------------------------------
 SRCSNOLINKDEF	:= $(patsubst %.cc,$(SRCDIR)/%.cc,$(SRCSNOLINKDEF))
 DICTSNOLINKDEF	:= $(patsubst $(SRCDIR)/%.cc,$(BLDDIR)/%Dict.cxx,$(SRCSNOLINKDEF))

@@ -39,10 +39,6 @@ class PadeChannel : public TObject {
   static const Int_t N_PADE_PORCH=15;     // diagnostic info in data payload
   static const Int_t N_PADE_SAMPLES=N_PADE_DATA-N_PADE_PORCH;
   static const Int_t PADE_PED_SAMPLES=20;
-  // discard 15 WF samples from here (otherwise discard 32)
-  static const ULong64_t START_PORCH15=635421671607690753; 
-  // unless time <= END_TBEAM1, then discard none
-  static const ULong64_t END_TBEAM1=635337576077954884;
 
   // private:
   ULong64_t     _ts;

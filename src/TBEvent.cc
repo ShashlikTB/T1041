@@ -186,3 +186,8 @@ void TBEvent::CalibrateCalHits(vector<CalHit> &calHits, float* calconstants){
   }
 }
 
+TBEvent::TBRun TBEvent::GetRunPeriod(ULong64_t padeTime){
+  if (padeTime<=END_TBEAM1) return TBRun1;
+  else if (padeTime<START_PORCH15) return TBRun2a;
+  else return TBRun2b;
+}

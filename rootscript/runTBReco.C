@@ -3,8 +3,9 @@
 #include <TTree.h>
 #include <TBranch.h>
 #include <TSystem.h>
-#include "include/TBEvent.h"
-#include "include/CalReco.h"
+#include "TBEvent.h"
+#include "CalReco.h"
+#include "TrackReco.h"
 
 void runTBReco(TString rawFile, TString recFile="", TString outdir=""){
   if (recFile=="") {
@@ -28,9 +29,12 @@ void runTBReco(TString rawFile, TString recFile="", TString outdir=""){
   TFile *tfRec=new TFile(recFile,"recreate");
   TTree *recTree=(TTree*)rawTree->CloneTree();
 
+  TrackReco *trackreco=new TrackReco();
+  trackreco->Process(rawTree,recTree);
 
   CalReco *calreco=new CalReco(2);   // 2 sigma cut for pulse fitting
-  calreco->Process(recTree);
+  calreco->Process(rawTree,recTree);
+
 
   // finish
   recTree->Write();

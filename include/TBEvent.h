@@ -1,7 +1,6 @@
 
 //Created 4/12/2014 B.Hirosky: Initial release
 
-
 #ifndef TBEVENT_H
 #define TBEVENT_H
 #include "PadeChannel.h"
@@ -21,7 +20,7 @@ class PadeHeader : public TObject{
   _isMaster(master), _boardID(board), _status(stat), _trgStatus(tstat), 
     _events(events), _memReg(mreg), _trigPtr(pTrg), 
     _pTemp(pTmp), _sTemp(sTmp){;}
-
+  
  private:
   Bool_t _isMaster;
   UShort_t _boardID;
@@ -103,6 +102,15 @@ private:
 class TBEvent : public TObject {
   ClassDef(TBEvent,1);  //Event structure
 public:
+  enum TBRun { 
+    TBRun1=0,   // April 2014
+    TBRun2a=1,  // Start of July-Aug 2014 run (32 ADC samples used for porch)
+    TBRun2b=2,  // Final July-Aug 2014 cfg. (15 ADC samples used for porch)
+    TBUndef=3
+  };
+  static const ULong64_t START_PORCH15=635421671607690753; // beginning of TBRun2b
+  static const ULong64_t END_TBEAM1=635337576077954884;    // end of TBRun1
+
   void Reset();    // clear data
 
   // getters (tbd - return (const) references, not copies, where appopriate)
@@ -113,6 +121,7 @@ public:
   Int_t GetWCHits() const {return wc.size();}
   vector<WCChannel> GetWChitsX(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   vector<WCChannel> GetWChitsY(Int_t wc, Int_t *min=0, Int_t* max=0) const;
+  static TBRun GetRunPeriod(ULong64_t padeTime);
   void GetCalHits(vector<CalHit> &calHits, float* calconstants=0, float cut=0);
   void GetCalHitsFit(vector<CalHit> &calHits, float* calconstants=0, float cut=0);
   void CalibrateCalHits(vector<CalHit> &calHits, float* calconstants);

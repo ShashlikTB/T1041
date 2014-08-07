@@ -5,6 +5,7 @@
 #define TBRECHIT_H
 
 #include "PadeChannel.h"
+#include "TMath.h"
 #include <TObject.h>
 #include <ostream>
 
@@ -41,6 +42,8 @@ class TBRecHit : public TObject {
   Float_t NoiseRMS() const {return noise;}
   Float_t Chi2() const {return chi2;}
   Float_t NZsp() const {return nzsp;}
+  Float_t Ndof() const {return ndof;}
+  Float_t Prob() const {return TMath::Prob(chi2,ndof);}
   UInt_t Status() const {return status;}
   void SetChannelIndex(Int_t idx) {channelIndex=idx;} 
   void SetOptNoFit() {status&=kNoFit;}

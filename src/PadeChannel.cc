@@ -1,7 +1,7 @@
 #include "PadeChannel.h"
 #include "calConstants.h"
 #include "Mapper.h"
-
+#include "TBEvent.h"
 
 void PadeChannel::Reset(){
   _ts=0;
@@ -45,7 +45,7 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   
   // another evil hack - this handles the start of testbeam2 data where the first
   // 32 waveform samples are not valid wave data.  The current porch is 15 samples
-  if (_ts<START_PORCH15) { // shift wform array by 17 counts, widen peak search window
+  if (_ts<TBEvent::START_PORCH15) { // shift wform array by 17 counts, widen peak search window
     for (int i=0; i<N_PADE_DATA-17; i++) wform[i]=wform[i+17];
     for (int i=N_PADE_DATA-17; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-18];
     tmin=30;
@@ -212,8 +212,9 @@ float PadeChannel::GetMaxCalib(){
 
 int PadeChannel::GetPorch(ULong64_t ts) const{
   if (!ts) ts=_ts;
-  if (ts <= END_TBEAM1) return 0;
-  else if (ts<START_PORCH15) return 32;
+  TBEvent::TBRun tbrun=TBEvent::GetRunPeriod(ts);
+  if (tbrun==TBEvent::TBRun1) return 0;
+  else if (tbrun<TBEvent::TBRun2a) return 32;
   else return 15;
 }
 

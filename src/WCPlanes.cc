@@ -154,7 +154,7 @@ void WCPlanes::Draw(TBEvent* event, Util& util)
       for(unsigned h2=0; h2<hitsY1.size(); ++h2){ // loop over Y1
 	for(unsigned h3=0; h3<hitsX2.size(); ++h3){ // loop over X2 
 	  for(unsigned h4=0; h4<hitsY2.size(); ++h4){ // loop over Y2
-	    WCtrack multiTrack(hitsX1[h1], hitsY1[h2], hitsX2[h3], hitsY2[h4]);
+	    TBTrack multiTrack(hitsX1[h1], hitsY1[h2], hitsX2[h3], hitsY2[h4]);
 	    float trackX, trackY;
 	    multiTrack.Project(zSC1, trackX, trackY);
 	    if(foundgood) continue;

@@ -11,7 +11,7 @@
 class CalReco{
  public:
  CalReco(float nSigmaCut=0) : _nSigmaCut(nSigmaCut) {;}
-  int Process(TTree *recTree);
+  int Process(TTree *rawTree, TTree *recTree);
  private:
   float _nSigmaCut;
 };

@@ -2,7 +2,7 @@
 #define WCPlanes_H
 #include "TBEvent.h"
 #include "TCanvas.h"
-#include "TBReco.h"
+#include "TBTrack.h"
 #include <TH2.h>
 #include "THStack.h"
 #include "Util.h"
@@ -24,8 +24,6 @@ class WCPlanes{
   TH2F *Scint1;
   TH2F *Scint2;
   TH2F *Shashlik;
-
-
 
   WCReco wcReco;
   TH2I *WC1_Beam;

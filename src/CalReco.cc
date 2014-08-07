@@ -9,23 +9,27 @@ using std::cout;
 using std::endl;
 
 
-int CalReco::Process(TTree *recTree){
+
+int CalReco::Process(TTree *rawTree, TTree *recTree){
+  TBEvent *event = new TBEvent();
+  rawTree->ResetBranchAddresses();
+  rawTree->SetBranchAddress("tbevent",&event);
+
   // Add the TBRecHit branch
   vector<TBRecHit> *rechits = new vector<TBRecHit>;
   cout << "Adding branch: tbrechits"<< endl;
   TBranch *brp=recTree->Branch("tbrechits","std::vector<TBRecHit>",&rechits);
 
+
   TBRecHit hit;
-  TBEvent *event = new TBEvent();
-  recTree->SetBranchAddress("tbevent",&event);
 
   // loop over the raw data tree
-  int nEvents=recTree->GetEntries();
+  int nEvents=rawTree->GetEntries();
   for (int i=0; i<nEvents; i++){
     if ( i % TMath::Max(1,(nEvents/50)) == 0) 
       cout << "CalReco: Processing event " << i << " / " << nEvents << endl;
+    rawTree->GetEntry(i);
     rechits->clear();  
-    recTree->GetEntry(i);
 
     for (Int_t nch=0; nch<event->NPadeChan(); nch++){
       PadeChannel pc=event->GetPadeChan(nch);

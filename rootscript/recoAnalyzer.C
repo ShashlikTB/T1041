@@ -12,9 +12,9 @@
 #include <TMath.h>
 #include <TString.h>
 #include <iostream>
-#include <TBEvent.h>
-#include <TBRecHit.h>
-
+#include "TBEvent.h"
+#include "TBRecHit.h"
+#include "TBTrack.h"
 
 using std::cout;
 using std::endl;
@@ -32,10 +32,12 @@ void recoAnalyzer(TString file="latest_reco.root"){
   TBEvent *tbevent=new TBEvent();
   TBSpill *tbspill=new TBSpill();
   vector<TBRecHit> *rechits=0;  // important to set this = 0!
+  vector<TBTrack> *tracks=0;
   
   t1041->SetBranchAddress("tbevent",&tbevent);
   t1041->SetBranchAddress("tbspill",&tbspill);
   t1041->SetBranchAddress("tbrechits",&rechits);
+  t1041->SetBranchAddress("tbtracks",&tracks);
 
   // find mean pulse amplitude
   double meanA=0;
@@ -55,6 +57,9 @@ void recoAnalyzer(TString file="latest_reco.root"){
   TH1F *hRise4=new TH1F("hRise4","tRise Board 117",50,25,75);
   TH2F *hNoise1=new TH2F("hNoise1","Noise vs Channel Board 112;channel number;ADC counts",32,0,32,20,0,2);
   TH2F *hChi21=new TH2F("hChi21","Chi^2 vs Channel Board 112;channel number;ADC counts",32,0,32,20,0,100);
+  TH1F *hslopeX=new TH1F("hslopeX","Track x-slope",50,-0.01,0.01);
+  TH1F *hslopeY=new TH1F("hslopeY","Track y-slope",50,-0.01,0.01);
+
 
   for (Int_t i=0; i<t1041->GetEntries(); i++) {
     t1041->GetEntry(i);
@@ -71,6 +76,11 @@ void recoAnalyzer(TString file="latest_reco.root"){
       else if (boardID==116) hRise3->Fill(hit.TRise());
       else if (boardID==117) hRise4->Fill(hit.TRise());
     }
+    if (tracks->size()>0) { 
+      TBTrack &track=(*tracks)[0];
+      hslopeX->Fill(track.GetSlopeX());
+      hslopeY->Fill(track.GetSlopeY());
+    }
   }
   
 
@@ -83,6 +93,8 @@ void recoAnalyzer(TString file="latest_reco.root"){
   c1->cd(5); hRise4->Draw();
   c1->cd(6); hNoise1->Draw("COLZ");
   c1->cd(7); hChi21->Draw("COLZ");
+  c1->cd(8); hslopeX->Draw();
+  c1->cd(9); hslopeY->Draw();
 
 }
 

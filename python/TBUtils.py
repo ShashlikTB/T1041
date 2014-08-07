@@ -230,7 +230,6 @@ def wcLookup(tgttime, bound=45, filename="wcdb.txt"):
                 print "miss!"
                 return (-1, None)
             if diff <= bound:   # fuzzy time match
-                print "hit!"
                 return( int(split[4]),split[3] )  # byte offset and filename
 
     except IOError as e:
