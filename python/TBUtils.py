@@ -104,11 +104,11 @@ def TBOpen(fin):
 def ParsePadeData(padeline):
     padeline=padeline.split()
     pade_ts=long(padeline[0])
-    pade_transfer_size=int(padeline[1]+padeline[2],16)
+    pade_transfer_size=int(padeline[1],16)<<8+int(padeline[2],16)
     pade_board_id=int(padeline[3],16)
     pade_hw_counter=int(padeline[4]+padeline[5]+padeline[6],16)
     pade_ch_number=int(padeline[7],16)
-    eventNumber = int(padeline[9],16)<<8+int(padeline[8],16)
+    eventNumber = int(padeline[9]+padeline[8],16)
     waveform=(padeline[10:])
     return (pade_ts,pade_transfer_size,pade_board_id,
             pade_hw_counter,pade_ch_number,eventNumber,waveform)

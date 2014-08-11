@@ -122,12 +122,13 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
     writevent=True
 
     # read PADE data file
+    linesread=0;
     while 1:
         padeline=fPade.readline().rstrip()
         if not padeline: 
             fillTree(BeamTree,eventDict,tbspill)          # end of file
             break
-
+        linesread=linesread+1
         ###########################################################
         ############### Reading spill header information ##########
 
@@ -224,7 +225,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
         if not goodPacketCount:
             logger.Warn("Packet counter increment error, delta=",
                         pade_hw_counter-lastPacket," Board:",pade_board_id,"channel:",pade_ch_number,
-                        "Clearing events in dictionary")
+                        "line number",linesread,"Clearing events in dictionary")
             for ievt in range(lastEvent,len(eventDict)):
                 if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
             skipToNextBoard=True
@@ -304,6 +305,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
     #=======================================================================# 
     #  Write tree and file to disk                                          #
     #=======================================================================#
+    print "Total lines read:",linesread
     print
     print "Finished processing"
     BeamTree[0].Print()
@@ -327,7 +329,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:o:flp")
+        opts, args = getopt.getopt(sys.argv[1:], "n:d:r:o:flpv")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
@@ -337,6 +339,7 @@ if __name__ == '__main__':
     forceFlag=False
     prof=False
     logToFile=False
+    verbose=false
     outDir=""
     for o, a in opts:
         if o == "-n": NEventLimit=int(a)
@@ -349,6 +352,7 @@ if __name__ == '__main__':
         elif o == "-l": logToFile=True
         elif o == "-p": prof=True
         elif o == "-o": outDir=a
+        elif o == "-v": verbose=true
 
 
     if inputDir=="":
