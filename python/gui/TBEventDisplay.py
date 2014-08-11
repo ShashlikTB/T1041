@@ -21,6 +21,7 @@ from gui.TBShashlikFaces import ShashlikHeatmap
 from gui.TDCtiming import TDCtiming
 from gui.TBFiberADC import FiberADC
 from gui.TBDisplay3D import Display3D
+from gui.TBPedestalNoise import PedestalNoise
 #------------------------------------------------------------------------------
 WIDTH        = 1000            # Width of GUI in pixels
 HEIGHT       =  500            # Height of GUI in pixels
@@ -275,6 +276,7 @@ class TBEventDisplay:
         for pageName, constructor, buttons in [('WF traces', 'TracePlot(canvas)', WFbuttons),
                           ('ADC heatmap',   'ShashlikHeatmap(canvas)', None),
                           ('ADC fibers', 'FiberADC(canvas)', None), 
+                          ('WF Noise', 'PedestalNoise(canvas)', None), 
                           ('Wire chambers', 'WCPlanes(canvas)', WCbuttons),
                           ('TDC timing','TDCtiming(canvas)', None),
                           ('3D display',    'Display3D(page)', ThreeDbuttons)]:
@@ -420,10 +422,12 @@ class TBEventDisplay:
         if id==2:
             self.pageName = 'Fibers'
         if id==3:
-            self.pageName = 'WC'
+            self.pageName = 'Noise'
         if id==4:
-            self.pageName = 'TDC'
+            self.pageName = 'WC'
         if id==5:
+            self.pageName = 'TDC'
+        if id==6:
             self.pageName = '3D_'
         self.noteBook.SetPage(id)
         if self.eventNumber >= 0:
@@ -471,7 +475,7 @@ class TBEventDisplay:
     def cycleTabs(self):
         self.debug('begin:cycleTabs')
         self.mutex.Lock()
-        if self.noteBook.pageNumber == 5:#len(self.noteBook.pages)-1:
+        if self.noteBook.pageNumber == 6:#len(self.noteBook.pages)-1:
             self.noteBook.pageNumber = 0
         self.timer.Start(self.DELAY*5, kFALSE)
         self.noteBook.pageNumber+=1

@@ -26,9 +26,12 @@ def MakePlots(object, c1, event, util):
         c1.Divide(1,2)
         gStyle.SetPalette(1)
         gStyle.SetOptStat(0)
+        c1.GetPad(1).SetLogz()
+        c1.GetPad(1).SetLogy()
 
-        object.hMapADCvsFiber = TH2F('hMapADCfiber','ADC Samples Vs. Fiber', 128,0,128,3000,0,3000)
-        object.hMapCHI2vsFiber = TH2F('hMapADCvsFiber','Chi2 Vs. Fiber', 128,0,128,25,0,10000)
+        object.hMapADCvsFiber = TH2F('hMapADCfiber','ADC Samples Vs. Channel', 128,0,128,3000,0,3000)
+        
+        object.hMapCHI2vsFiber = TH2F('hMapADCvsFiber','Chi2 Vs. Channel', 128,0,128,25,0,10000)
         HistoSamStyle(object.hMapADCvsFiber)
         HistoSamStyle(object.hMapCHI2vsFiber)
 
@@ -46,7 +49,7 @@ def MakePlots(object, c1, event, util):
             pade = event.GetPadeChan(i)
             hit.Init(pade, nSigmaCut)
             for iwf in range(0,60):
-                    number = pade.GetWform()[iwf]
+                    number = pade.GetWform()[iwf] - pade.GetPedestal()
                     hMapADCvsFiber.Fill(i,number)
             if not (hit.Status() and TBRecHit.kZSP):
                 chi2= min(9999,hit.Chi2())
@@ -56,7 +59,8 @@ def MakePlots(object, c1, event, util):
     if not util.stealthmode:
         gStyle.SetTitleSize(.08,"t"); 
         c1.cd(1)
-        c1.SetLogz()
+        c1.GetPad(1).SetLogz()
+        c1.GetPad(1).SetLogy()
         hMapADCvsFiber.Draw('COLZ')
         c1.cd(2)
         hMapCHI2vsFiber.Draw('COLZ')

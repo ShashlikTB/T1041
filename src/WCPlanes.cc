@@ -50,7 +50,6 @@ WCPlanes::WCPlanes()
 WCPlanes::WCPlanes(TCanvas* canvas)
   : c1(canvas), wcReco(WCReco()), isFirstEvent(true)
 {
- 
   WC1_Beam      = new TH2I("WC1_Beam", "WC1 Hits, Quality",            32,-64,64,32,-64,64);
   WC2_Beam      = new TH2I("WC2_Beam", "WC2 Hits, Quality",            32,-64,64,32,-64,64);
   WC_Shashlik   = new TH2F("WC_Shashlik", "Beam Hits in Shashlik Face",  32,-64,64,32,-64,64); 
@@ -59,6 +58,7 @@ WCPlanes::WCPlanes(TCanvas* canvas)
   Scint1   = new TH2F("Scint1",  "Scintillator 1 Hits", 128, -64, 64, 128, -64, 64);
   Scint2   = new TH2F("Scint2",  "Scintillator 2 Hits", 128, -64, 64, 128, -64, 64);
   Shashlik = new TH2F("Shashlik","Shashlik Hits",       128, -64, 64, 128, -64, 64);
+  hEmpty  = new TH2I("Empty","Empty",32,-64,64,32,-64,64); 
 
   
   WC1_Beam->SetFillColor(2);
@@ -148,7 +148,7 @@ void WCPlanes::Draw(TBEvent* event, Util& util)
   util.x2hit = 64;
   util.y2hit = 64;
 
-  bool foundgood = false;
+  double m2d = 99999;
   for(unsigned h1=0; h1<hitsX1.size(); ++h1)
     { // loop over X1 
       for(unsigned h2=0; h2<hitsY1.size(); ++h2){ // loop over Y1
@@ -157,22 +157,23 @@ void WCPlanes::Draw(TBEvent* event, Util& util)
 	    TBTrack multiTrack(hitsX1[h1], hitsY1[h2], hitsX2[h3], hitsY2[h4]);
 	    float trackX, trackY;
 	    multiTrack.Project(zSC1, trackX, trackY);
-	    if(foundgood) continue;
 	    if(fabs(trackX)>50 || fabs(trackY)>50)continue;
 	    Scint1->Fill(trackX, trackY, 1);
 	    multiTrack.Project(zSC2, trackX, trackY);
 	    if(fabs(trackX)>50 || fabs(trackY)>50)continue;
 	    Scint2->Fill(trackX, trackY, 1);
 	    multiTrack.Project(zWC1, trackX, trackY);
+	    double m2d_ = sqrt(pow(multiTrack.GetSlopeX(),2) + pow(multiTrack.GetSlopeY(),2));
+	    if (!(m2d_ < m2d)) 
+	      continue;
+	    m2d = m2d_;
 	    WC1_Beam->Fill(trackX, trackY, 1);
 	    util.x1hit = trackX;
 	    util.y1hit = trackY;
 	    multiTrack.Project(zWC2, trackX, trackY);
 	    WC2_Beam->Fill(trackX, trackY, 1);
 	    util.x2hit = trackX;
-	    util.y2hit = trackY;
-	      
-	    foundgood = true;
+	    util.y2hit = trackY;   
 	  }
 	}
       }
@@ -203,13 +204,17 @@ void WCPlanes::Draw(TBEvent* event, Util& util)
       }
     }
 
-
-  hEmpty  = new TH2I("Empty","Empty",32,-64,64,32,-64,64); 
   if(hStack1!=0) delete hStack1;
+  if(hStack2!=0) delete hStack2;
   TString name1; name1.Form("Upstream WC - evt %d", util.eventNumber);
   TString name2; name2.Form("Downstream WC - evt %d", util.eventNumber);
   hStack1 = new THStack(name1,name1);
   hStack2 = new THStack(name2,name2);
+  if (util.accumulate)
+    {
+    hStack1->SetTitle("WC1 (Upstream) accumulated");
+    hStack2->SetTitle("WC2 (Upstream) accumulated");
+    }
   c1->cd(1); 
   gPad->SetFrameFillColor(0);
   if(util.WC_showIThits)hStack1->Add(WC1_hits);
