@@ -357,17 +357,21 @@ def getRunData(timeStamp):
 
             # gain setting
             lna_pga=run[6]
-            gain=0
+            gain=10 # default is High_High
+            if "Low_" in lna_pga:
+                gain=gain-2
             if "Mid_" in lna_pga:
-                gain=gain+1
-            if "High_" in lna_pga:
-                gain=gain+2
-            if "_Mid"in lna_pga:
+                gain=gain-1
+            #if "High_" in lna_pga:
+            #    gain=gain
+            if "_low" in lna_pga:
+                gain=gain-8
+            if "_Mid" in lna_pga:
                 gain=gain+4
-            if "_High" in lna_pga:
-                gain=gain+8
+            #if "_High" in lna_pga:
+            #    gain=gain
             if "_VHigh" in lna_pga:
-                gain=gain+12
+                gain=gain+4
             gain=gain+vga<<4
 
             return (pid,float(momentum),gain,float(tableX),float(tableY))
@@ -380,3 +384,11 @@ def lastRunDat():
     runs=len(runlist)
     last=runlist[runs-1][2].replace(".txt","").replace("rec_capture_","")
     return last
+
+
+def dumpRunDat():
+    with open('runlist.dat', 'r') as f:
+        runlist = pickle.load(f)
+    runs=len(runlist)
+    for a in range(len(runlist)):
+        print runlist[a]
