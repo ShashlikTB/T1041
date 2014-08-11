@@ -79,7 +79,7 @@ void WCChannel::Dump() const {
 void TBSpill::SetSpillData(Int_t spillNumber, ULong64_t pcTime, 
 			   Int_t nTrigWC, ULong64_t wcTime,
 			   Int_t pdgID, Float_t nomMomentum,
-			   Float_t tableX, Float_t tableY, Float_t boxTemp, 
+			   Float_t tableX, Float_t tableY, Float_t boxTemp, Float_t angle,
 			   Float_t roomTemp){
   _spillNumber=spillNumber;
   _pcTime=pcTime;
@@ -89,6 +89,7 @@ void TBSpill::SetSpillData(Int_t spillNumber, ULong64_t pcTime,
   _nomMomentum=nomMomentum;
   _tableX=tableX;
   _tableY=tableY;
+  _angle=angle;
   _boxTemp=boxTemp;
   _roomTemp=roomTemp;
 }

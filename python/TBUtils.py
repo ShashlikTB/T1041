@@ -329,7 +329,10 @@ def getRunData(timeStamp):
                 vga=int(run[4],16)
             except: 
                 vga=0
+
             momentum=run[5].replace("GeV","")
+            try: momentum=float(momentum)
+            except: momentum=0
 
             # table location
             try: 
@@ -356,25 +359,23 @@ def getRunData(timeStamp):
                 pid=-22
 
             # gain setting
-            lna_pga=run[6]
-            gain=10 # default is High_High
-            if "Low_" in lna_pga:
-                gain=gain-2
-            if "Mid_" in lna_pga:
-                gain=gain-1
-            #if "High_" in lna_pga:
-            #    gain=gain
-            if "_low" in lna_pga:
-                gain=gain-8
-            if "_Mid" in lna_pga:
-                gain=gain+4
-            #if "_High" in lna_pga:
-            #    gain=gain
-            if "_VHigh" in lna_pga:
-                gain=gain+4
+            pga_lna=run[6]
+            gain=6 # default is Mid_High  = 0110 binary
+            if "Low_" in pga_lna: gain=gain-4
+            #elif "Mid_" in pga_lna: gain=gain
+            elif "High_" in pga_lna: gain=gain+4
+            elif "VHigh_" in pga_lna: gain=gain+8
+            if "_Low" in pga_lna: gain=gain-2
+            elif "_Mid" in pga_lna: gain=gain-1
+            #elif "_High" in pga_lna: gain=gain
+
             gain=gain+vga<<4
 
-            return (pid,float(momentum),gain,float(tableX),float(tableY))
+            try:
+                angle=float(run[20])
+            except:
+                angle=0
+            return (pid,momentum,gain,tableX,tableY,angle)
     return []
 
 def lastRunDat():

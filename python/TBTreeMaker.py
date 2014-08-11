@@ -84,11 +84,12 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
     
     #tableX,tableY=getTableXY(timeStamp)
     try:
-        particle,momentum,gain,tableX,tableY=getRunData(timeStamp)
+        particle,momentum,gain,tableX,tableY,angle=getRunData(timeStamp)
     except:
-        logger.Fatal("No run data found for",padeDat,"\n Either this run is not logged, or rerun getRunData.py")
-
-    logger.Info("particle,momentum,gain,tableX,tableY:",particle,momentum,gain,tableX,tableY)
+        logger.Warn("No run data found for",padeDat,"\n Either this run is not logged, or rerun getRunData.py")
+        particle=0; momentum=0; gain=0; tableX=0; tableY=0; angle=0
+    logger.Info("particle,momentum,gain,tableX,tableY,angle:",particle,momentum,gain,tableX,tableY,angle)
+    
     
 
     fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
@@ -159,7 +160,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
                 continue
             tbspill.SetSpillData(padeSpill['number'],long(padeSpill['pctime']),
                                  padeSpill['nTrigWC'],long(padeSpill['wcTime']),
-                                 particle,momentum,tableX,tableY)
+                                 particle,momentum,tableX,tableY,angle)
 
             # find associated spill in WC data
             wcSpill=wcLookup(padeSpill['wcTime'])
