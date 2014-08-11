@@ -1,4 +1,3 @@
-
 //Created 4/12/2014 B.Hirosky: Initial release
 
 #ifndef TBEVENT_H
@@ -9,18 +8,17 @@
 
 using std::vector;
 
-
 class PadeHeader : public TObject{
   ClassDef(PadeHeader,1); 
  public:
   PadeHeader(){;}
  PadeHeader(Bool_t master, UShort_t board, UShort_t stat,
 	    UShort_t tstat, UShort_t events, UShort_t mreg,
-	    UShort_t pTrg, UShort_t pTmp, UShort_t sTmp):
+	    UShort_t pTrg, UShort_t pTmp, UShort_t sTmp, UShort_t gain):
   _isMaster(master), _boardID(board), _status(stat), _trgStatus(tstat), 
     _events(events), _memReg(mreg), _trigPtr(pTrg), 
-    _pTemp(pTmp), _sTemp(sTmp){;}
-  
+    _pTemp(pTmp), _sTemp(sTmp), _gain(gain), _bias(0){;}
+
  private:
   Bool_t _isMaster;
   UShort_t _boardID;
@@ -31,8 +29,8 @@ class PadeHeader : public TObject{
   UShort_t _trigPtr;
   UShort_t _pTemp;    // temperature on PADE board
   UShort_t _sTemp;    // temperature on SIPM board
-  UShort_t _gainA;    // LNA [bits 1:0]  PGA [bits 3:2]  VGA [bits 15:4]
-  UShort_t _biasA;    // main bias setting
+  UShort_t _gain;     // LNA [bits 1:0]  PGA [bits 3:2]  VGA [bits 15:4]
+  UShort_t _bias;     // main bias setting
 };
 
 /// for now ASSUME we are only dealing with WC1 and WC2
@@ -61,10 +59,10 @@ class TBSpill : public TObject {
   ClassDef(TBSpill,1);  // Spill header info
 public:
  TBSpill(Int_t spillNumber=0, ULong64_t pcTime=0, Int_t nTrigWC=0, ULong64_t wcTime=0, 
-	 Int_t pdgID=0, Float_t nomMomentum=0, 
+	 Int_t pdgID=0, Float_t nomMomentum=0,
 	 Float_t tableX=-999, Float_t tableY=-999, Float_t boxTemp=0, Float_t roomTemp=0) : 
   _spillNumber(spillNumber), _pcTime(pcTime), 
-    _nTrigWC(nTrigWC), _wcTime(wcTime), _pdgID(pdgID), _nomMomentum(nomMomentum), 
+    _nTrigWC(nTrigWC), _wcTime(wcTime), _pdgID(pdgID), _nomMomentum(nomMomentum),
     _tableX(tableX), _tableY(tableY), _boxTemp(boxTemp), _roomTemp(roomTemp) {;}
   Int_t GetSpillNumber() const {return _spillNumber;}
   ULong64_t GetPCTime() const {return _pcTime;}
@@ -103,13 +101,22 @@ class TBEvent : public TObject {
   ClassDef(TBEvent,1);  //Event structure
 public:
   enum TBRun { 
-    TBRun1=0,   // April 2014
-    TBRun2a=1,  // Start of July-Aug 2014 run (32 ADC samples used for porch)
-    TBRun2b=2,  // Final July-Aug 2014 cfg. (15 ADC samples used for porch)
-    TBUndef=3
+    TBRun1=0,   ///< April 2014
+    TBRun2a=1,  ///< Start of July-Aug 2014 run (32 ADC samples used for porch)
+    TBRun2b=2,  ///< Final July-Aug 2014 cfg. (15 ADC samples used for porch)
+    TBRun2c=3,  ///< More precise WC time stamps in PADE DAQ
+    TBUndef=5
   };
-  static const ULong64_t START_PORCH15=635421671607690753; // beginning of TBRun2b
-  static const ULong64_t END_TBEAM1=635337576077954884;    // end of TBRun1
+  /// earliest TB data run
+  static const ULong64_t START_TBEAM1=635321637512389603L;   
+  /// end of TBRun1
+  static const ULong64_t END_TBEAM1=635337576077954884L;      
+  /// beginning of TBRun2b
+  static const ULong64_t START_PORCH15=635421671607690753L;   
+  /// More precise end of spill time reported
+  /** Mod of PADE WC Spill time stamp.  Previously, reported end of spill + PADE RO time.
+      Now end of spill time reported.  This is 0-1 seconds behind spill time reported by WC DAQ **/
+  static const ULong64_t START_NEWWCSYNC=635432861909176340L;  
 
   void Reset();    // clear data
 
@@ -122,6 +129,7 @@ public:
   vector<WCChannel> GetWChitsX(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   vector<WCChannel> GetWChitsY(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   static TBRun GetRunPeriod(ULong64_t padeTime);
+  static TBRun GetRunPeriod(TBEvent *event);
   void GetCalHits(vector<CalHit> &calHits, float* calconstants=0, float cut=0);
   void GetCalHitsFit(vector<CalHit> &calHits, float* calconstants=0, float cut=0);
   void CalibrateCalHits(vector<CalHit> &calHits, float* calconstants);

@@ -11,6 +11,8 @@ void PadeChannel::Reset(){
   _ch_number=0;
   _eventnum=0;
   _max=0;
+  _ped=0;
+  _pedsigma=0;
   for (int i=0; i<N_PADE_SAMPLES; i++) _wform[i]=0;
 }
 
@@ -35,27 +37,26 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   _eventnum = eventnum;
   _max=0;
   
-
-  // HACK, needs improvement
-  // find in-time window
-  int idx=_board_id-112;   // BAD practice!
-  if (idx>1) idx-=2;   
-  int tmin=PADE_SAMPLE_TIMES[idx]-PADE_SAMPLE_RANGE;
-  int tmax=PADE_SAMPLE_TIMES[idx]+PADE_SAMPLE_RANGE;
+  // range to search for signal peaks
+  int tmin=15;
+  int tmax=40;
   
-  // another evil hack - this handles the start of testbeam2 data where the first
-  // 32 waveform samples are not valid wave data.  The current porch is 15 samples
-  if (_ts<TBEvent::START_PORCH15) { // shift wform array by 17 counts, widen peak search window
-    for (int i=0; i<N_PADE_DATA-17; i++) wform[i]=wform[i+17];
-    for (int i=N_PADE_DATA-17; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-18];
-    tmin=30;
-    tmax=60;
+  // This handles the start of testbeam2 data where the first
+  // 32 waveform samples are not valid wave data.  No porch was present in April 2014
+  if (_ts>TBEvent::END_TBEAM1 && _ts<TBEvent::START_PORCH15) { // shift wform array by 32 counts
+      for (int i=0; i<N_PADE_DATA-32; i++) wform[i]=wform[i+32];
+      for (int i=N_PADE_DATA-32; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-33];
+      N_PADE_SAMPLES=N_PADE_DATA-32;
+  } // The current porch is 15 samples
+  else if (_ts>=TBEvent::START_PORCH15){
+    for (int i=0; i<N_PADE_DATA-15; i++) wform[i]=wform[i+15];
+    for (int i=N_PADE_DATA-15; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-16];
+    N_PADE_SAMPLES=N_PADE_DATA-15;
   }
 
-  /// todo add ped calculation here
-  for (int i=0; i<N_PADE_SAMPLES; i++) {
-    int dataIdx=i+N_PADE_PORCH;
-    _wform[i]=wform[dataIdx];
+  // loop over samples
+  for (int i=0; i<N_PADE_DATA; i++) {  
+    _wform[i]=wform[i];
     // max/min from start of data (not samples)
     if (i<=tmin || i>tmax) continue; 
     if (_wform[i]>_max) {
@@ -63,8 +64,11 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
       _peak=i;  // sample number for peak
     }
   }
-  /// todo add pulse shape fit here 
-  _flag = 0;
+  Double_t p,s;
+  GetPedestal(p,s);
+  _ped=p;
+  _pedsigma=s;
+  _status = 0;
 }
 
 void PadeChannel::GetHist(TH1F *h){
@@ -76,7 +80,8 @@ void PadeChannel::GetHist(TH1F *h){
   for (int i=0; i<N_PADE_SAMPLES; i++){
     h->SetBinContent(i+1,_wform[i]);
   }
-  h->SetMinimum(0);
+  h->SetMinimum(75);
+  h->SetStats(0);
 }
 
 void PadeChannel::GetXYZ(double &x, double &y, double &z){
@@ -96,19 +101,12 @@ void PadeChannel::GetPedestal(double &ped, double &stdev){
 }
 
 
-double PadeChannel::GetPedestal(){
-double ped = 0;
-double stdev = 0;
-GetPedestal(ped, stdev);
-return ped;
-}
-
 Int_t PadeChannel::GetChannelIndex(){
   Mapper *mapper=Mapper::Instance();
   return mapper->ChannelID2ChannelIndex(GetChannelID());
 }
 
-PulseFit PadeChannel::FitPulse(PadeChannel *pc, bool laserShape){ 
+PulseFit PadeChannel::FitPulse(PadeChannel *pc){ 
   static bool first=true;
   static TF1 *func;
   if (first){
@@ -218,3 +216,7 @@ int PadeChannel::GetPorch(ULong64_t ts) const{
   else return 15;
 }
 
+
+void PadeChannel::SetAsLaser() {_status|=kLaser;}
+
+Int_t PadeChannel::N_PADE_SAMPLES=PadeChannel::N_PADE_DATA;

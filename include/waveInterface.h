@@ -81,6 +81,7 @@ class waveInterface : public TQObject {
   TGTextButton *_loadBN;
   TGTextButton *_goBN;
   TGTextButton *_stopBN;
+  TGTextButton *_fitBN;
   TGTextButton *_nextenBN;
   TGTextButton *_prevenBN;
 
@@ -107,6 +108,7 @@ class waveInterface : public TQObject {
   TFile *_f; 
   
   PadeChannel _padeChannel; 
+  bool _showPulseFit;
   
 
 
@@ -118,6 +120,7 @@ class waveInterface : public TQObject {
   void closeCleanup(); 
   void Go(); 
   void Stop(); 
+  void Fit();
 
   bool PlayerStatus() { return _playerStatus; } 
   UInt_t Delay() { return _delay; } 

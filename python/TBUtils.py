@@ -1,6 +1,6 @@
 # Created 4/12/2014 B.Hirosky: Initial release
 
-import sys, os, bz2, inspect, re, time, collections, StringIO
+import sys, os, bz2, inspect, re, time, collections, StringIO, pickle
 from commands import getoutput,getstatusoutput
 from ROOT import *
 
@@ -316,4 +316,67 @@ def getTableXY(timeStamp):
         print "Failed to open file %s due to %s" % (posFile, e)
     return (x,y)
 
+def getRunData(timeStamp):
+    with open('runlist.dat', 'r') as f:
+        runlist = pickle.load(f)
+    print "search for",timeStamp
 
+    for run in runlist:  # could move to a binary search
+        if run[0]==timeStamp:
+            print run
+            particle=run[3]
+            try: 
+                vga=int(run[4],16)
+            except: 
+                vga=0
+            momentum=run[5].replace("GeV","")
+
+            # table location
+            try: 
+                tableX=float(run[18])
+            except: 
+                tableX=-999.
+            try: 
+                tableY=float(run[19])
+            except: 
+                tableY=-999.
+            # beam type
+            pid=0
+            if "elec" in particle: 
+                pid=11
+            elif "posi" in particle: 
+                pid=-11
+            elif "muo" in particle: 
+                pid=12
+            elif "pion" in paticle: 
+                pid=211
+            elif "prot" in particle: 
+                pid=2212
+            elif "las" in particle:  
+                pid=-22
+
+            # gain setting
+            lna_pga=run[6]
+            gain=0
+            if "Mid_" in lna_pga:
+                gain=gain+1
+            if "High_" in lna_pga:
+                gain=gain+2
+            if "_Mid"in lna_pga:
+                gain=gain+4
+            if "_High" in lna_pga:
+                gain=gain+8
+            if "_VHigh" in lna_pga:
+                gain=gain+12
+            gain=gain+vga<<4
+
+            return (pid,float(momentum),gain,float(tableX),float(tableY))
+    return []
+
+def lastRunDat():
+    if not os.path.isfile('runlist.dat') : return "00000000_000000"
+    with open('runlist.dat', 'r') as f:
+        runlist = pickle.load(f)
+    runs=len(runlist)
+    last=runlist[runs-1][2].replace(".txt","").replace("rec_capture_","")
+    return last

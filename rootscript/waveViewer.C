@@ -22,8 +22,6 @@ void waveViewer(TString fdat, Int_t board=-1, Int_t channel=-1){
     return;
   }
 
-  gStyle->SetOptStat(0);
-
   TBEvent *event = new TBEvent();
   TTree *t1041 = (TTree*)f->Get("t1041"); 
   TBranch *bevent = t1041->GetBranch("tbevent");

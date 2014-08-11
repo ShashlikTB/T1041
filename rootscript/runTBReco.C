@@ -7,7 +7,7 @@
 #include "CalReco.h"
 #include "TrackReco.h"
 
-void runTBReco(TString rawFile, TString recFile="", TString outdir=""){
+TString runTBReco(TString rawFile, TString recFile="", TString outdir=""){
   if (recFile=="") {
     recFile=rawFile;
     recFile.ReplaceAll(".root","_reco.root");
@@ -44,5 +44,6 @@ void runTBReco(TString rawFile, TString recFile="", TString outdir=""){
   
   delete tfRec;
   delete tfRaw;
+  return recFile;
 }
 

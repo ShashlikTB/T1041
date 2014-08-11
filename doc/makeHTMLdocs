@@ -1,0 +1,3 @@
+#!/bin/bash
+doxygen Doxyfile
+rsync -av --delete html/* hirosky@hepcat:/var/www/html/cms/T1041

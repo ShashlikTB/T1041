@@ -77,6 +77,7 @@ waveInterface::waveInterface(bool initialise) {
   _playerStatus = false; 
   _delay=1000;
   _currentBoard = -1; 
+  _showPulseFit=false;
   //By default start the interface
   if (initialise)
     initWindow(); 
@@ -312,6 +313,8 @@ void waveInterface::makeButtons()  {
   _stopBN = new TGTextButton(_actionFrame, "&Stop");
   _actionFrame->AddFrame(_stopBN, new TGLayoutHints(kLHintsTop,5,5,5,1)); 
 
+  _fitBN = new TGTextButton(_actionFrame, "&Fit on ");
+  _actionFrame->AddFrame(_fitBN, new TGLayoutHints(kLHintsTop,5,5,5,1)); 
 
   _delayBox = new TGNumberEntry(_actionFrame, 1000,9,999, TGNumberFormat::kNESInteger,
 				TGNumberFormat::kNEANonNegative,TGNumberFormat::kNELLimitMinMax,100,10000);
@@ -337,6 +340,7 @@ void waveInterface::connectButtons()  {
 
   _goBN->Connect("Clicked()", "waveInterface", this, "Go()"); 
   _stopBN->Connect("Clicked()", "waveInterface", this, "Stop()"); 
+  _fitBN->Connect("Clicked()", "waveInterface", this, "Fit()"); 
   _nextenBN->Connect("Clicked()", "waveInterface", this, "nextEntry()"); 
   _prevenBN->Connect("Clicked()", "waveInterface", this, "prevEntry()");
 
@@ -479,7 +483,8 @@ void waveInterface::openFileDialog() {
   }
 
   _filename = fileInfo->fFilename; 
-  loadRootFile(); 
+  loadRootFile();
+  delete fileDialog;
 }
 
 void waveInterface::Go() { 
@@ -496,6 +501,21 @@ void waveInterface::Stop() {
   _playerStatus = false; 
 
 }
+
+void waveInterface::Fit() { 
+  std::cout << "Fitting channel(s)..." << std::endl; 
+  if (_showPulseFit==false){
+    _showPulseFit=true;
+    _fitBN->SetText("&Fit off");
+    waveformChUpdate();
+  }
+  else {
+    _showPulseFit=false;
+    _fitBN->SetText("&Fit on ");
+    waveformChUpdate();
+  }
+}
+
 
 void waveInterface::updateHistogram() { 
 
@@ -551,7 +571,15 @@ void waveInterface::updateFrame(UInt_t entry, UInt_t channel) {
   std::cout << "Drawing Sample" << std::endl; 
   _waveform->SetStats(0); 
   _waveform->Draw(); 
-
+  PulseFit fit;
+  if (_showPulseFit) {
+    fit=PadeChannel::FitPulse(&_padeChannel);
+    TSpectrum s;
+    s.Search(_waveform,3,"",0.25);
+    _waveform->Draw(); 
+    fit.func.Draw("same");
+    std::cout<<fit<<endl;
+  }
   _waveformCanvas->GetCanvas()->Modified(); 
   _waveformCanvas->GetCanvas()->Update(); 
 }
@@ -632,7 +660,7 @@ bool waveInterface::nextOverthresholdCh(bool up) {
   if (up)  { 
     for (Int_t i = 0; i < _event->NPadeChan(); i++) { 
       _padeChannel = _event->GetPadeChan(i);
-      if (_padeChannel.GetBoardID() == _currentBoard && _padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() < _minCount) { 
+      if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() < _minCount) { 
 	_chiterator++; 
 
 	if (_chiterator == _chSet.end()) {
@@ -640,7 +668,7 @@ bool waveInterface::nextOverthresholdCh(bool up) {
 	  break; 
 	}
       }
-      if (_padeChannel.GetBoardID() == _currentBoard && _padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() >= _minCount) { 
+      if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() >= _minCount) { 
 	std::cout << "Channel " << *_chiterator << " Over threshold." << std::endl; 
 	return true; 
       }
@@ -651,7 +679,7 @@ bool waveInterface::nextOverthresholdCh(bool up) {
     Int_t i = 0; 
     while (i < _event->NPadeChan()) { 
       _padeChannel = _event->GetPadeChan(i); 
-      if (_padeChannel.GetBoardID() == _currentBoard && _padeChannel.GetChannelNum() == *_chiterator)
+      if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator)
 	break; 
       i++; 
     }
@@ -659,14 +687,14 @@ bool waveInterface::nextOverthresholdCh(bool up) {
     for (; i >= 0; i--) { 
 
       _padeChannel = _event->GetPadeChan(i); 
-    if (_padeChannel.GetBoardID() == _currentBoard && _padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() < _minCount) { 
+      if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() < _minCount) { 
 
 	if (_chiterator != _chSet.begin())
 	  _chiterator--; 
 	else 
 	  return false; 
     }
-    if (_padeChannel.GetBoardID() == _currentBoard && _padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() >= _minCount)
+    if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() >= _minCount)
 	return true; 
     }
 
@@ -677,12 +705,15 @@ bool waveInterface::nextOverthresholdCh(bool up) {
 void waveInterface::waveformChUpdate() { 
   for (Int_t i = 0; i < _event->NPadeChan(); i++) { 
       _padeChannel = _event->GetPadeChan(i); 
-      if (_padeChannel.GetBoardID() == _currentBoard && _padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() >= _minCount ) {
-	std::cout << _padeChannel.GetBoardID() << " " << _padeChannel.GetChannelNum() << std::endl; 
+      if (_padeChannel.GetBoardID() == _currentBoard && 
+	  (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() >= _minCount ) {
+	std::cout << "Board Channel: " << _padeChannel.GetBoardID() << " " 
+		  << _padeChannel.GetChannelNum() << std::endl; 
 	updateFrame(_currentEntry, i); 
 	return; 
       }
   }
+
   _waveformCanvas->GetCanvas()->Clear(); 
   _waveformCanvas->GetCanvas()->Modified(); 
   _waveformCanvas->GetCanvas()->Update(); 

@@ -81,8 +81,14 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
         logger.SetLogFile(logFile)
 
     timeStamp=os.path.basename(outFile).replace("rec_capture_","").replace(".root","")
-    tableX,tableY=getTableXY(timeStamp)
-    logger.Info("Table position:",tableX,tableY)
+    
+    #tableX,tableY=getTableXY(timeStamp)
+    try:
+        particle,momentum,gain,tableX,tableY=getRunData(timeStamp)
+    except:
+        logger.Fatal("No run data found for",padeDat,"\n Either this run is not logged, or rerun getRunData.py")
+
+    logger.Info("particle,momentum,gain,tableX,tableY:",particle,momentum,gain,tableX,tableY)
     
 
     fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
@@ -153,7 +159,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
                 continue
             tbspill.SetSpillData(padeSpill['number'],long(padeSpill['pctime']),
                                  padeSpill['nTrigWC'],long(padeSpill['wcTime']),
-                                 0,0,tableX,tableY)
+                                 particle,momentum,tableX,tableY)
 
             # find associated spill in WC data
             wcSpill=wcLookup(padeSpill['wcTime'])
@@ -171,7 +177,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
             (isMaster,boardID,status,trgStatus,
              events,memReg,trigPtr,pTemp,sTemp) = ParsePadeBoardHeader(padeline)
             tbspill.AddPade(PadeHeader(isMaster,boardID,status,trgStatus,
-                                            events,memReg,trigPtr,pTemp,sTemp))
+                                            events,memReg,trigPtr,pTemp,sTemp,gain))
             continue
 
         ############### Reading spill header information ########## 
@@ -274,7 +280,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
                             eventDict[padeEvent].AddWCHit(tdcNum,wire,tdcCount)
                         else: break
                 else:
-                    logger.Warn("No matching event in WC")
+                    logger.Warn("No matching spill in WC")
                 fWC.close()
 
         else: # new event in a slave

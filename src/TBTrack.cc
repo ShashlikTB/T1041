@@ -80,6 +80,7 @@ void WCReco::AddTree(TTree *tree){
   bevent->SetAddress(&event);
   for (int i = 0; i < tree->GetEntries(); i++) {
     tree->GetEntry(i);
+    if (i==0) _run=TBEvent::GetRunPeriod(event);
     for(int j = 0; j < event->GetWCHits(); j++){
       Int_t module        = event->GetWCChan(j).GetTDCNum();
       Int_t channelCount  = event->GetWCChan(j).GetCount();
@@ -97,12 +98,18 @@ void WCReco::FitTDCs(){
 
   for(Int_t drawG=0; drawG<NTDC; ++drawG){  
     // finding peak using tspectrum
-    tspectrum.Search(_TDC[drawG],2,"goff",0.25); 
+    tspectrum.Search(_TDC[drawG],5,"goff",0.25); 
     int npeaks = tspectrum.GetNPeaks();
     Float_t *tdc_peaks = tspectrum.GetPositionX();
     Float_t early_peak = 9999.;
+    // hacky!  Test beam2 runs have TDC peak at earlier time values
+    // whereas test beam1 runs may have noise peaks at early time values
+    // better solution: set minimum width for choosing first peak
+    float minPeakTime=25;
+    if (_run==TBEvent::TBRun2b) minPeakTime=0;
     for (int ipeak = 0; ipeak < npeaks; ipeak++){  // TEMPORARY! was 25 for tb1
-      if ( tdc_peaks[ipeak] < early_peak && tdc_peaks[ipeak] > 10) early_peak = tdc_peaks[ipeak];
+      if ( tdc_peaks[ipeak] < early_peak && tdc_peaks[ipeak] > minPeakTime) 
+	early_peak = tdc_peaks[ipeak];
     }
     // Fitting the peak with a gaussian
     int maxBin    = _TDC[drawG]->FindBin(early_peak);

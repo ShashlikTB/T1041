@@ -44,6 +44,7 @@ class TBTrack : public TObject {
 
 // This class histograms TDC data based on on or more input trees
 // It provides the in time cuts
+// n.b. called now by TrackReco, kept around for compatibility w/ GUI display
 class WCReco{
 public:
   WCReco(); 
@@ -60,6 +61,7 @@ public:
   float _tLow[NTDC];
   float _tHigh[NTDC];
   bool _cutsMade;
+  TBEvent::TBRun _run; // get the un period for later use
 };
 
 
