@@ -15,12 +15,11 @@ logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 
 #generate a set of previously read files
 def findPrevReadFiles(handle): 
-	files = set()
+        files = set()
 	for line in handle: 
 		l = re.split(' +', line.strip())
 		files.add(l[-2])
-		
-	return files
+        return files
 		
 
 def generateSpillDB(wcHandle, dbHandle, filename): 
@@ -30,7 +29,6 @@ def generateSpillDB(wcHandle, dbHandle, filename):
 
         if not wcHandle:
             raise 
-
         line = -1
         while line != '': 
             line = wcHandle.readline()
@@ -131,50 +129,40 @@ def main():
 			print "Couldn't open db file %s, regenerating" % dbfile
 			dbHandle = open(dbfile, 'w')
 
-	if os.path.isfile(location):
-	    filename = location
-	    try:
-		if filename.endswith(".txt") or filename.endswith(".dat"):
-		    wcHandle = open(filename, "r")
-		elif filename.endswith(".bz2"):
-		    wcHandle = bz2.BZ2File(filename, "r")
-		else:
-		    logger.Warn('Unrecognized filename extension')
+	if os.path.isdir(location): 
+                absPath =  os.path.abspath(location)
+                # joinedPath = os.path.join(absPath, location)
+                # files = glob.glob(joinedPath)
+                files = glob.glob(absPath+"/t1041*dat*")
+                print location,absPath,files
+        elif os.path.isfile(location):
+                files=[]
+                files.append(os.path.abspath(location))
 
-	    except IOError as e:
-		logger.Warn("Unable to open %s, %s" % (filename, e))
-	    generateSpillDB(wcHandle, dbHandle)
-	elif os.path.isdir(location): 
-	    absPath =  os.path.abspath(location)
-#	    joinedPath = os.path.join(absPath, location)
-#	    files = glob.glob(joinedPath)
-            files = glob.glob(absPath+"/t1041*dat*")
-            print location,absPath,files
+        #Generate a list of tuples containing the filename and file modification time 
+        sortedFiles = []
+        for f in files:
+            sortedFiles.append((f,os.path.getmtime(f)))
 
-	    #Generate a list of tuples containing the filename and file modification time 
-	    sortedFiles = []
-	    for f in files:
-		    sortedFiles.append((f,os.path.getmtime(f)))
-
-	    #Sort the files by the file modification time 
-	    sortedFiles = sorted(sortedFiles, key=itemgetter(1))
-	    for filename,mtime in sortedFiles:
+        #Sort the files by the file modification time 
+        sortedFiles = sorted(sortedFiles, key=itemgetter(1))
+        for filename,mtime in sortedFiles:
                 if force or not prevReadFiles or (prevReadFiles and filename not in prevReadFiles):
-			if not "t1041_" in filename: continue  # not a WC file
-			if filename.endswith(".dat.bz2"):
-				try:
-					wcHandle = bz2.BZ2File(filename, "r")
-					logger.Info("Processing %s" % filename)
-					generateSpillDB(wcHandle, dbHandle, filename)
-				except IOError as e:
-					logger.Warn("Unable to open %s, %s" % (filename, e))
-			elif filename.endswith(".dat"): 
-				try:
-					wcHandle = open(filename, "r")
-					logger.Info("Processing %s" % filename)
-					generateSpillDB(wcHandle, dbHandle, filename)
-				except IOError as e:
-					logger.Warn("Unable to open %s, %s" % (filename, e))
+                        if not "t1041_" in filename: continue  # not a WC file
+                        if filename.endswith(".dat.bz2"):
+                                try:
+                                        wcHandle = bz2.BZ2File(filename, "r")
+                                        logger.Info("Processing %s" % filename)
+                                        generateSpillDB(wcHandle, dbHandle, filename)
+                                except IOError as e:
+                                        logger.Warn("Unable to open %s, %s" % (filename, e))
+                        elif filename.endswith(".dat"): 
+                                try:
+                                        wcHandle = open(filename, "r")
+                                        logger.Info("Processing %s" % filename)
+                                        generateSpillDB(wcHandle, dbHandle, filename)
+                                except IOError as e:
+                                        logger.Warn("Unable to open %s, %s" % (filename, e))
 
 
 
