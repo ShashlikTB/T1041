@@ -351,7 +351,7 @@ def getRunData(timeStamp):
                 pid=-11
             elif "muo" in particle: 
                 pid=12
-            elif "pion" in paticle: 
+            elif "pion" in particle: 
                 pid=211
             elif "prot" in particle: 
                 pid=2212
