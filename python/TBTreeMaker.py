@@ -43,10 +43,10 @@ def usage():
 
 
 def fillTree(tree, eventDict, tbspill):  
+    ndrop=0
     if len(eventDict)==0: return
     nfill=min(len(eventDict),MAXPERSPILL)
     tree[0].SetBranchAddress("tbspill",AddressOf(tbspill))
-    ndrop=0
     for ievt in range(nfill):
         if not ievt in eventDict:
             ndrop=ndrop+1
@@ -150,7 +150,9 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
             if nSpills>0:
                 ndrop=fillTree(BeamTree,eventDict,tbspill)
                 if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
-            if (nEventsTot>=NEventLimit): break
+            if (nEventsTot>=NEventLimit): 
+                logger.Warn("Too many events - this should never happen!")
+                break
             tbspill.Reset();
             logger.Info(padeline)
             eventDict={}           # clear dictionary containing events in spill
@@ -214,14 +216,15 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
 
         # check for event overflows
         if padeEvent>MAXPERSPILL:
-            logger.Warn("Event count overflow in spill, reading 1st",
-                        MAXPERSPILL,"events")
+            logger.Warn("PadeEvent",padeEvent,"Event count overflow in spill, reading 1st",
+                        MAXPERSPILL,"events","line number",linesread)
             skipToNextSpill=True
             continue
 
         # check for sequential events
         if newEvent and (padeEvent-lastEvent)!=1:
             logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
+                        "this event",padeEvent,"last event",lastEvent,
                         "Board:",pade_board_id,"channel:",pade_ch_number,"line number",linesread)
         lastEvent=padeEvent
 

@@ -82,6 +82,12 @@ void recoAnalyzer(TString file="latest_reco.root"){
       hslopeY->Fill(track.GetSlopeY());
     }
   }
+  // using the last event, print out some run summary info
+  cout << "===== Run Summary Info =====" << endl;
+  cout << "Beam Type: " << tbspill->GetPID() << "   "
+       << "Gain: " << (tbspill->GetPadeHeader(0))->Gain() << endl;
+  cout << "Table X Y: " << tbspill->GetTableX() << " " << tbspill->GetTableY() << endl;
+  cout << "============================" << endl;
   
 
   TCanvas *c1=new TCanvas("c1","recoAnayzer",1600,800);

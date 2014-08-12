@@ -18,6 +18,13 @@ class PadeHeader : public TObject{
   _isMaster(master), _boardID(board), _status(stat), _trgStatus(tstat), 
     _events(events), _memReg(mreg), _trigPtr(pTrg), 
     _pTemp(pTmp), _sTemp(sTmp), _gain(gain), _bias(0){;}
+  
+  UShort_t Gain() const {return _gain;}
+  UShort_t BoardID() const {return _boardID;}
+  UShort_t Events() const {return _events;}
+  Bool_t IsMaster() const {return _isMaster;}
+  UShort_t PadeTemp() const {return _pTemp;}
+  UShort_t SipmTemp() const {return _sTemp;}
 
  private:
   Bool_t _isMaster;
@@ -54,7 +61,17 @@ class WCChannel : public TObject{
   UShort_t      _tdcCount;
 };
 
-
+/// Container for spill-related data
+/**
+   Container for spill-related data
+   Beam types are given usin PDG ID's
+    11 : electron
+   -11 : positron
+    12 : muon
+    211 : pion
+    2212 : proton
+    -22 : Laser
+ **/
 class TBSpill : public TObject {
   ClassDef(TBSpill,1);  // Spill header info
 public:
@@ -68,13 +85,20 @@ public:
     _boxTemp(boxTemp), _roomTemp(roomTemp) {;}
   Int_t GetSpillNumber() const {return _spillNumber;}
   ULong64_t GetPCTime() const {return _pcTime;}
-  Int_t GetnTigWC() const {return _nTrigWC;}
+  Int_t GetnTrigWC() const {return _nTrigWC;}
   ULong64_t GetWCTime() const {return _wcTime;}
   Float_t GetTableX() const {return _tableX;}
   Float_t GetTableY() const {return _tableY;}
   Float_t GetAngle() const {return _angle;}
   Int_t GetPID() const {return _pdgID;}
+  Float_t GetMomentum() const {return _nomMomentum;}
+  Int_t NPades() const {return _padeHeader.size();}
   void Dump() const;
+  /// index 0:n-1 
+  PadeHeader const* GetPadeHeader(Int_t i) {
+    if (i<NPades()) return &(_padeHeader[i]);
+    return 0;
+  }
   // setters
   void Reset();
   void SetSpillData(Int_t spillNumber, ULong64_t pcTime, Int_t nTrigWC, ULong64_t wcTime,

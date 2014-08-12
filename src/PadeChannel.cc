@@ -151,7 +151,7 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
 
   TH1F h;
   pc->GetHist(&h);
-  result.status = h.Fit("func", "BQW");
+  pc->LaserData() ? result.status = h.Fit("funcL", "BQW") : result.status = h.Fit("funcB", "BQW");
 
   result.aMaxValue  = func->GetParameter(1);
   result.aMaxError  = func->GetParError(1);
@@ -165,7 +165,10 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
   func->FixParameter(0, result.pedestal);
   func->FixParameter(1, result.aMaxValue);
   func->FixParameter(2, result.tRiseValue);
-  h.Fit("func", "BQW", "", result.tRiseValue - 5.0, result.tRiseValue + 15.0 );
+  if (pc->LaserData())
+    h.Fit("funcL", "BQW", "", result.tRiseValue - 5.0, result.tRiseValue + 15.0 );
+  else
+    h.Fit("funcB", "BQW", "", result.tRiseValue - 5.0, result.tRiseValue + 15.0 );
   result.chi2Peak       = func->GetChisquare();
   result.ndofPeak       = func->GetNDF();
   result.func = *func;
