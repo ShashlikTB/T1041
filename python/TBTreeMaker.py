@@ -46,10 +46,18 @@ def fillTree(tree, eventDict, tbspill):
     if len(eventDict)==0: return
     nfill=min(len(eventDict),MAXPERSPILL)
     tree[0].SetBranchAddress("tbspill",AddressOf(tbspill))
+    ndrop=0
     for ievt in range(nfill):
-        if ievt in eventDict:
-            tree[0].SetBranchAddress("tbevent",AddressOf(eventDict[ievt]))            
-            tree[0].Fill()
+        if not ievt in eventDict:
+            ndrop=ndrop+1
+            continue
+        if not eventDict[ievt].NPadeChan()==128: 
+            ndrop=ndrop+1
+            continue      # only fill w/ complete events
+        tree[0].SetBranchAddress("tbevent",AddressOf(eventDict[ievt]))
+        tree[0].Fill()
+    return ndrop
+
 
 
 def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
@@ -84,11 +92,11 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
     
     #tableX,tableY=getTableXY(timeStamp)
     try:
-        particle,momentum,gain,tableX,tableY,angle=getRunData(timeStamp)
+        pdgId,momentum,gain,tableX,tableY,angle=getRunData(timeStamp)
     except:
         logger.Warn("No run data found for",padeDat,"\n Either this run is not logged, or rerun getRunData.py")
-        particle=0; momentum=0; gain=0; tableX=0; tableY=0; angle=0
-    logger.Info("particle,momentum,gain,tableX,tableY,angle:",particle,momentum,gain,tableX,tableY,angle)
+        pdgId=0; momentum=0; gain=0; tableX=0; tableY=0; angle=0
+    logger.Info("pdgId,momentum,gain,tableX,tableY,angle:",pdgId,momentum,gain,tableX,tableY,angle)
     
     
 
@@ -126,7 +134,8 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
     while 1:
         padeline=fPade.readline().rstrip()
         if not padeline: 
-            fillTree(BeamTree,eventDict,tbspill)          # end of file
+            ndrop=fillTree(BeamTree,eventDict,tbspill)          # end of file
+            if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
             break
         linesread=linesread+1
         ###########################################################
@@ -138,7 +147,9 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
             continue
 
         if "starting spill" in padeline:   # new spill condition
-            fillTree(BeamTree,eventDict,tbspill) 
+            if nSpills>0:
+                ndrop=fillTree(BeamTree,eventDict,tbspill)
+                if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
             if (nEventsTot>=NEventLimit): break
             tbspill.Reset();
             logger.Info(padeline)
@@ -161,7 +172,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
                 continue
             tbspill.SetSpillData(padeSpill['number'],long(padeSpill['pctime']),
                                  padeSpill['nTrigWC'],long(padeSpill['wcTime']),
-                                 particle,momentum,tableX,tableY,angle)
+                                 pdgId,momentum,tableX,tableY,angle)
 
             # find associated spill in WC data
             wcSpill=wcLookup(padeSpill['wcTime'])
@@ -173,7 +184,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
             continue  # finished w/ spill header read next line in PADE file
 
         # begin reading at next spill header (triggered by certain errors)
-        if skipToNextSpill: continue    
+        if skipToNextSpill: continue      #!!!!!!!!!!!!!!!!!111
 
         if "spill status" in padeline:   # spill header for a PADE card
             (isMaster,boardID,status,trgStatus,
@@ -205,31 +216,21 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
         if padeEvent>MAXPERSPILL:
             logger.Warn("Event count overflow in spill, reading 1st",
                         MAXPERSPILL,"events")
-            skipToNextBoard=True
+            skipToNextSpill=True
             continue
 
         # check for sequential events
         if newEvent and (padeEvent-lastEvent)!=1:
-            #logger.Warn("Nonsequential event #:",padeEvent,"Expected",lastEvent+1,
-            #            " Board:",pade_board_id,"channel:",pade_ch_number,"Clearing events in dictionary")
             logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
-                        " Board:",pade_board_id,"channel:",pade_ch_number," Clearing events in dictionary")
-            skipToNextBoard=True     # give up on remainder of this spill
-            for ievt in range(lastEvent,len(eventDict)):
-                if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
-            continue
+                        "Board:",pade_board_id,"channel:",pade_ch_number,"line number",linesread)
         lastEvent=padeEvent
 
         # check packet counter
         goodPacketCount = (newBoard or newEvent) or (pade_hw_counter-lastPacket)==1
         if not goodPacketCount:
             logger.Warn("Packet counter increment error, delta=",
-                        pade_hw_counter-lastPacket," Board:",pade_board_id,"channel:",pade_ch_number,
-                        "line number",linesread,"Clearing events in dictionary")
-            for ievt in range(lastEvent,len(eventDict)):
-                if ievt in eventDict: del eventDict[ievt]    # remove incomplete event and all following
-            skipToNextBoard=True
-            continue
+                        pade_hw_counter-lastPacket,"Board:",pade_board_id,"channel:",pade_ch_number,
+                        "line number",linesread)
         lastPacket=pade_hw_counter
 
         # fetch ADC samples (to do clear event from here on error)
@@ -243,13 +244,9 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
             isSaturated = "FFF" in waveform
             if (isSaturated):
                 logger.Warn("ADC shows saturation. Board:",
-                            pade_board_id,"channel:",pade_ch_number)
-            porch=padeChannel.GetPorch(long(pade_ts))  # samples to skip
+                            pade_board_id,"channel:",pade_ch_number,"line number",linesread)
             for i in range(nsamples): 
                 samples[i]=int(waveform[i],16)
-                if samples[i]>4095 and i>=porch:
-                    logger.Warn("Invalid ADC reading > 0xFFF", 
-                                pade_board_id,"channel:",pade_ch_number,i,porch)
 
         writeChan=True   # now assume channel is good to write, until proven guilty
         # new event condition in master
@@ -287,18 +284,15 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
 
         else: # new event in a slave
             if not padeEvent in eventDict:
-    #            logger.Warn("Event count mismatch. Slave:",
-    #                        pade_board_id,"reports event",padeEvent,"not present in master.",
-    #                        "Total events in master:",nEventsInSpill)
-                logger.Warn("Event count mismatch. Slave:",
+                logger.Warn("Event number mismatch. Slave:",
                             pade_board_id,"reports event not present in master.")
                 writeChan=False
-                skipToNextBoard=True
 
         if writeChan:
+            isLaser=(pdgId==-22)
             eventDict[padeEvent].FillPadeChannel(pade_ts, pade_transfer_size, 
                                                  pade_board_id, pade_hw_counter, 
-                                                 pade_ch_number, padeEvent, samples)
+                                                 pade_ch_number, padeEvent, samples, isLaser)
             if DEBUG_LEVEL>1: eventDict[padeEvent].GetLastPadeChan().Dump()
 
 

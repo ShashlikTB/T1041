@@ -20,6 +20,8 @@ std::ostream& operator<<(std::ostream& s, const PulseFit& f);
 
 
 double funcPulse(double *x, double *par);
+double funcPulseLaser(double *x, double *par);
+
 
 
 	

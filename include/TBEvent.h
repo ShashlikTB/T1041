@@ -72,6 +72,8 @@ public:
   ULong64_t GetWCTime() const {return _wcTime;}
   Float_t GetTableX() const {return _tableX;}
   Float_t GetTableY() const {return _tableY;}
+  Float_t GetAngle() const {return _angle;}
+  Int_t GetPID() const {return _pdgID;}
   void Dump() const;
   // setters
   void Reset();
@@ -143,7 +145,7 @@ public:
   void SetPadeChannel(const PadeChannel p, Int_t i) {padeChannel[i]=p;}
   void FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 		       UShort_t  board_id, UInt_t hw_counter, 
-		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform);
+		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser=false);
   void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
 
 

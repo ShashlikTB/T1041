@@ -20,7 +20,7 @@ void TBEvent::Reset(){
 
 void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 			      UShort_t  board_id, UInt_t hw_counter, 
-			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform){
+			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser){
 
   Mapper *mapper=Mapper::Instance();
   mapper->SetEpoch(ts);
@@ -29,7 +29,7 @@ void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size,
 	 << board_id << ":" << ch_number << " ts= " << ts << endl;
   }
   PadeChannel pc;  // todo make constructor w/ fill inputs
-  pc.Fill(ts, transfer_size, board_id, hw_counter, ch_number, eventnum, wform);
+  pc.Fill(ts, transfer_size, board_id, hw_counter, ch_number, eventnum, wform, isLaser);
   padeChannel.push_back(pc);
 }
 

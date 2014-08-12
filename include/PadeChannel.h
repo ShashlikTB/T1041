@@ -14,7 +14,7 @@ class PadeChannel : public TObject {
  public:
   void Fill(ULong64_t ts, UShort_t transfer_size, 
 	    UShort_t  board_id, UInt_t hw_counter, 
-	    UInt_t ch_number,  UInt_t eventnum, Int_t *wform);
+	    UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser=false);
   void Reset();
   void Dump() const;
 
@@ -38,9 +38,11 @@ class PadeChannel : public TObject {
   Double_t GetPedSigma() {return _pedsigma;}
   Double_t GetAmplitude() {return _max-_ped;}
   void GetHist(TH1F* h);
+  Bool_t LaserData(){return _status && kLaser;}
   static PulseFit FitPulse(PadeChannel *pc);
   int GetPorch(ULong64_t ts=0) const;
   void SetAsLaser();
+  
 
   static const Int_t N_PADE_DATA=120;     ///< fixed in FW
   static const Int_t N_PADE_PORCH=15;     ///< diagnostic info in data payload

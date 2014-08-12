@@ -13,6 +13,7 @@ void PadeChannel::Reset(){
   _max=0;
   _ped=0;
   _pedsigma=0;
+  _status=0;
   for (int i=0; i<N_PADE_SAMPLES; i++) _wform[i]=0;
 }
 
@@ -27,8 +28,8 @@ void PadeChannel::Dump() const{
 
 
 void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size, 
-		      UShort_t board_id, UInt_t hw_counter, 
-		      UInt_t  ch_number,  UInt_t eventnum, Int_t *wform){
+		       UShort_t board_id, UInt_t hw_counter, 
+		       UInt_t  ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser){
   _ts = ts;
   _transfer_size = transfer_size;
   _board_id = board_id;
@@ -36,6 +37,7 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   _ch_number = ch_number;
   _eventnum = eventnum;
   _max=0;
+  if (isLaser) _status|=kLaser;
   
   // range to search for signal peaks
   int tmin=15;
@@ -108,12 +110,17 @@ Int_t PadeChannel::GetChannelIndex(){
 
 PulseFit PadeChannel::FitPulse(PadeChannel *pc){ 
   static bool first=true;
-  static TF1 *func;
+  static TF1 *funcB;
+  static TF1 *funcL;
   if (first){
-    func = new TF1("func", funcPulse, 0.0, 120.0, 3);
-    func->SetNpx(N_PADE_SAMPLES);
+    funcB = new TF1("funcB", funcPulse, 0.0, 120.0, 3);
+    funcL = new TF1("funcL", funcPulseLaser, 0.0, 120.0, 3);
+    funcB->SetNpx(N_PADE_SAMPLES);
+    funcL->SetNpx(N_PADE_SAMPLES);
     first=false;
   }
+  TF1 *func;
+  pc->LaserData() ? func=funcL : func=funcB;
   PulseFit result;
   result.aMaxValue  = 0.;
   result.aMaxError  = 0.;
