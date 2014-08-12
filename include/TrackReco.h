@@ -1,13 +1,13 @@
-// TrackReco Class
-// Add an vector of TBTracks to the tree passed to the Process method
-
-
 #ifndef TRACKRECO_H
 #define TRACKRECO_H
 
 #include "WCPlanes.h"
 #include <TTree.h>
 
+/// TrackReco Class : Add tbtracks branch
+/** Add an vector of TBTracks to the tree passed to the Process method 
+    Multiple tracks may be found in a single event.  These are ordered
+    according to incerasind 2D slope**/
 class TrackReco{
  public:
   TrackReco() {;}
