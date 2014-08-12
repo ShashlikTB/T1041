@@ -1,5 +1,5 @@
 // Created 7/8/2014 B.Hirosky: Initial release
-// based on CMSSW EcalRecHit
+
 
 #ifndef TBRECHIT_H
 #define TBRECHIT_H
@@ -9,20 +9,21 @@
 #include <TObject.h>
 #include <ostream>
 
+/// based on CMSSW EcalRecHit
 class TBRecHit : public TObject {
   ClassDef(TBRecHit,1);
  public:
-   // recHit flags
+   /// recHit flags (mostly not implemented yet!)
   enum Flags { 
-    kGood=0,       // channel ok, the energy,time,pedistal measurements are reliable
-    kNoFit=1,      // the pulse fit is skipped, use simple peak finder only 
-    kPoorFit=2,    // energy,time,pedistal approximate (bad shape, large chi2)
-    kFaultyHardware=4,  // channel is faulty at some hardware level
-    kNoisy=8,           // the channel is very noisy
-    kSaturated=16,      // saturated channel
-    kPileup=32,         // multiple peaks detected
-    kMirrored=64,       // channel was replaced w/ TBRecHit from opposing channel
-    kZSP=128,           // signal is below ZSP threshold
+    kGood=0,       ///< channel ok, the energy,time,pedistal measurements are reliable
+    kNoFit=1,      ///< the pulse fit is skipped, use simple peak finder only 
+    kPoorFit=2,    ///< energy,time,pedistal approximate (bad shape, large chi2)
+    kFaultyHardware=4,  ///< channel is faulty at some hardware level
+    kNoisy=8,           ///< the channel is very noisy
+    kSaturated=16,      ///< saturated channel
+    kPileup=32,         ///< multiple peaks detected
+    kMirrored=64,       ///< channel was replaced w/ TBRecHit from opposing channel
+    kZSP=128,           ///< signal is below ZSP threshold
     kUnknown=2<<31           
   };
   TBRecHit(PadeChannel *pc=0, Float_t zsp=0, UInt_t options=0);
@@ -48,18 +49,18 @@ class TBRecHit : public TObject {
   void SetChannelIndex(Int_t idx) {channelIndex=idx;} 
   void SetOptNoFit() {status&=kNoFit;}
  private:
-  UShort_t channelIndex;   // channel index, S.L. convention
-  UShort_t maxADC;        // max value of ADC samples (in expected signal region)
-  Float_t pedestal;       // from average of samples before peak
-  Float_t noise;          // RMS of pedistal samples
-  Float_t aMaxValue;      // Peak from fit to pulse shape
-  Float_t tRiseValue;
-  Float_t aMaxError;      // beginning of pulse from fit
+  UShort_t channelIndex;   ///< channel index, S.L. convention
+  UShort_t maxADC;         ///< max value of ADC samples (in expected signal region)
+  Float_t pedestal;        ///< from average of samples before peak
+  Float_t noise;           ///< RMS of pedestal samples
+  Float_t aMaxValue;       ///< Peak from fit to pulse shape
+  Float_t tRiseValue;      ///< beginning of pulse from fit
+  Float_t aMaxError;       
   Float_t tRiseError;    
-  Float_t chi2;            
-  Float_t ndof;
-  Float_t nzsp;            // nSigma zero suppression
-  UInt_t status;
+  Float_t chi2;            ///< chi2 calculated in the peak region (chi2Peak)
+  Float_t ndof;            ///< ndof calculated in the peak region (ndofPeak)
+  Float_t nzsp;            ///< nSigma zero suppression applied in creating TBecHit
+  UInt_t status;           ///< see definition under TBRecHit::Flags
 };
 	       
 std::ostream& operator<<(std::ostream& s, const TBRecHit& hit);

@@ -10,30 +10,12 @@
 #include <iostream>
 using namespace std;
 
-/* Overview of Mapping for the Shashlik Testbeam
-There are many mapping schemes (alas!)
-
-ModuleID:
-  Run from -16...-1 (upstream face) 1..16 (downstream face)
-FiberNumber 1..4 
-  Numbered CCW from the lower right corner of a module viewed from upstream
-FiberID: 
-  = ModuleID*100-FiberNumber [upstream face]
-  = ModuleID*100+FiberNumber [downstream face]
-Pade BoardID = 112,115,116,117 for testbeam2
-Pade ChannelNumber 0..31 ADC channels (groups of 8 correspond to physical ADCs)
-ChannelID:
-  = BoardID*100+ChannelNumber
-ChannelIndex 0..127 (good for histogram x-axis)
-  = -1*ModuleID+(FiberNumber-1)  [upstream face]
-  = ModuleID+(FiberNumber-1)     [downstream face]
- */
 
 
-/* Module x,y positions are relative to the center of the detector 
+
+/** Module x,y positions are relative to the center of the detector 
    Looking downstream: +x is to the right, +y is up
-*/
-
+**/
 const int NMODULES=16;
 
 // locations in mm, from center of detector
@@ -55,6 +37,8 @@ const int NMODULES=16;
 /*    15,  7.0, -21.0, */
 /*    16, 21.0, -21.0 */
 /* }; */
+
+/// Approximate postions of module centers, relative to center of the detector in mm
 const double MODULEXY[]={
    1, -21.0,  21.0,
    2,  -7.0,  21.0,
@@ -77,9 +61,8 @@ const double MODULEXY[]={
 
 
 
-// x,y offsets of fiber placements from center of module (not acurate!)
-const float FIBER_OFFSET_X=3.5;
-const float FIBER_OFFSET_Y=3.5;
+const float FIBER_OFFSET_X=3.5; ///< x offset of fiber placements from center of module in mm (not acurate!)
+const float FIBER_OFFSET_Y=3.5; ///< y offset of fiber placements from center of module in mm (not acurate!)
 const float MIN_EDGE_X=-28;
 const float MIN_EDGE_Y=-28;
 const float MAX_EDGE_X=28;
@@ -91,7 +74,25 @@ const float MAX_EDGE_Y=28;
 // const unsigned long BADCHANMAP[]={11316, 1397186943, 0}; // stuck lower bit(s)
 
 
-// mapping functions
+
+/** Overview of Mapping for the Shashlik Testbeam<br>
+There are many mapping schemes (alas!)<br>
+<br>
+ModuleID:<br>
+  Run from -16...-1 (upstream face) 1..16 (downstream face)<br>
+FiberNumber 1..4 <br>
+  Numbered CCW from the lower right corner of a module viewed from upstream<br>
+FiberID: <br>
+  = ModuleID*100-FiberNumber [upstream face]<br>
+  = ModuleID*100+FiberNumber [downstream face]<br>
+Pade BoardID = 112,115,116,117 for testbeam2<br>
+Pade ChannelNumber 0..31 ADC channels (groups of 8 correspond to physical ADCs)<br>
+ChannelID:<br>
+  = BoardID*100+ChannelNumber<br>
+ChannelIndex 0..127 (good for histogram x-axis)<br>
+  = -1*ModuleID+(FiberNumber-1)  [upstream face]<br>
+  = ModuleID+(FiberNumber-1)     [downstream face]
+**/
 class Mapper{
  public:
   static Mapper* Instance(){
@@ -144,6 +145,8 @@ class Mapper{
   void MakeMaps();
 };
 
+
+/// Depricated, use TBRecHit instead
 class CalHit{
  public:
  CalHit(int idx, double val): _channelIndex(idx), _val(val) {;}

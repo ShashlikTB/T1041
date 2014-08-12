@@ -196,20 +196,6 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
     result.chi2Peak   /= rms * rms;
   }
 
-
-  // Some comments about output: 
-  //
-  //    status = 0 - normal outcome 
-  //    status = 4 - (about 14% of hits). 
-  //                  Still OK. 
-  //                  Errors on amplitude and time may be
-  //                  unreliable
-  //              
-  //    aMaxError  - Not needed. It should be 0.5*noise for good pulses
-  //    tRiseError - Not needed. It does not include systematics that is significant
-  //    chi2       - Not needed. Use ch2Peak instead
-  //    ndof       - Not needed. Use ndofPeak instead
-
   return result;
 }
 

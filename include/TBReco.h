@@ -1,11 +1,10 @@
 #ifndef TBRECO_H
 #define TBRECO_H
 
-// soon to be removed!
 
 #include "TBEvent.h"
 
-
+/// soon to be removed or rewritten as main reco processor
 class CalCluster{
  public:
   void MakeCluster(const vector<CalHit> &calHits, float threshold=0);
