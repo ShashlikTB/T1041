@@ -37,6 +37,7 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   _ch_number = ch_number;
   _eventnum = eventnum;
   _max=0;
+  _status=0;
   if (isLaser) _status|=kLaser;
   
   // range to search for signal peaks
@@ -49,11 +50,13 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
       for (int i=0; i<N_PADE_DATA-32; i++) wform[i]=wform[i+32];
       for (int i=N_PADE_DATA-32; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-33];
       N_PADE_SAMPLES=N_PADE_DATA-32;
+      _status|=kPorch32;
   } // The current porch is 15 samples
   else if (_ts>=TBEvent::START_PORCH15){
     for (int i=0; i<N_PADE_DATA-15; i++) wform[i]=wform[i+15];
     for (int i=N_PADE_DATA-15; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-16];
     N_PADE_SAMPLES=N_PADE_DATA-15;
+    _status|=kPorch15;
   }
 
   // loop over samples
