@@ -38,7 +38,7 @@ class PadeChannel : public TObject {
   Double_t GetPedSigma() {return _pedsigma;}
   Double_t GetAmplitude() {return _max-_ped;}
   void GetHist(TH1F* h);
-  Bool_t LaserData(){return _status && kLaser;}
+  Bool_t LaserData(){return _status & kLaser;}
   static PulseFit FitPulse(PadeChannel *pc);
   int GetPorch(ULong64_t ts=0) const;
   void SetAsLaser();

@@ -23,7 +23,7 @@ void PadeChannel::Dump() const{
        << _hw_counter << " ch#: " <<  _ch_number << " event#: " 
        << _eventnum << endl << "samples=> " << (hex);
   for (int i=0; i<N_PADE_SAMPLES; i++) cout << _wform[i] << " ";
-  cout << (dec) << endl;
+  cout << (dec) << endl << "status:" << _status << endl;
 }
 
 
@@ -70,7 +70,6 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   GetPedestal(p,s);
   _ped=p;
   _pedsigma=s;
-  _status = 0;
 }
 
 void PadeChannel::GetHist(TH1F *h){
