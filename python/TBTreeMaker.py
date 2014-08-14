@@ -151,7 +151,6 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
                 ndrop=fillTree(BeamTree,eventDict,tbspill)
                 if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
             if (nEventsTot>=NEventLimit): 
-                logger.Warn("Too many events - this should never happen!")
                 break
             tbspill.Reset();
             logger.Info(padeline)
@@ -216,24 +215,26 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
 
         # check for event overflows
         if padeEvent>MAXPERSPILL:
-            logger.Warn("PadeEvent",padeEvent,"Event count overflow in spill, reading 1st",
-                        MAXPERSPILL,"events","line number",linesread)
+            if logger.Warn("PadeEvent",padeEvent,"Event count overflow in spill, reading 1st",
+                        MAXPERSPILL,"events"):
+                if DEBUG_LEVEL>1: logger.Info("line number",linesread)
             skipToNextSpill=True
             continue
 
         # check for sequential events
         if newEvent and (padeEvent-lastEvent)!=1:
-            logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
+            if logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
                         "this event",padeEvent,"last event",lastEvent,
-                        "Board:",pade_board_id,"channel:",pade_ch_number,"line number",linesread)
+                        "Board:",pade_board_id,"channel:",pade_ch_number):
+                if DEBUG_LEVEL>1: logger.Info("line number",linesread)
         lastEvent=padeEvent
 
         # check packet counter
         goodPacketCount = (newBoard or newEvent) or (pade_hw_counter-lastPacket)==1
         if not goodPacketCount:
-            logger.Warn("Packet counter increment error, delta=",
-                        pade_hw_counter-lastPacket,"Board:",pade_board_id,"channel:",pade_ch_number,
-                        "line number",linesread)
+            if logger.Warn("Packet counter increment error, delta=",
+                           pade_hw_counter-lastPacket,"Board:",pade_board_id,"channel:",pade_ch_number):
+                if DEBUG_LEVEL>1: logger.Info("line number",linesread)
         lastPacket=pade_hw_counter
 
         # fetch ADC samples (to do clear event from here on error)
@@ -244,7 +245,10 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
                         padeChannel.__DATASIZE(),"found:",nsamples,"Board:", pade_board_id)
             continue
         else:
-            isSaturated = "FFF" in waveform
+            if pade_ts>=TBEvent().START_PORCH15: porch=15
+            elif pade_t>=TBEvent().END_TBEAM1: porch=32
+            else: porch=0
+            isSaturated = "FFF" in waveform[porch]
             if (isSaturated):
                 logger.Warn("ADC shows saturation. Board:",
                             pade_board_id,"channel:",pade_ch_number,"line number",linesread)

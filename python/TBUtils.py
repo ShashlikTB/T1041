@@ -63,6 +63,8 @@ class Logger():
         if self.warnings[msg]<=self.max: 
             sys.stdout.write(self.RED+msg+self.COL_OFF)
             if (self.logfile !=""): self.stdout.write(msg)
+            return True   # message printed
+        return False      # message just logged
     def Fatal(self,*arg):
         msg="**FATAL**: "+ccat(*arg)+"\n"
         sys.stdout.write(self.RED+msg+self.COL_OFF)
