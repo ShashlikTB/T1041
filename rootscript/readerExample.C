@@ -8,8 +8,8 @@
 // code
 
 
-// NOTE: this is becoming depricated.  CPU-intensive fitting can be found in 
-// TBRecHits in the RECO files
+// NOTE: this is becoming depricated.  CPU-intensive fitting and traking
+// results can be found in TBRecHits, TBTracks in the RECO files
 
 #include <TString.h>
 #include <TFile.h>
@@ -23,6 +23,7 @@
 #include <TH2F.h>
 #include <TMath.h>
 #include "TBReco.h"
+#include "TBTrack.h"
 #include "WC.h"
 #include "TBEvent.h"
 #include "calConstants.h"
@@ -92,7 +93,7 @@ void readerExample(TString file="latest.root"){
   mapper->SetChannelBins(hMax);
 
   // cluster "energies"
-  const float EMIN=5000;
+  const float EMIN=100;
   const float EMAX=20000;
   TH1F* hClusterE=new TH1F("hClusterE","Cluster E", 40, EMIN, EMAX);
   TH1F* hClusterECalib=new TH1F("hClusterECalib","Cluster E (calibrated)", 40, EMIN, EMAX);
@@ -193,7 +194,7 @@ void readerExample(TString file="latest.root"){
 
  
     if (haveTrack){
-      WCtrack track(hitsX1[0],hitsY1[0],hitsX2[0],hitsY2[0]); // fit a track
+      TBTrack track(hitsX1[0],hitsY1[0],hitsX2[0],hitsY2[0]); // fit a track
       hslopeX->Fill(track.GetSlopeX());
       hslopeY->Fill(track.GetSlopeY());  
 
