@@ -80,7 +80,7 @@ void WCReco::AddTree(TTree *tree){
   bevent->SetAddress(&event);
   for (int i = 0; i < tree->GetEntries(); i++) {
     tree->GetEntry(i);
-    if (i==0) _run=TBEvent::GetRunPeriod(event);
+    if (i==0) _run=event->GetRunPeriod();
     for(int j = 0; j < event->GetWCHits(); j++){
       Int_t module        = event->GetWCChan(j).GetTDCNum();
       Int_t channelCount  = event->GetWCChan(j).GetCount();

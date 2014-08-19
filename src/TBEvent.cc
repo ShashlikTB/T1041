@@ -194,8 +194,8 @@ TBEvent::TBRun TBEvent::GetRunPeriod(ULong64_t padeTime){
   else return TBRun2b;
 }
 
-TBEvent::TBRun TBEvent::GetRunPeriod(TBEvent *event){
-  if (event->NPadeChan()>0) 
-    return GetRunPeriod(event->GetPadeChan(0).GetTimeStamp());
+TBEvent::TBRun TBEvent::GetRunPeriod() const{
+  if (NPadeChan()>0) 
+    return GetRunPeriod(GetPadeChan(0).GetTimeStamp());
   else return TBUndef;
 }

@@ -12,6 +12,7 @@ def usage():
     print "Usage: python runTBReco.py [OPTION] input_path[=latest.root]"
     print "       -r             : Recursively process input_path"
     print "       -o DIR         : Output dir, instead of default = location of input file" 
+    print "       -n number      : max # of events to RECO"
     print 
     sys.exit()
 
@@ -19,7 +20,7 @@ def usage():
 ### main ###
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ro:")
+    opts, args = getopt.getopt(sys.argv[1:], "ro:n:")
 except getopt.GetoptError as err: usage()
 
 
@@ -31,6 +32,9 @@ for o, a in opts:
     elif o == "-o": 
         outDir=a
         print "Sending output to directory",outDir
+    elif o == "-n": 
+        nMax=a
+        print "Process only up to",nMax,"events"
 
 
 if len(args)<1:

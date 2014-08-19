@@ -27,6 +27,11 @@ class TBRecHit : public TObject {
     kUnknown=2<<31           
   };
   TBRecHit(PadeChannel *pc=0, Float_t zsp=0, UInt_t options=0);
+  /// Alternate copy constructor
+  /** 
+      Copy constructor useful for mirroring dead channels 
+   **/
+  TBRecHit(const TBRecHit &hit, UShort_t idx, UInt_t newstatus);
   void Init(PadeChannel *pc=0,  Float_t zsp=0);
   Int_t ChannelIndex() const {return channelIndex;}
   Int_t GetChannelID() const;  // returns board_id*100+ch_number
@@ -46,7 +51,6 @@ class TBRecHit : public TObject {
   Float_t Ndof() const {return ndof;}
   Float_t Prob() const {return TMath::Prob(chi2,ndof);}
   UInt_t Status() const {return status;}
-  void SetChannelIndex(Int_t idx) {channelIndex=idx;} 
   void SetOptNoFit() {status&=kNoFit;}
  private:
   UShort_t channelIndex;   ///< channel index, S.L. convention

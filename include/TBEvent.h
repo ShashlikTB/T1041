@@ -19,6 +19,7 @@ class PadeHeader : public TObject{
     _events(events), _memReg(mreg), _trigPtr(pTrg), 
     _pTemp(pTmp), _sTemp(sTmp), _gain(gain), _bias(0){;}
   
+  /// PADE gain in packed format
   UShort_t Gain() const {return _gain;}
   UShort_t BoardID() const {return _boardID;}
   UShort_t Events() const {return _events;}
@@ -34,10 +35,10 @@ class PadeHeader : public TObject{
   UShort_t _events;
   UShort_t _memReg;
   UShort_t _trigPtr;
-  UShort_t _pTemp;    // temperature on PADE board
-  UShort_t _sTemp;    // temperature on SIPM board
-  UShort_t _gain;     // LNA [bits 1:0]  PGA [bits 3:2]  VGA [bits 15:4]
-  UShort_t _bias;     // main bias setting
+  UShort_t _pTemp;    ///< temperature on PADE board
+  UShort_t _sTemp;    ///< temperature on SIPM board
+  UShort_t _gain;     ///< LNA [bits 1:0]  PGA [bits 3:2]  VGA [bits 15:4]
+  UShort_t _bias;     ///< main bias setting
 };
 
 /// for now ASSUME we are only dealing with WC1 and WC2
@@ -159,7 +160,7 @@ public:
   vector<WCChannel> GetWChitsX(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   vector<WCChannel> GetWChitsY(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   static TBRun GetRunPeriod(ULong64_t padeTime);
-  static TBRun GetRunPeriod(TBEvent *event);
+  TBRun GetRunPeriod() const;
   void GetCalHits(vector<CalHit> &calHits, float* calconstants=0, float cut=0);
   void GetCalHitsFit(vector<CalHit> &calHits, float* calconstants=0, float cut=0);
   void CalibrateCalHits(vector<CalHit> &calHits, float* calconstants);

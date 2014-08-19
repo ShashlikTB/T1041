@@ -11,6 +11,15 @@ TBRecHit::TBRecHit(PadeChannel *pc, Float_t zsp, UInt_t options){
   else Init(pc);
 }
 
+TBRecHit::TBRecHit(const TBRecHit &hit, UShort_t idx, UInt_t newstatus) :
+  TObject(hit),
+  maxADC(hit.maxADC), pedestal(hit.pedestal),
+  noise(hit.noise), aMaxValue(hit.aMaxValue), tRiseValue(hit.tRiseValue),
+  chi2(hit.chi2), ndof(hit.ndof), nzsp(hit.nzsp), status(hit.status|newstatus)
+{
+  if (idx<=127) channelIndex=idx;
+}
+
 void TBRecHit::Init(PadeChannel *pc,  Float_t zsp){
   channelIndex=-1;
   maxADC=-1;
@@ -24,7 +33,7 @@ void TBRecHit::Init(PadeChannel *pc,  Float_t zsp){
   status=0;
   nzsp=zsp;
   if (!pc) return;
-  SetChannelIndex(pc->GetChannelIndex());
+  channelIndex=pc->GetChannelIndex();
   maxADC=pc->GetMax();
   double ped,sig;
   pc->GetPedestal(ped,sig);

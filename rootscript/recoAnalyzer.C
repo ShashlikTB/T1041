@@ -44,8 +44,8 @@ void recoAnalyzer(TString file="latest_reco.root"){
   for (Int_t i=0; i<t1041->GetEntries(); i++) {
     t1041->GetEntry(i);
     for (unsigned c=0;c<rechits->size(); c++){
-      if (i<1) cout << (*rechits)[c] << endl;
-      meanA+=(*rechits)[c].AMax();
+      if (i==0) cout << c << " , " << rechits->at(c) << endl;
+      meanA+=rechits->at(c).AMax();
     }
   }
   meanA/=rechits->size()/t1041->GetEntries();
@@ -56,17 +56,19 @@ void recoAnalyzer(TString file="latest_reco.root"){
   TH1F *hRise3=new TH1F("hRise3","tRise Board 116",50,25,75);
   TH1F *hRise4=new TH1F("hRise4","tRise Board 117",50,25,75);
   TH2F *hNoise1=new TH2F("hNoise1","Noise vs Channel Board 112;channel number;ADC counts",32,0,32,20,0,2);
-  TH2F *hChi21=new TH2F("hChi21","Chi^2 vs Channel Board 112;channel number;ADC counts",32,0,32,20,0,100);
+  TH2F *hChi21=new TH2F("hChi21","Chi^2 vs Channel Board 112;channel number;Chi^2",32,0,32,20,0,100);
+  TH2F *hAmax2D=new TH2F("hAmax","Amplitude vs Channel;channel number;ADC counts",128,0,128,40,0,2048);
   TH1F *hslopeX=new TH1F("hslopeX","Track x-slope",50,-0.01,0.01);
   TH1F *hslopeY=new TH1F("hslopeY","Track y-slope",50,-0.01,0.01);
-
 
   for (Int_t i=0; i<t1041->GetEntries(); i++) {
     t1041->GetEntry(i);
     for (unsigned c=0;c<rechits->size(); c++){
-      TBRecHit &hit=(*rechits)[c];
+      TBRecHit &hit=rechits->at(c);
       hAmp->Fill( hit.AMax() );
+      hAmax2D->Fill ( hit.ChannelIndex(), hit.AMax() );
       int boardID=hit.GetBoardID();
+      
       if (boardID==112) {
 	hRise1->Fill(hit.TRise());
 	hNoise1->Fill(hit.GetChannelNumber(),hit.NoiseRMS());
@@ -99,8 +101,8 @@ void recoAnalyzer(TString file="latest_reco.root"){
   c1->cd(5); hRise4->Draw();
   c1->cd(6); hNoise1->Draw("COLZ");
   c1->cd(7); hChi21->Draw("COLZ");
-  c1->cd(8); hslopeX->Draw();
-  c1->cd(9); hslopeY->Draw();
-
+  c1->cd(8); hAmax2D->Draw("COLZ");
+  c1->cd(9); hslopeX->Draw();
+  c1->cd(10); hslopeY->Draw();
 }
 
