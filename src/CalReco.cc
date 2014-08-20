@@ -46,6 +46,7 @@ int CalReco::Process(TTree *rawTree, TTree *recTree){
 
       if ( tbrun2
 	   && (idx==29 || idx==51 || idx==60 ) ) continue; // dead channels
+      if ( tbrun1 && idx==123 ) continue; // dead channel
       
       hit.Init(&pc, _nSigmaCut);
       if ( (hit.Status() & TBRecHit::kZSP) == 0 ) {
@@ -57,6 +58,11 @@ int CalReco::Process(TTree *rawTree, TTree *recTree){
 	TBRecHit mirror(hit,idx-64,TBRecHit::kMirrored);
 	rechits->push_back(mirror);
       }
+      if ( tbrun1 && idx==123-64 ){
+	TBRecHit mirror(hit,idx+64,TBRecHit::kMirrored);
+	rechits->push_back(mirror);
+      }
+
     }
     brp->Fill();
 

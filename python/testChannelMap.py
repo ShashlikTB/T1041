@@ -13,8 +13,8 @@ LoadLibs("TBLIB","libTB.so")
 
 gROOT.ProcessLine(".L rootscript/testChannelMap.C+")
 
-testChannelMap()
-
+testChannelMap()  # Summer 2014
+#testChannelMap(0) # April 2014
 
 hit_continue('Hit any key to exit')
 

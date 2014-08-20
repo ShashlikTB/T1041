@@ -5,18 +5,20 @@
 
 #include "TH2I.h"
 #include "../include/Mapper.h"
+#include "../include/TBEvent.h"
 #include "TStyle.h"
 #include "TCanvas.h"
 #include <iostream>
 using namespace std;
 
-void testChannelMap(){
+void testChannelMap(ULong64_t ts=TBEvent::END_TBEAM1+1){
   cout<<"========================================================"<<endl;
   cout<<"All views are looking towards the detector from UPSTREAM"<<endl;
   cout<<"========================================================"<<endl;
 
   gStyle->SetOptStat(0);
   Mapper *mapper=Mapper::Instance();
+  mapper->SetEpoch(ts);
 
   // module numbers
   TH2I *hModU=new TH2I();
