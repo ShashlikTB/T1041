@@ -133,7 +133,10 @@ def ParsePadeSpillHeader(padeline):
     spill['number']=int(padeline[4])
     pcTime=padeline[7]+" "+padeline[8]+" "+padeline[9]
     spill['pcTime']=time.mktime(time.strptime(pcTime, "%m/%d/%Y %H:%M:%S %p"))
-    spill['nTrigWC']=wcTiggers=int(padeline[14],16)
+    try:
+        spill['nTrigWC']=wcTiggers=int(padeline[14],16)
+    except:
+        spill['nTrigWC']=wcTiggers=0
     # check for fake run or # WC time stamp missing
     if haveWCtime: 
         wcTime=padeline[17]+" 20"+padeline[18]  # fix format to 4-digit year
