@@ -1,4 +1,5 @@
 #include "Mapper.h"
+#include "TBEvent.h"
 
 // defaulf map based on initial 4 PADE cards of July 2014 Test Beam  
 Mapper::Mapper(){  // Private so that it cannot be called
@@ -8,11 +9,11 @@ Mapper::Mapper(){  // Private so that it cannot be called
 }
 
 void Mapper::SetEpoch(unsigned long ts){  // redundant data here, clean this up
-  if (ts<=635337576077954884L && FIBERMAP!=FIBERMAP_APRIL14){
+  if (ts<=TBEvent::END_TBEAM1 && FIBERMAP!=FIBERMAP_APRIL14){
     FIBERMAP=FIBERMAP_APRIL14;
     MakeMaps(); 
   }
-  else if (ts>635337576077954884L && FIBERMAP!=FIBERMAP_JULY14){
+  else if (ts>TBEvent::END_TBEAM1 && FIBERMAP!=FIBERMAP_JULY14){
     FIBERMAP=FIBERMAP_JULY14;
     MakeMaps(); 
   }

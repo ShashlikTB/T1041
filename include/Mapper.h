@@ -11,8 +11,6 @@
 using namespace std;
 
 
-
-
 /** Module x,y positions are relative to the center of the detector 
    Looking downstream: +x is to the right, +y is up
 **/
