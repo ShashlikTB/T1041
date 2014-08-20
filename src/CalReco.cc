@@ -52,6 +52,7 @@ int CalReco::Process(TTree *rawTree, TTree *recTree){
       if ( (hit.Status() & TBRecHit::kZSP) == 0 ) {
 	rechits->push_back(hit);  // only save hits over ZSP
       }
+      else continue;  // no hit to add
 
       if ( tbrun2
 	   && (idx==(29+64) || idx==(51+64) || idx==(60+64) ) ){
