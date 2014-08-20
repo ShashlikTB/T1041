@@ -246,7 +246,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
             continue
         else:
             if pade_ts>=TBEvent().START_PORCH15: porch=15
-            elif pade_t>=TBEvent().END_TBEAM1: porch=32
+            elif pade_ts>=TBEvent().END_TBEAM1: porch=32
             else: porch=0
             isSaturated = "FFF" in waveform[porch]
             if (isSaturated):

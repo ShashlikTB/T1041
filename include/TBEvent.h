@@ -136,7 +136,7 @@ public:
     TBRun2a=1,  ///< Start of July-Aug 2014 run (32 ADC samples used for porch)
     TBRun2b=2,  ///< Final July-Aug 2014 cfg. (15 ADC samples used for porch)
     TBRun2c=3,  ///< More precise WC time stamps in PADE DAQ
-    TBUndef=5
+    TBUndef=10
   };
   /// earliest TB data run
   static const ULong64_t START_TBEAM1=635321637512389603L;   
@@ -148,6 +148,7 @@ public:
   /** Mod of PADE WC Spill time stamp.  Previously, reported end of spill + PADE RO time.
       Now end of spill time reported.  This is 0-1 seconds behind spill time reported by WC DAQ **/
   static const ULong64_t START_NEWWCSYNC=635432861909176340L;  
+  static const ULong64_t END_TBEAM2=635440566331915360L;
 
   void Reset();    // clear data
 

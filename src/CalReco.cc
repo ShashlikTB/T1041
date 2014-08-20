@@ -11,8 +11,10 @@ using std::endl;
 
 int CalReco::Process(TTree *rawTree, TTree *recTree){
   TBEvent *event = new TBEvent();
+  TBSpill *tbspill=new TBSpill();
   rawTree->ResetBranchAddresses();
   rawTree->SetBranchAddress("tbevent",&event);
+  rawTree->SetBranchAddress("tbspill",&tbspill);
 
   // Add the TBRecHit branch
   vector<TBRecHit> *rechits = new vector<TBRecHit>;
@@ -31,30 +33,33 @@ int CalReco::Process(TTree *rawTree, TTree *recTree){
     rechits->clear();  
 
     // Special cases  
+    // April 2014
+    //    Replace dead channel idx= ???
     // Summer 2013: 
-    //    Replace cut/dead channels(29,51,60) w/ copy of opposing channel 
+    //    Replace cut/dead channels(idx=29,51,60) w/ copy of opposing channel 
+    bool tbrun1 = event->GetRunPeriod()==TBEvent::TBRun1;
+    bool tbrun2 = !tbrun1 && event->GetRunPeriod()<=TBEvent::TBRun2c;
     for (Int_t nch=0; nch<event->NPadeChan(); nch++){
+
       PadeChannel pc=event->GetPadeChan(nch);
       int idx=pc.GetChannelIndex();
 
-      if ( event->GetRunPeriod()>=TBEvent::TBRun2a
+      if ( tbrun2
 	   && (idx==29 || idx==51 || idx==60 ) ) continue; // dead channels
       
       hit.Init(&pc, _nSigmaCut);
       if ( (hit.Status() & TBRecHit::kZSP) == 0 ) {
 	rechits->push_back(hit);  // only save hits over ZSP
       }
-      if ( event->GetRunPeriod()>=TBEvent::TBRun2a
+
+      if ( tbrun2
 	   && (idx==(29+64) || idx==(51+64) || idx==(60+64) ) ){
 	TBRecHit mirror(hit,idx-64,TBRecHit::kMirrored);
 	rechits->push_back(mirror);
       }
     }
     brp->Fill();
-    if (i==0) {
-      cout << " *********** " << endl;
-      for (unsigned n=0; n<rechits->size(); n++) cout << rechits->at(n) << endl;
-    }
+
   }
   delete rechits;
   return 0;

@@ -105,6 +105,7 @@ def main():
             print "Reading WC data in",a
         elif o == "-o":
             dbfile=a
+            print "Writing WC data in:",dbfile
         elif o == "-f": force=True
 
 

@@ -191,7 +191,9 @@ TBEvent::TBRun TBEvent::GetRunPeriod(ULong64_t padeTime){
   if (padeTime<START_TBEAM1) return TBUndef;
   else if (padeTime<=END_TBEAM1) return TBRun1;
   else if (padeTime<START_PORCH15) return TBRun2a;
-  else return TBRun2b;
+  else if (padeTime<START_NEWWCSYNC) return TBRun2b;
+  else if (padeTime<=END_TBEAM2) return TBRun2c;
+  return TBUndef;
 }
 
 TBEvent::TBRun TBEvent::GetRunPeriod() const{
