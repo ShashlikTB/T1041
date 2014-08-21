@@ -10,6 +10,10 @@
 #include <ostream>
 
 /// based on CMSSW EcalRecHit
+/**
+   A simple class to provide reconstucted calorimeter pulses.<br>
+ **/
+
 class TBRecHit : public TObject {
   ClassDef(TBRecHit,1);
  public:
