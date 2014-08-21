@@ -9,6 +9,8 @@ Directories:
 - dqm          : dqm utilities, for running online
 - doc          : various documentation
 
+<a href="http://hepcat.phys.virginia.edu/cms/T1041/">Class documentation</a>
+
 ## Quick start guide
 
 ### First Steps
