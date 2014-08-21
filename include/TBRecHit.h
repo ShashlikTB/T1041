@@ -24,6 +24,7 @@ class TBRecHit : public TObject {
     kPileup=32,         ///< multiple peaks detected
     kMirrored=64,       ///< channel was replaced w/ TBRecHit from opposing channel
     kZSP=128,           ///< signal is below ZSP threshold
+    kMonitor=256,       ///< monitor for laser pulse, no calorimeter connection
     kUnknown=2<<31           
   };
   TBRecHit(PadeChannel *pc=0, Float_t zsp=0, UInt_t options=0);
@@ -42,6 +43,8 @@ class TBRecHit : public TObject {
   void GetXYZ(double &x, double &y, double &z) const;
   void GetXYZ(float &x, float &y, float &z) const;
   unsigned short MaxADC() const {return maxADC;}
+  void AddStatus(enum Flags flag) {status|=flag;}
+  void SetStatus(unsigned flags) {status=flags;}
   Float_t AMax() const {return aMaxValue;}
   Float_t TRise() const {return tRiseValue;}
   Float_t Pedestal() const {return pedestal;}

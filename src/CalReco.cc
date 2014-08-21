@@ -36,7 +36,7 @@ int CalReco::Process(TTree *rawTree, TTree *recTree){
     // April 2014
     //    Replace dead channel idx= ???
     // Summer 2013: 
-    //    Replace cut/dead channels(idx=29,51,60) w/ copy of opposing channel 
+    //    Replace cut/dead channels(idx=51,60/29) w/ copy of opposing channel 
     bool tbrun1 = event->GetRunPeriod()==TBEvent::TBRun1;
     bool tbrun2 = !tbrun1 && event->GetRunPeriod()<=TBEvent::TBRun2c;
     for (Int_t nch=0; nch<event->NPadeChan(); nch++){
@@ -44,22 +44,32 @@ int CalReco::Process(TTree *rawTree, TTree *recTree){
       PadeChannel pc=event->GetPadeChan(nch);
       int idx=pc.GetChannelIndex();
 
-      if ( tbrun2
-	   && (idx==29 || idx==51 || idx==60 ) ) continue; // dead channels
+      if ( tbrun2 ) {
+	if ( idx==29 ) continue;  // dead channel
+	if ( (idx==51 || idx==60)
+	     && !(pc.LaserData()) ) continue; // mirror for beam data
+      }
+
       if ( tbrun1 && idx==123 ) continue; // dead channel
       
       hit.Init(&pc, _nSigmaCut);
       if ( (hit.Status() & TBRecHit::kZSP) == 0 ) {
+	if ( (idx==51 || idx==60) && pc.LaserData() ) 
+	  hit.AddStatus(TBRecHit::kMonitor);
 	rechits->push_back(hit);  // only save hits over ZSP
       }
       else continue;  // no hit to add
 
-      if ( tbrun2
-	   && (idx==(29+64) || idx==(51+64) || idx==(60+64) ) ){
-	TBRecHit mirror(hit,idx-64,TBRecHit::kMirrored);
-	rechits->push_back(mirror);
+      if ( tbrun2 ) {
+	if ( idx==(29+64) 
+	     || ( ( idx==(51+64) || idx==(60+64) )
+		  && !(pc.LaserData()) ) ){  // do not mirror laser data
+	  TBRecHit mirror(hit,idx-64,TBRecHit::kMirrored);
+	  rechits->push_back(mirror);
+	}
       }
-      if ( tbrun1 && idx==123-64 ){
+
+      if ( tbrun1 && idx==(123-64) ){
 	TBRecHit mirror(hit,idx+64,TBRecHit::kMirrored);
 	rechits->push_back(mirror);
       }

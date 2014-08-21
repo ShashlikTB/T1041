@@ -57,7 +57,7 @@ void recoAnalyzer(TString file="latest_reco.root"){
   TH1F *hRise4=new TH1F("hRise4","tRise Board 117",50,25,75);
   TH2F *hNoise1=new TH2F("hNoise1","Noise vs Channel Board 112;channel number;ADC counts",32,0,32,20,0,2);
   TH2F *hChi21=new TH2F("hChi21","Chi^2 vs Channel Board 112;channel number;Chi^2",32,0,32,20,0,100);
-  TH2F *hAmax2D=new TH2F("hAmax","Amplitude vs Channel;channel number;ADC counts",128,0,128,40,0,2048);
+  TH2F *hAmax2D=new TH2F("hAmax","Amplitude vs Channel;channel number;ADC counts",128,0,128,64,0,512);
   TH1F *hslopeX=new TH1F("hslopeX","Track x-slope",50,-0.01,0.01);
   TH1F *hslopeY=new TH1F("hslopeY","Track y-slope",50,-0.01,0.01);
 

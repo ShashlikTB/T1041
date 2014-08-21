@@ -70,7 +70,8 @@ void TBRecHit::GetModuleFiber(int &moduleID, int &fiberID) const{
 }
 
 void TBRecHit::FitPulse(PadeChannel *pc){
-  if ( (maxADC-pedestal) / noise < nzsp ) {
+
+  if ( TMath::Abs(maxADC-pedestal) / (noise+0.001) < nzsp ) { // avoid div by 0
     status|=kZSP;
     return;
   }
@@ -89,7 +90,8 @@ void TBRecHit::FitPulse(PadeChannel *pc){
 std::ostream& operator<<(std::ostream& s, const TBRecHit& hit) {
   double x,y,z;
   hit.GetXYZ(x,y,z);
-  return s << "TBRecHit (index,x,y,z,aMax,tRise,Chi2) " 
-	   << hit.ChannelIndex() << "," << x << "," << y << "," << z<<","
-	   << hit.AMax() << "," << hit.TRise() << "," << hit.Chi2();
+  return s << "TBRecHit (index,x,y,z,noise,aMax,tRise,Chi2) " 
+	   << hit.ChannelIndex() << "," << x << "," << y << "," << z<< ","
+	   << hit.NoiseRMS() << "," << hit.AMax() << "," 
+	   << hit.TRise() << "," << hit.Chi2();
 }
