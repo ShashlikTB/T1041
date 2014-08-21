@@ -168,7 +168,6 @@ void waveInterface::enableChannelColumn(UInt_t col) {
     }
   }
 
-
 }
 
 
@@ -328,7 +327,6 @@ void waveInterface::makeButtons()  {
   _buttonFrame->AddFrame(_actionFrame, new TGLayoutHints(kLHintsExpandX | kLHintsTop,5,5,5,1)); 
   _FMain->AddFrame(_spectrumFrame, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY)); 
   _FMain->AddFrame(_buttonFrame, new TGLayoutHints(kLHintsExpandX,10,10,10,1)); 
-
 
 
 }
@@ -660,7 +658,9 @@ bool waveInterface::nextOverthresholdCh(bool up) {
   if (up)  { 
     for (Int_t i = 0; i < _event->NPadeChan(); i++) { 
       _padeChannel = _event->GetPadeChan(i);
-      if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() < _minCount) { 
+      if (_padeChannel.GetBoardID() == _currentBoard && 
+	  (int)_padeChannel.GetChannelNum() == *_chiterator && 
+	  _padeChannel.GetMax() < _minCount) { 
 	_chiterator++; 
 
 	if (_chiterator == _chSet.end()) {
@@ -668,7 +668,9 @@ bool waveInterface::nextOverthresholdCh(bool up) {
 	  break; 
 	}
       }
-      if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() >= _minCount) { 
+      if (_padeChannel.GetBoardID() == _currentBoard && 
+	  (int)_padeChannel.GetChannelNum() == *_chiterator && 
+	  _padeChannel.GetMax() >= _minCount) { 
 	std::cout << "Channel " << *_chiterator << " Over threshold." << std::endl; 
 	return true; 
       }

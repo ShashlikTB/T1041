@@ -20,6 +20,9 @@ class PadeHeader : public TObject{
     _pTemp(pTmp), _sTemp(sTmp), _gain(gain), _bias(0){;}
   
   /// PADE gain in packed format
+  /** 
+      Packing format LNA [bits 1:0]  PGA [bits 3:2]  VGA [bits 15:4]
+   **/
   UShort_t Gain() const {return _gain;}
   UShort_t BoardID() const {return _boardID;}
   UShort_t Events() const {return _events;}
