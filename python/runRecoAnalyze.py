@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Run analyze example
 # this is just a wrapper for the ROOT C++ code
 # Usage: python runRecoAnalyze.py [file.root]

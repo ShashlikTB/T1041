@@ -13,17 +13,18 @@ using std::cout;
 
 
 
-void CalCluster::MakeCluster(const vector<CalHit> &calHits, float threshold){
+void CalCluster::MakeCluster(const vector<TBRecHit> *rechits, float threshold){
   float sumx=0, sumy=0; 
   float sumx2=0, sumy2=0;
   float sumE2=0;
   _Eu=_Ed=0;
   _ECenter=_EIso=0;
   double x,y,z;
-  for (unsigned j=0; j<calHits.size(); j++){
-    float val=calHits[j].Value();
-    if (val<threshold) continue;
-    calHits[j].GetXYZ(x,y,z);
+  for (unsigned j=0; j<rechits->size(); j++){
+    const TBRecHit *hit = &(rechits->at(j));
+    if (hit->AMax()<threshold) continue;
+    float val=hit->AMax();
+    hit->GetXYZ(x,y,z);
 
     if (z>0) _Ed+=val;
     else _Eu+=val;
@@ -53,8 +54,6 @@ void CalCluster::Print(){
        << _x << "," << _y << "," << _z << ","  << _Ed+_Eu << ";" << _sx << ","<<_sy<<" )" << endl;
   cout << "ECenter/Iso = " << _ECenter << " / " << _EIso << endl;
 }
-
-
 
 
 

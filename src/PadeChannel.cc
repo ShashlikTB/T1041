@@ -77,7 +77,8 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
 
 void PadeChannel::GetHist(TH1F *h){
   TString ti;
-  ti.Form("Event %d : Board %d, channel %d",_eventnum, GetBoardID(),GetChannelNum());
+  ti.Form("Event %d : Board %d, channel %d;Sample;ADC Counts",
+	  _eventnum, GetBoardID(),GetChannelNum());
   h->Reset();
   h->SetTitle(ti);
   h->SetBins(N_PADE_SAMPLES,-0.5,N_PADE_SAMPLES-0.5);
@@ -89,7 +90,7 @@ void PadeChannel::GetHist(TH1F *h){
 }
 
 void PadeChannel::GetXYZ(double &x, double &y, double &z){
-  Mapper *mapper=Mapper::Instance();
+  Mapper *mapper=Mapper::Instance(_ts);
   mapper->ChannelXYZ(GetChannelID(),x,y,z);
 }
 
@@ -106,7 +107,7 @@ void PadeChannel::GetPedestal(double &ped, double &stdev){
 
 
 Int_t PadeChannel::GetChannelIndex(){
-  Mapper *mapper=Mapper::Instance();
+  Mapper *mapper=Mapper::Instance(_ts);
   return mapper->ChannelID2ChannelIndex(GetChannelID());
 }
 
@@ -199,10 +200,10 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
   return result;
 }
 
-
+// WARNING: not really calibrated!  Just PED subtracted
+// kept around for compatibility w/ event display
 float PadeChannel::GetMaxCalib(){
-  int idx=GetChannelIndex();
-  return (_max-GetPedestal())*CalConstants[idx];
+  return (_max-GetPedestal());
 }
 
 

@@ -103,11 +103,11 @@ void WCReco::FitTDCs(){
     Float_t *tdc_peaks = tspectrum.GetPositionX();
     Float_t early_peak = 9999.;
     // hacky!  Test beam2 runs have TDC peak at earlier time values
-    // whereas test beam1 runs may have noise peaks at early time values
+    // whereas test beam1 runs may have noise peak(s) at early time values
     // better solution: set minimum width for choosing first peak
     float minPeakTime=25;
-    if (_run==TBEvent::TBRun2b) minPeakTime=0;
-    for (int ipeak = 0; ipeak < npeaks; ipeak++){  // TEMPORARY! was 25 for tb1
+    if (_run>=TBEvent::TBRun2a) minPeakTime=0;
+    for (int ipeak = 0; ipeak < npeaks; ipeak++){  
       if ( tdc_peaks[ipeak] < early_peak && tdc_peaks[ipeak] > minPeakTime) 
 	early_peak = tdc_peaks[ipeak];
     }

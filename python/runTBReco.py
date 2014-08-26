@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Run RECO tools
 # this is just a wrapper for the ROOT C++ code
 # Usage: python runTBReco.py [-o output directory] input_file.root 

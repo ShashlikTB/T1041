@@ -2,6 +2,7 @@
 
 #ifndef SHASHLIK_H
 #define SHASHLIK_H
+#include "TBEvent.h"
 #include "TMath.h"
 #include "fibermap.h"
 #include <TH2I.h>
@@ -12,7 +13,7 @@ using namespace std;
 
 
 /** Module x,y positions are relative to the center of the detector 
-   Looking downstream: +x is to the right, +y is up
+    Looking downstream: +x is to the right, +y is up
 **/
 const int NMODULES=16;
 
@@ -38,15 +39,15 @@ const int NMODULES=16;
 
 /// Approximate postions of module centers, relative to center of the detector in mm
 const double MODULEXY[]={
-   1, -21.0,  21.0,
-   2,  -7.0,  21.0,
-   3,   7.0,  21.0,
-   4,  21.0,  21.0,
-   5, -21.0,   7.0,
-   6,  -7.0,   7.0,
-   7,   7.0,   7.0,
-   8,  21.0,   7.0,
-   9, -21.0,  -7.0,
+1, -21.0,  21.0,
+  2,  -7.0,  21.0,
+  3,   7.0,  21.0,
+  4,  21.0,  21.0,
+  5, -21.0,   7.0,
+  6,  -7.0,   7.0,
+  7,   7.0,   7.0,
+  8,  21.0,   7.0,
+  9, -21.0,  -7.0,
   10,  -7.0,  -7.0,
   11,   7.0,  -7.0,
   12,  21.0,  -7.0,
@@ -54,7 +55,7 @@ const double MODULEXY[]={
   14,  -7.0, -21.0,
   15,   7.0, -21.0,
   16,  21.0, -21.0,
-};
+  };
 
 
 
@@ -74,34 +75,37 @@ const float MAX_EDGE_Y=28;
 
 
 /** Overview of Mapping for the Shashlik Testbeam<br>
-There are many mapping schemes (alas!)<br>
-<br>
-ModuleID:<br>
-  Run from -16...-1 (upstream face) 1..16 (downstream face)<br>
-FiberNumber 1..4 <br>
-  Numbered CCW from the lower right corner of a module viewed from upstream<br>
-FiberID: <br>
-  = ModuleID*100-FiberNumber [upstream face]<br>
-  = ModuleID*100+FiberNumber [downstream face]<br>
-Pade BoardID = 112,115,116,117 for testbeam2<br>
-Pade ChannelNumber 0..31 ADC channels (groups of 8 correspond to physical ADCs)<br>
-ChannelID:<br>
-  = BoardID*100+ChannelNumber<br>
-ChannelIndex 0..127 (good for histogram x-axis)<br>
-  = -1*ModuleID+(FiberNumber-1)  [upstream face]<br>
-  = ModuleID+(FiberNumber-1)     [downstream face]
+    There are many mapping schemes (alas!)<br>
+    <br>
+    ModuleID:<br>
+    Run from -16...-1 (upstream face) 1..16 (downstream face)<br>
+    FiberNumber 1..4 <br>
+    Numbered CCW from the lower right corner of a module viewed from upstream<br>
+    FiberID: <br>
+    = ModuleID*100-FiberNumber [upstream face]<br>
+    = ModuleID*100+FiberNumber [downstream face]<br>
+    Pade BoardID = 112,115,116,117 for testbeam2<br>
+    Pade ChannelNumber 0..31 ADC channels (groups of 8 correspond to physical ADCs)<br>
+    ChannelID:<br>
+    = BoardID*100+ChannelNumber<br>
+    ChannelIndex 0..127 (good for histogram x-axis)<br>
+    = -1*ModuleID+(FiberNumber-1)  [upstream face]<br>
+    = ModuleID+(FiberNumber-1)     [downstream face]
 **/
+
 class Mapper{
- public:
-  static Mapper* Instance(){
+public:
+/// Retrieve instance of mapper class, use care to define run period if hardware channels are accessed
+  static Mapper* Instance(unsigned long ts=635337576077954884L+1){  // default to run 2
     if (!_pInstance)   // Only allow one instance of class to be generated.
       _pInstance = new Mapper;
-    return _pInstance;
+  _pInstance->SetEpoch(ts);
+  return _pInstance;
   }
   void ModuleXY(int module, double &x, double &y) const;
   void FiberXY(int fiberID, double &x, double &y) const; 
   void ChannelXYZ(int channelID, double &x, double &y, double &z) const;
-
+  void ChannelIdxXYZ(int channelIdx, double &x, double &y, double &z) const;
   void SetModuleBins(TH2 *h) const;
   void SetChannelBins(TH2 *h) const;
   void GetModuleMap(TH2I* h, int z=1 /*-1 for upstream*/ ) const;
@@ -117,22 +121,22 @@ class Mapper{
   int ChannelIndex2ChannelID(int channelIndex) const;
 
 
-  int ChannelID2FiberID(int channelID) {
-    if  (_padeMap.find(channelID) == _padeMap.end()) return 0;
-    return _padeMap[channelID]; 
-  }
+int ChannelID2FiberID(int channelID) {
+  if  (_padeMap.find(channelID) == _padeMap.end()) return 0;
+  return _padeMap[channelID]; 
+}
 
-  double* ChannelID2XY(int chanID) {
-    int fiberID = ChannelID2FiberID(chanID);
-    double x, y;
-    static double xy[2];
-    FiberXY(fiberID, x, y);
-    xy[0] = x;
-    xy[1] = y;
-    return xy;
-  }
+double* ChannelID2XY(int chanID) {
+  int fiberID = ChannelID2FiberID(chanID);
+  double x, y;
+  static double xy[2];
+  FiberXY(fiberID, x, y);
+  xy[0] = x;
+  xy[1] = y;
+  return xy;
+}
 
- private:
+private:
   static Mapper* _pInstance;
   static const int *FIBERMAP;
   map<int,int> _padeMap;  // map pade channels to fibers
@@ -141,21 +145,6 @@ class Mapper{
   Mapper();
   Mapper(Mapper const&){;}              // copy constructor is private
   void MakeMaps();
-};
-
-
-/// Depricated, use TBRecHit instead
-class CalHit{
- public:
- CalHit(int idx, double val): _channelIndex(idx), _val(val) {;}
-  int GetChannelIndex() const {return _channelIndex;}
-  double Value() const {return _val;}
-  void GetXYZ(double &x, double &y, double &z) const;
-  void Print() const;
-  void SetValue(double val) {_val=val;}
- private:
-  int _channelIndex;
-  double _val;
 };
 
 

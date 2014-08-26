@@ -15,6 +15,7 @@ using std::vector;
 #include "TString.h"
 #include "TSpectrum.h"
 #include "TList.h"
+#include "TROOT.h"
 #include "TPolyMarker.h"
 #include "TCanvas.h"
 #include "TH1D.h"
@@ -564,6 +565,9 @@ void waveInterface::updateFrame(UInt_t entry, UInt_t channel) {
   _eventTree->GetEntry(entry); 
   _padeChannel = _event->GetPadeChan(channel); 
   _padeChannel.GetHist(_waveform); 
+  gROOT->SetStyle("Pub");
+  _waveform->SetLineWidth(3);
+
 
   _waveformCanvas->GetCanvas()->cd(); 
   std::cout << "Drawing Sample" << std::endl; 
@@ -681,7 +685,8 @@ bool waveInterface::nextOverthresholdCh(bool up) {
     Int_t i = 0; 
     while (i < _event->NPadeChan()) { 
       _padeChannel = _event->GetPadeChan(i); 
-      if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator)
+      if (_padeChannel.GetBoardID() == _currentBoard && 
+	  (int)_padeChannel.GetChannelNum() == *_chiterator)
 	break; 
       i++; 
     }
@@ -689,14 +694,18 @@ bool waveInterface::nextOverthresholdCh(bool up) {
     for (; i >= 0; i--) { 
 
       _padeChannel = _event->GetPadeChan(i); 
-      if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() < _minCount) { 
+      if (_padeChannel.GetBoardID() == _currentBoard && 
+	  (int)_padeChannel.GetChannelNum() == *_chiterator && 
+	  _padeChannel.GetMax() < _minCount) { 
 
 	if (_chiterator != _chSet.begin())
 	  _chiterator--; 
 	else 
 	  return false; 
     }
-    if (_padeChannel.GetBoardID() == _currentBoard && (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() >= _minCount)
+    if (_padeChannel.GetBoardID() == _currentBoard && 
+	(int)_padeChannel.GetChannelNum() == *_chiterator && 
+	_padeChannel.GetMax() >= _minCount)
 	return true; 
     }
 
@@ -738,7 +747,7 @@ bool waveInterface::nextChannel() {
     return false; 
   }
   else {
-    //    std::cout << "No next overthreshold" << std::endl;
+    std::cout << "No next overthreshold" << std::endl;
     waveformChUpdate(); 
     return true; 
   }

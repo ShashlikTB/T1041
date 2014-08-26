@@ -165,9 +165,6 @@ public:
   vector<WCChannel> GetWChitsY(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   static TBRun GetRunPeriod(ULong64_t padeTime);
   TBRun GetRunPeriod() const;
-  void GetCalHits(vector<CalHit> &calHits, float* calconstants=0, float cut=0);
-  void GetCalHitsFit(vector<CalHit> &calHits, float* calconstants=0, float cut=0);
-  void CalibrateCalHits(vector<CalHit> &calHits, float* calconstants);
 
 
   // setters
@@ -182,7 +179,6 @@ private:
   vector<PadeChannel> padeChannel;
   vector<WCChannel> wc; 
 };
-
 
 
 #endif

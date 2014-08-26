@@ -10,6 +10,7 @@
 
 // NOTE: this is becoming depricated.  CPU-intensive fitting and traking
 // results can be found in TBRecHits, TBTracks in the RECO files
+// see recoAnalyzer.C for more modern example code
 
 #include <TString.h>
 #include <TFile.h>
@@ -44,6 +45,7 @@ void readerExample(TString file="latest.root"){
   TFile *tfo=new TFile(outname,"recreate");
 
   //// Use WCReco to find definition of in-time hits ////
+  // !!!! no need to do this any longer, see recoAnalyzer.C
   WCReco wcReco;
   wcReco.AddTree(t1041);
   Int_t tMean[NTDC], tLow[NTDC], tHigh[NTDC];
@@ -51,6 +53,7 @@ void readerExample(TString file="latest.root"){
   TH1I* hTDC[NTDC];
   wcReco.GetTDChists(hTDC);    // use to fetch the TDC histograms 
   /////////////////////////////////////////
+
 
   // slopes and x-y postion of track at face of detector
   TH1F *hslopeX=new TH1F("hslopeX","Beam slope in X",50,-0.005,0.005);
@@ -103,12 +106,14 @@ void readerExample(TString file="latest.root"){
   TBSpill *spill = new TBSpill();
   TBranch *bevent = t1041->GetBranch("tbevent");
   TBranch *bspill = t1041->GetBranch("tbspill");
+  vector<TBRecHit> *rechits=0;  // important to set this = 0!
   bevent->SetAddress(&event);
   bspill->SetAddress(&spill);
+  t1041->SetBranchAddress("tbrechits",&rechits);
 
   // loop over events
   CalCluster calCluster, calClusterCalib;
-  vector<CalHit> calhits, calhitsCalib;
+
 
   for (Int_t i=0; i< t1041->GetEntries(); i++) {
 
@@ -141,26 +146,18 @@ void readerExample(TString file="latest.root"){
     bool haveTrack= (hitsX1.size()==1 && hitsY1.size()==1 && 
 		     hitsX2.size()==1 && hitsY2.size()==1);   // require only 2 x,y hits
 
-    // just doing peak=pedestal subtraction
-    //    event->GetCalHits(calhits,0,3.0);  // fetch ped-subtracted calorimter hits, no calib, 3sigma noise cut
-    //    event->GetCalHits(calhitsCalib,CalConstants,3.0);  // and again w/ Shasha's inter calibration, 3sigma noise cut
-    // using the pulse shape fit  [ this takes MUCH longer ]
-    if (i==0) cout << "We are doing pulse fits here, so this will be SLOW" << endl;
-    event->GetCalHitsFit(calhits,0,3.0);  // fetch ped-subtracted calorimter hits, no calib, 3sigma noise cut
-    calhitsCalib=calhits;
-    event->CalibrateCalHits(calhitsCalib,CalConstants);  // much faster than redoing fit
-    //    event->GetCalHitsFit(calhitsCalib,CalConstants,3.0);  // and again w/ Shasha's inter calibration, 3sigma noise c
+    // updated to use TBRechits, requires a RECO file!
 
-
-    // Loop over calhits to find the channel with maximum energy
-    // Use CalHits here and not the loop over PadeChannels above, b/c
-    // CalHits are pedestal corrected and our bad channel is remapped to the opposing SIPM
+    // Loop over rechits to find the channel with maximum energy
+    // Use RecHits here and not the loop over PadeChannels above, b/c
+    // RecHits are pedestal corrected and bad channel(s) are remapped to the opposing SIPM
     float max=0;
     double x,y,z;
-    for (unsigned k=0; k<calhits.size(); k++) { 
-      if (calhits[k].Value()>max){
-	max=calhits[k].Value();
-	calhits[k].GetXYZ(x,y,z);
+    for (unsigned k=0; k<rechits->size(); k++) { 
+      const TBRecHit *hit = &(rechits->at(k));
+      if (hit->AMax()>max){
+	max=hit->AMax();
+	hit->GetXYZ(x,y,z);
       }
     }
     if (max>0) hMax->Fill(x,y);
@@ -168,7 +165,7 @@ void readerExample(TString file="latest.root"){
     // Analysis of calorimter clusters
     // plot x,y positions and "energy" (really ADC value) clusters
     // Warning clustering code is not well vetted
-    calCluster.MakeCluster(calhits);  // cut requiring adcMin counts>pedistal
+    calCluster.MakeCluster(rechits);  // cut requiring adcMin counts>pedistal
     if (calCluster.GetE()==0) continue;
     // calCluster.Print();
     bool isContained= TMath::Abs( calCluster.GetX()<14 ) && TMath::Abs( calCluster.GetY()<14 );
@@ -181,8 +178,9 @@ void readerExample(TString file="latest.root"){
 
     if (isContained) hClusterE->Fill( Min((double)calCluster.GetE(), EMAX-0.0001) );
    
-
-    calClusterCalib.MakeCluster(calhitsCalib);  
+    if (event->GetRunPeriod()==TBEvent::TBRun1)
+      TBRecHit::Calibrate(rechits,CalConstants_April2014);
+    calClusterCalib.MakeCluster(rechits);  
     isContained= TMath::Abs( calClusterCalib.GetX()<14 ) && TMath::Abs( calClusterCalib.GetY()<14 );
 
     hClusterCalibX->Fill(calClusterCalib.GetX());

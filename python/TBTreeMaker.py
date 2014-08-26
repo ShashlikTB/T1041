@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ###############################################################################
 #
 # PADE and WC file format descriptions

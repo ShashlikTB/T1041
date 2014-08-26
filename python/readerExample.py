@@ -11,7 +11,7 @@ from TBUtils import *
 logger=Logger()
 
 if len(sys.argv)<2:
-    runDat="latest.root"
+    runDat="latest_reco.root"
 else: runDat=sys.argv[1]
 
 print "Processing file:",runDat
@@ -25,7 +25,7 @@ gROOT.ProcessLine(".L rootscript/readerExample.C+")
 readerExample(runDat)
 
 
-hit_continue('Hit any key to exit')
+#hit_continue('Hit any key to exit')
 
 
 

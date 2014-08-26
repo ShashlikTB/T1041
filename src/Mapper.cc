@@ -1,7 +1,6 @@
 #include "Mapper.h"
-#include "TBEvent.h"
 
-// defaulf map based on initial 4 PADE cards of July 2014 Test Beam  
+// default map based on initial 4 PADE cards of July 2014 Test Beam  
 Mapper::Mapper(){  // Private so that it cannot be called
   FIBERMAP=FIBERMAP_JULY14;
   // fill maps
@@ -18,6 +17,7 @@ void Mapper::SetEpoch(unsigned long ts){  // redundant data here, clean this up
     MakeMaps(); 
   }
 }
+
 
 void Mapper::MakeMaps(){
   _padeMap.clear();
@@ -123,6 +123,15 @@ void Mapper::ChannelXYZ(int channelID, double &x, double &y, double &z) const{
   else z=1;
 }
 
+void Mapper::ChannelIdxXYZ(int channelIdx, double &x, double &y, double &z) const{
+  int module,fiber;
+  ChannelIndex2ModuleFiber(channelIdx,module,fiber);
+  int fiberID;
+  module<0 ? fiberID=module-fiber : fiberID=module+fiber;
+  FiberXY(fiberID,x,y);
+  if (fiberID<0) z=-1;
+  else z=1;
+}
 
 void Mapper::SetModuleBins(TH2 *h) const{
   h->SetBins(4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
@@ -195,18 +204,6 @@ void Mapper::GetChannelIdx(TH2I* h, int z) const{
   }
 }
 
-void CalHit::GetXYZ(double &x, double &y, double &z) const{
-   Mapper *mapper=Mapper::Instance();
-   int channelID=mapper->ChannelIndex2ChannelID(_channelIndex);
-   mapper->ChannelXYZ(channelID,x,y,z);
-}
-
-void CalHit::Print() const{
-  double x,y,z;
-  GetXYZ(x,y,z);
-  cout << "Calhit (index,x,y,z,val) = ( " << _channelIndex << "," 
-       << x << "," << y << "," << z << "," << _val << " )" << endl;
-}
 
 
 Mapper* Mapper::_pInstance=NULL;

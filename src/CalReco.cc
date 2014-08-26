@@ -40,7 +40,6 @@ int CalReco::Process(TTree *rawTree, TTree *recTree){
     bool tbrun1 = event->GetRunPeriod()==TBEvent::TBRun1;
     bool tbrun2 = !tbrun1 && event->GetRunPeriod()<=TBEvent::TBRun2c;
     for (Int_t nch=0; nch<event->NPadeChan(); nch++){
-
       PadeChannel pc=event->GetPadeChan(nch);
       int idx=pc.GetChannelIndex();
 
@@ -57,6 +56,12 @@ int CalReco::Process(TTree *rawTree, TTree *recTree){
 	if ( (idx==51 || idx==60) && pc.LaserData() ) 
 	  hit.AddStatus(TBRecHit::kMonitor);
 	rechits->push_back(hit);  // only save hits over ZSP
+
+	if (i==0) {
+	  pc.Dump();
+	  cout<<hit<<endl;
+	}
+
       }
       else continue;  // no hit to add
 

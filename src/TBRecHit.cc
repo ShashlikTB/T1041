@@ -15,7 +15,8 @@ TBRecHit::TBRecHit(const TBRecHit &hit, UShort_t idx, UInt_t newstatus) :
   TObject(hit),
   maxADC(hit.maxADC), pedestal(hit.pedestal),
   noise(hit.noise), aMaxValue(hit.aMaxValue), tRiseValue(hit.tRiseValue),
-  chi2(hit.chi2), ndof(hit.ndof), nzsp(hit.nzsp), status(hit.status|newstatus)
+  chi2(hit.chi2), ndof(hit.ndof), nzsp(hit.nzsp), status(hit.status|newstatus),
+  cfactor(hit.cfactor), ts(hit.ts)
 {
   if (idx<=127) channelIndex=idx;
 }
@@ -32,8 +33,10 @@ void TBRecHit::Init(PadeChannel *pc,  Float_t zsp){
   ndof=0;
   status=0;
   nzsp=zsp;
+  cfactor=1;
   if (!pc) return;
   channelIndex=pc->GetChannelIndex();
+  ts=pc->GetTimeStamp();
   maxADC=pc->GetMax();
   double ped,sig;
   pc->GetPedestal(ped,sig);
@@ -45,9 +48,8 @@ void TBRecHit::Init(PadeChannel *pc,  Float_t zsp){
 
 
 void TBRecHit::GetXYZ(double &x, double &y, double &z) const {
-  Mapper *mapper=Mapper::Instance();
-  int channelID=mapper->ChannelIndex2ChannelID(channelIndex);
-  mapper->ChannelXYZ(channelID,x,y,z);
+  Mapper *mapper=Mapper::Instance(ts);
+  mapper->ChannelIdxXYZ(channelIndex,x,y,z); // does not depend on run epoch
 }
 
 void TBRecHit::GetXYZ(float &x, float &y, float &z) const {
@@ -59,18 +61,17 @@ void TBRecHit::GetXYZ(float &x, float &y, float &z) const {
 }
 
 
-Int_t TBRecHit::GetChannelID() const{
-  Mapper *mapper=Mapper::Instance();
+Int_t TBRecHit::GetChannelID() const{  // depends on run epoch b/c of PADE id's
+  Mapper *mapper=Mapper::Instance(ts);
   return mapper->ChannelIndex2ChannelID(channelIndex);
 }
 
 void TBRecHit::GetModuleFiber(int &moduleID, int &fiberID) const{
-  Mapper *mapper=Mapper::Instance();
-  mapper->ChannelIndex2ModuleFiber(channelIndex,moduleID,fiberID);
+  Mapper *mapper=Mapper::Instance(ts);  
+  mapper->ChannelIndex2ModuleFiber(channelIndex,moduleID,fiberID); // result independent of run epoch
 }
 
 void TBRecHit::FitPulse(PadeChannel *pc){
-
   if ( TMath::Abs(maxADC-pedestal) / (noise+0.001) < nzsp ) { // avoid div by 0
     status|=kZSP;
     return;
@@ -95,3 +96,17 @@ std::ostream& operator<<(std::ostream& s, const TBRecHit& hit) {
 	   << hit.NoiseRMS() << "," << hit.AMax() << "," 
 	   << hit.TRise() << "," << hit.Chi2();
 }
+
+void TBRecHit::Calibrate(float *calconstants){
+  float c=calconstants[channelIndex];
+  if (IsCalibrated()) c/=cfactor;  // undo pevious calibration
+  aMaxValue*=c;
+  aMaxError*=c;
+  noise*=c;
+  cfactor=calconstants[channelIndex];
+}
+void TBRecHit::Calibrate(vector<TBRecHit> *rechits, float *calconstants){
+  for (unsigned i=0; i<rechits->size(); i++)
+    (rechits->at(i)).Calibrate(calconstants);
+}
+

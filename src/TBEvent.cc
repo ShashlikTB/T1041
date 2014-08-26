@@ -22,8 +22,8 @@ void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size,
 			      UShort_t  board_id, UInt_t hw_counter, 
 			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser){
 
-  Mapper *mapper=Mapper::Instance();
-  mapper->SetEpoch(ts);
+  Mapper *mapper=Mapper::Instance(ts);
+  //  mapper->SetEpoch(ts);
   if (!mapper->validChannel(board_id, ch_number)){ // sanity check 
     cerr << "Warning: channel ID error, board:channel " 
 	 << board_id << ":" << ch_number << " ts= " << ts << endl;
@@ -47,7 +47,7 @@ vector<WCChannel> TBEvent::GetWChitsX(Int_t nwc, Int_t *min, Int_t* max) const{
     bool keep = tdc2WC(tdc)==nwc && (tdc-1)%4<2;   // match to chamber
     if (max) {
       UShort_t count=wc[i].GetCount();
-      keep &= count>=min[tdc] && count<=max[tdc];
+      keep &= count>=min[tdc-1] && count<=max[tdc-1];
     }
     if (keep) hits.push_back(wc[i]);
   }
@@ -60,7 +60,7 @@ vector<WCChannel> TBEvent::GetWChitsY(Int_t nwc, Int_t *min, Int_t* max) const{
     bool keep = tdc2WC(tdc)==nwc && (tdc-1)%4>1;   // match to chamber
     if (max) {
       UShort_t count=wc[i].GetCount();
-      keep &= count>=min[tdc] && count<=max[tdc];
+      keep &= count>=min[tdc-1] && count<=max[tdc-1];
     }
     if (keep) hits.push_back(wc[i]);  
   }
@@ -130,62 +130,6 @@ float WCChannel::GetY(){
 
 
 
-void TBEvent::GetCalHits(vector<CalHit> &calHits, float* calconstants, float cut){
-  calHits.clear();
-  for (Int_t i=0; i<NPadeChan(); i++){
-    int idx=padeChannel[i].GetChannelIndex();
-    double ped,sig;
-    padeChannel[i].GetPedestal(ped,sig);
-    float val=padeChannel[i].GetMax()-ped;      
-    if (calconstants) val*=calconstants[idx];     // relative calibration
-    // Hack here to fix bad channel
-    // bad channel 11316, set equal to 11608 (set rear fiber to front fiber)
-    // padechannels are ordered according to boardID*100+channelID
-    // so 11316 = padeChannel[48],  11608 = padeChannel[104]
-    if (i==48){
-      padeChannel[104].GetPedestal(ped,sig);
-      val=padeChannel[104].GetMax()-ped;
-      if (calconstants) val*=calconstants[104];    
-    }    
-    if (val>0 && val/sig>cut) calHits.push_back( CalHit(idx, val) );  // n-sigma noise cut
-  }
-}
-
-// This version uses Sasha's fitting code to return pedestal subtracted hits
-void TBEvent::GetCalHitsFit(vector<CalHit> &calHits, float* calconstants, float cut){
-  calHits.clear();
-  PulseFit fit;
-  double ped,sig;
-
-  for (Int_t i=0; i<NPadeChan(); i++){
-    int idx=padeChannel[i].GetChannelIndex();
-
-    // BH: speed things up by not fitting small pulses
-    padeChannel[i].GetPedestal(ped,sig);
-    float val=padeChannel[i].GetMax()-ped;
-    if (val>0 && val/sig>cut) continue;
-
-    // Hack here to fix bad channel
-    // bad channel 11316, set equal to 11608 (set rear fiber to front fiber)
-    // padechannels are ordered according to boardID*100+channelID
-    // so 11316 = padeChannel[48],  11608 = padeChannel[104]
-    if (i==48){
-      fit=PadeChannel::FitPulse(&padeChannel[104]);
-    }
-    else fit=PadeChannel::FitPulse(&padeChannel[i]);
-    if (calconstants) fit.aMaxValue*=calconstants[idx]; 
-    if (fit.aMaxValue/fit.noise > cut)   // n-sigma noise cut
-      calHits.push_back( CalHit(idx, fit.aMaxValue) );  
-  }
-}
-
-void TBEvent::CalibrateCalHits(vector<CalHit> &calHits, float* calconstants){
-  for (unsigned i=0; i<calHits.size(); i++){
-    int idx=calHits[i].GetChannelIndex();
-    double calib=calHits[i].Value()*calconstants[idx];
-    calHits[i].SetValue(calib);
-  }
-}
 
 TBEvent::TBRun TBEvent::GetRunPeriod(ULong64_t padeTime){
   if (padeTime<START_TBEAM1) return TBUndef;

@@ -1,5 +1,5 @@
-# very rudimentary code to display wave forms 
-# Created 4/13/2014 B.Hirosky: Initial release
+#!/usr/bin/env python
+# wrapper script to run wave gui
 
 import sys, signal
 from ROOT import *
@@ -22,8 +22,6 @@ else: runDat=sys.argv[1]
 print "Processing file:",runDat
 LoadLibs("TBLIB","libTB.so")
 gSystem.SetIncludePath("-I\"$TBHOME/include\"")
-
-gROOT.ProcessLine(".L rootscript/waveViewer.C+")
 
 
 # show all wave forms in file
