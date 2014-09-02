@@ -1,0 +1,85 @@
+\documentclass[12pt,A4paper]{article}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{graphicx}
+    \usepackage{amsmath}
+    \usepackage{caption}
+    \usepackage{subcaption}
+    \usepackage{cancel}
+    \usepackage{etoolbox} % provides \patchcmd macro
+    \makeatletter % modify the "headings" page style
+    \makeatother
+    \pagestyle{headings}
+
+
+\usepackage[
+top    =  -1 cm,
+bottom =  -4 cm,
+left   = 2 cm,
+right  = 2 cm]{geometry}
+
+
+\title{Post-Run Summary}
+\date{}
+
+\begin{document}
+        \maketitle
+\vspace{-1.8 cm}
+\linespread{.2}
+\noindent 
+\textbf{filename:} FILENAME \hspace{2mm} \textbf{species:} SPECIES\hspace{2mm}\textbf{energy:} ENERGY \hspace{2mm} \\
+\noindent
+\textbf{\#events:} NEVENTS
+\linespread{1.5}
+
+\noindent 
+In-time and quality tracks in wire chambers 1 and 2:
+\vspace{-.5 cm}
+\begin{centering}
+\begin{figure}[hb]
+\centering
+\includegraphics[width=15 cm]{doc/etc/wc.pdf}
+\end{figure}
+\end{centering}
+    
+\vspace{-.7 cm}
+\noindent 
+Average pedestal-subtracted ADC counts for each fiber readout:
+\vspace{-.5cm}
+\begin{figure}[hb]
+\centering
+\includegraphics[width=15 cm]{doc/etc/heatmap}
+\end{figure}
+
+
+\vspace{-.7 cm}
+\noindent 
+Accumulated waveform sample ADC values for pulse readouts and $\chi^2$ of the fits:
+\vspace{-.5cm}
+\begin{figure}[hb]
+\hspace{-1.5cm}
+\includegraphics[width=20cm]{doc/etc/pulse.pdf}
+\end{figure}
+
+
+\newpage
+\noindent 
+\\\\\\\\Pedestal Noise:
+\vspace{-.45 cm}
+\begin{figure}[hb]
+\hspace{-1.5cm}
+\includegraphics[width=20cm]{doc/etc/noise.pdf}
+\end{figure}
+
+
+\vspace{-.7 cm}
+\noindent 
+TDC hit timing distributions:
+\vspace{-.5 cm}
+\begin{figure}[hb]
+\hspace{-1.1cm}
+\includegraphics[width=20cm]{doc/etc/tdc.pdf}
+\end{figure}
+
+
+     \end{document}

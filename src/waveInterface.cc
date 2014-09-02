@@ -4,6 +4,7 @@
 
 #include <iostream> 
 #include <vector>
+
 using std::vector; 
 
 
@@ -56,9 +57,7 @@ void *timer(void *ptr) {
   waveInterface *interface = (waveInterface *) ptr; 
 
   while(1) { 
-    if (!interface->PlayerStatus())
-      break; 
-
+    if (!interface->PlayerStatus()) break; 
     if (interface->nextChannel()) {
       interface->nextEntry(); 
       interface->firstChannel(); 
@@ -70,7 +69,6 @@ void *timer(void *ptr) {
 
 
 waveInterface::waveInterface(bool initialise) { 
-
   _f = NULL; 
   _filename = "" ;
   _width = 1000; 
@@ -84,39 +82,34 @@ waveInterface::waveInterface(bool initialise) {
     initWindow(); 
 }
 
-waveInterface::waveInterface(const TString &filename, bool initialise) { 
 
+waveInterface::waveInterface(const TString &filename, bool initialise) { 
   _f = NULL; 
   _filename = filename; 
-  _playerStatus = false; 
-  _currentBoard = -1; 
-
-  std::cout << "Just starting up" << std::endl; 
   _width = 1000; 
-  _height = 500; 
+  _height = 500;
+  _playerStatus = false; 
+  _delay=1000;
+  _currentBoard = -1; 
+  _showPulseFit=false;
+  //By default start the interface
   if (initialise) {
     initWindow(); 
   }
-  
 }
 
 waveInterface::~waveInterface() { 
   if (_FMain) {
     delete _FMain; 
   }
-
 }
 
 
-
 void waveInterface::initWindow(UInt_t width, UInt_t height) { 
-
-
   if (width != 0 && height != 0) {
     _width = width; 
     _height = height; 
   }
-
 
   _FMain = new TGMainFrame(gClient->GetRoot(), _width, _height, kVerticalFrame); 
   _FMain->SetWindowName("Test Beam Waveform Viewer v.00000001"); 
@@ -133,8 +126,8 @@ void waveInterface::initWindow(UInt_t width, UInt_t height) {
   _FMain->MapSubwindows(); 
   _FMain->Resize(_FMain->GetDefaultSize()); 
   _FMain->MapWindow(); 
-
 }
+
 
 void waveInterface::enableChannelColumn(UInt_t col) { 
   std::cout << "Enabling column" << col << std::endl; 
@@ -199,7 +192,6 @@ void waveInterface::addFixedCheckBoxes() {
     _boardList.Add(brd); 
 
   }
-
 
   _channelFrame = new TGCompositeFrame(_boardAndchannelFrame); 
   _channelFrame->SetLayoutManager(new TGMatrixLayout(_channelFrame, 9, 0, 1)); 
@@ -436,9 +428,7 @@ void waveInterface::updateBoardSelection(Int_t brd) {
 }
 
 void waveInterface::delayBoxUpdate() { 
-
   _delay = _delayBox->GetIntNumber(); 
-
 }
 
 void waveInterface::minADCUpdate() { 
@@ -487,18 +477,15 @@ void waveInterface::openFileDialog() {
 }
 
 void waveInterface::Go() { 
-
   std::cout << "Starting channel playback..." << std::endl; 
   _playerStatus = true; 
   _timer = new TThread("timer", timer, this); 
   _timer->Run(); 
-
 }
 
 void waveInterface::Stop() { 
   std::cout << "Stopping channel playback..." << std::endl; 
   _playerStatus = false; 
-
 }
 
 void waveInterface::Fit() { 
@@ -524,9 +511,6 @@ void waveInterface::updateHistogram() {
   }
   _histoCanvas->GetCanvas()->cd(); 
   
-
-
-
   vector<Int_t> channels; 
   if (_pulseHeight)
     _pulseHeight->Reset(); 
@@ -557,21 +541,19 @@ void waveInterface::updateHistogram() {
 
 }
 
-void waveInterface::updateFrame(UInt_t entry, UInt_t channel) { 
-  //Quick sanity check
-  if (_f == NULL or _eventTree == NULL)
-    return;
 
-  _eventTree->GetEntry(entry); 
-  _padeChannel = _event->GetPadeChan(channel); 
+void waveInterface::updateFrame() { 
   _padeChannel.GetHist(_waveform); 
-  gROOT->SetStyle("Pub");
+  //  gROOT->SetStyle("Pub");
   _waveform->SetLineWidth(3);
 
 
   _waveformCanvas->GetCanvas()->cd(); 
   std::cout << "Drawing Sample" << std::endl; 
   _waveform->SetStats(0); 
+  TString title;
+  title.Form("Entry %d : Board %d, Channel %d",_currentEntry,_padeChannel.GetBoardID(),_padeChannel.GetChannelNum());
+  _waveform->SetTitle(title);
   _waveform->Draw(); 
   PulseFit fit;
   if (_showPulseFit) {
@@ -586,11 +568,7 @@ void waveInterface::updateFrame(UInt_t entry, UInt_t channel) {
   _waveformCanvas->GetCanvas()->Update(); 
 }
 
-
-
 void waveInterface::loadRootFile() { 
-
-
   if (_f != NULL && _f->IsZombie()) { 
     std::cout << "Closing stale root file" << std::endl; 
     delete _f; 
@@ -600,18 +578,14 @@ void waveInterface::loadRootFile() {
   if (_f) { 
     std::cout << "Cleaning old data" << std::endl; 
     reset(); 
-
   }
 
 
   if (_filename == "")
     return; 
 
-
   std::cout << "Loading Root File" << std::endl; 
   _f = new TFile(_filename);
-
-
   
   _currentBoard = -1; 
   
@@ -625,15 +599,11 @@ void waveInterface::loadRootFile() {
   std::cout << "Building waveform histogram" << std::endl; 
   _waveform = new TH1F("hw", "waveform", 120, 0, 120);
   
-
   std::cout << "Getting test sample" << std::endl; 
   _eventTree->GetEntry(0); 
     
-  
   _currentEntry = 0; 
   _currentChannel = 0; 
-
-
 
   _padeChannel = _event->GetPadeChan(0); 
 
@@ -652,8 +622,6 @@ void waveInterface::loadRootFile() {
   ((TGRadioButton *) _boardList[0])->SetState(kButtonDown); 
   ((TGCheckButton *) _chList[0])->SetState(kButtonDown); 
   firstChannel(); 
-
-
 }
 
 
@@ -714,13 +682,15 @@ bool waveInterface::nextOverthresholdCh(bool up) {
 }
 
 void waveInterface::waveformChUpdate() { 
+  _eventTree->GetEntry(_currentEntry);
   for (Int_t i = 0; i < _event->NPadeChan(); i++) { 
       _padeChannel = _event->GetPadeChan(i); 
       if (_padeChannel.GetBoardID() == _currentBoard && 
 	  (int)_padeChannel.GetChannelNum() == *_chiterator && _padeChannel.GetMax() >= _minCount ) {
 	std::cout << "Board Channel: " << _padeChannel.GetBoardID() << " " 
 		  << _padeChannel.GetChannelNum() << std::endl; 
-	updateFrame(_currentEntry, i); 
+	//updateFrame(_currentEntry, i); 
+	updateFrame();
 	return; 
       }
   }
@@ -764,19 +734,15 @@ void waveInterface::prevChannel() {
 }
 
 
-
 bool waveInterface::nextEntry() { 
   bool finished = true; 
   Int_t maxentries = _eventTree->GetEntries(); 
   std::cout << "Current Entry:" << _currentEntry << " of: " << maxentries << std::endl; 
 
-  if (_currentEntry < maxentries) {
-    _currentEntry++; 
-    finished = false; 
-    firstChannel(); 
-  }
-
-
+  if (_currentEntry == maxentries-1) return finished;
+  _currentEntry++; 
+  finished = false; 
+  firstChannel(); 
   return finished; 
 }
 
@@ -784,10 +750,7 @@ void waveInterface::prevEntry() {
   Int_t maxentries = _eventTree->GetEntries(); 
   std::cout << "Current Entry:" << _currentEntry << " of: " << maxentries << std::endl; 
 
-  if (_currentEntry == 0)
-    return; 
+  if (_currentEntry == 0) return; 
   _currentEntry--; 
   firstChannel(); 
-  
-
 }
