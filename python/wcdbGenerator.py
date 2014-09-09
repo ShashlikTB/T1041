@@ -83,7 +83,7 @@ def generateSpillDB(wcHandle, dbHandle, filename):
 
 def usage():
     print
-    print "Usage: python TBNtupleMaker [OPTION] [PADE_FILE] [PADE_FILE] ..."
+    print "Usage: python wcdbGenerator [OPTION] path"
     print "      -d DIR         : Process all padefiles in DIR"
     print "                       Overrides all files given on command line list"
     print "      -o DIR         : Output dir, instead of default = PWD"

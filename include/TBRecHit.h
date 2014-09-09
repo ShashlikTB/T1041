@@ -53,7 +53,7 @@ class TBRecHit : public TObject {
   void GetXYZ(float &x, float &y, float &z) const;
   /// Max ADC reading around expected peak location
   unsigned short MaxADC() const {return maxADC;}
-  void AddStatus(enum Flags flag) {status|=flag;} ///< Add bit(s) to status flag
+  void AddStatus(enum TBRecHit::Flags flag) {status|=flag;} ///< Add bit(s) to status flag
   void SetStatus(unsigned flags) {status=flags;}  ///< Set the status flag
   Float_t AMax() const {return aMaxValue;} ///< Amplitude fom pulse fit
   Float_t TRise() const {return tRiseValue;} ///< Starting location of pulse

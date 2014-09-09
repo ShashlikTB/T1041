@@ -48,13 +48,13 @@ int TrackReco::Process(TTree *rawTree, TTree *recTree){
 	    // Because we have no survey, the cuts on > 50 mm below
 	    // ASSUME WC 1,2 and Scint 1,2 are centered
 	    // Also assumed is that the scints are in fact 10 cm square!
-	    // This needs to be replaced with an effective alignemt derived from
-	    // in situ data
+	    // This needs to be replaced with an effective alignment derived 
+            // from in situ data
 	    track.Project(zSC1, trackX1, trackY1);
-	    if(fabs(trackX1)>50 || fabs(trackY1)>50) continue;
+	    if(fabs(trackX1)<50 && fabs(trackY1)<50) track.AddStatus(TBTrack::kSC1);
 	    float trackX2, trackY2;
 	    track.Project(zSC2, trackX2, trackY2);
-	    if(fabs(trackX2)>50 || fabs(trackY2)>50) continue;
+	    if(fabs(trackX2)<50 && fabs(trackY2)<50) track.AddStatus(TBTrack::kSC2);
 	    tracks->push_back(track);
 	  }
 	}

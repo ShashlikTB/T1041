@@ -11,7 +11,11 @@
 class TBTrack : public TObject {
   ClassDef(TBTrack,1);
  public:
-  TBTrack(){;}
+  enum Flags { 
+    kSC1=1,  // "confirmed" by projection to Scint 1
+    kSC2=2   // "confirmed" by projection to Scint 2
+  };
+  TBTrack();
   TBTrack(WCChannel x1, WCChannel y1, WCChannel x2, WCChannel y2);
   float GetSlopeX(){return _mx;}
   float GetSlopeY(){return _my;}
@@ -21,12 +25,8 @@ class TBTrack : public TObject {
   int TimingDifferenceWC2(){return _dt2;}
   void TablePos(float x_pos, float x_pos_table, float y_pos, float y_pos_table, float &offX, float &offY);
   void GetHits(WCChannel &x1, WCChannel &y1, WCChannel &x2, WCChannel &y2);
-  // flag is a bit mask
-  // bit 0: confirmed by projection to SC1
-  // bit 1: confirmed by projection to SC2
-  static const int kSC1=1;  // not used
-  static const int kSC2=2;
-  //bool Confirmed(int flag=1){return true;}  // to do 
+  void AddStatus(enum TBTrack::Flags flag) {status|=flag;} ///< Add bit(s) to status flag
+
   bool operator < (const TBTrack& trk) const{
     return _m2d<trk._m2d;
   }
@@ -39,6 +39,7 @@ class TBTrack : public TObject {
   WCChannel _x1, _y1, _x2, _y2;
   float _mx, _my, _m2d;  // slopes
   int _dt1, _dt2;       // time difference
+  unsigned short status;
 };
 
 

@@ -18,7 +18,7 @@
    tRiseError - Not needed. It does not include systematics that are significant <br>
    chi2       - Not needed. Use chi2Peak instead <br>
    ndof       - Not needed. Use ndofPeak instead
- **/
+**/
 struct PulseFit{
   double pedestal;   ///< PADE pedestal, typically ~100 ADC counts
   double noise;      ///< RMS of pedestal fluctuatio around average
@@ -36,14 +36,16 @@ struct PulseFit{
 
 std::ostream& operator<<(std::ostream& s, const PulseFit& f);
 
-/// function to fit beam pulse shapes
+/// function to fit beam and laser pulse shapes
 /** Pulse shape functions use an averaged emperical pulse shape that is
     pedestal suptracted, shifted and scaled by the fit proceedure.
 **/
-double funcPulse(double *x, double *par);
-/// function to fit laser pulse shapes
-double funcPulseLaser(double *x, double *par);
+double funcPulseA(double *x, double *par);
+double funcPulseB(double *x, double *par);
+double funcPulseC(double *x, double *par);
+double funcPulseD(double *x, double *par);
 
-
+double funcPulseLaserA(double *x, double *par);
+double funcPulseLaserB(double *x, double *par);
 	
 #endif

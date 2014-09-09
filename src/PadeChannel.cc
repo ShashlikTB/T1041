@@ -47,10 +47,10 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   // This handles the start of testbeam2 data where the first
   // 32 waveform samples are not valid wave data.  No porch was present in April 2014
   if (_ts>TBEvent::END_TBEAM1 && _ts<TBEvent::START_PORCH15) { // shift wform array by 32 counts
-      for (int i=0; i<N_PADE_DATA-32; i++) wform[i]=wform[i+32];
-      for (int i=N_PADE_DATA-32; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-33];
-      N_PADE_SAMPLES=N_PADE_DATA-32;
-      _status|=kPorch32;
+    for (int i=0; i<N_PADE_DATA-32; i++) wform[i]=wform[i+32];
+    for (int i=N_PADE_DATA-32; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-33];
+    N_PADE_SAMPLES=N_PADE_DATA-32;
+    _status|=kPorch32;
   } // The current porch is 15 samples
   else if (_ts>=TBEvent::START_PORCH15){
     for (int i=0; i<N_PADE_DATA-15; i++) wform[i]=wform[i+15];
@@ -112,18 +112,44 @@ Int_t PadeChannel::GetChannelIndex(){
 }
 
 PulseFit PadeChannel::FitPulse(PadeChannel *pc){ 
-  static bool first=true;
-  static TF1 *funcB;
-  static TF1 *funcL;
+  static bool first=true; 
+  static TF1 *funcB1;
+  static TF1 *funcB2;
+  static TF1 *funcL1;
+  static TF1 *funcL2;
   if (first){
-    funcB = new TF1("funcB", funcPulse, 0.0, 120.0, 3);
-    funcL = new TF1("funcL", funcPulseLaser, 0.0, 120.0, 3);
-    funcB->SetNpx(N_PADE_SAMPLES);
-    funcL->SetNpx(N_PADE_SAMPLES);
+    if(pc->GetTimeStamp()<=TBEvent::PULSESHAPE_T1){
+      funcB1 = new TF1("funcB1", funcPulseA, 0.0, 120.0, 3);
+      funcB2 = new TF1("funcB2", funcPulseA, 0.0, 120.0, 3);
+      funcL1 = new TF1("funcL1", funcPulseLaserA, 0.0, 120.0, 3);
+      funcL2 = new TF1("funcL2", funcPulseLaserA, 0.0, 120.0, 3);
+    }else if(pc->GetTimeStamp()<=TBEvent::PULSESHAPE_T2){
+      funcB1 = new TF1("funcB1", funcPulseB, 0.0, 120.0, 3);
+      funcB2 = new TF1("funcB2", funcPulseC, 0.0, 120.0, 3);
+      funcL1 = new TF1("funcL1", funcPulseLaserB, 0.0, 120.0, 3);
+      funcL2 = new TF1("funcL2", funcPulseLaserB, 0.0, 120.0, 3);
+    }else if(pc->GetTimeStamp()<=TBEvent::PULSESHAPE_T3){
+      funcB1 = new TF1("funcB1", funcPulseB, 0.0, 120.0, 3);
+      funcB2 = new TF1("funcB2", funcPulseB, 0.0, 120.0, 3);
+      funcL1 = new TF1("funcL1", funcPulseLaserB, 0.0, 120.0, 3);
+      funcL2 = new TF1("funcL2", funcPulseLaserB, 0.0, 120.0, 3);
+    }else if(pc->GetTimeStamp()<=TBEvent::PULSESHAPE_T4){
+      funcB1 = new TF1("funcB1", funcPulseB, 0.0, 120.0, 3);
+      funcB2 = new TF1("funcB2", funcPulseD, 0.0, 120.0, 3);
+      funcL1 = new TF1("funcL1", funcPulseLaserB, 0.0, 120.0, 3);
+      funcL2 = new TF1("funcL2", funcPulseLaserB, 0.0, 120.0, 3);
+    }else{
+      funcB1 = new TF1("funcB1", funcPulseB, 0.0, 120.0, 3);
+      funcB2 = new TF1("funcB2", funcPulseB, 0.0, 120.0, 3);
+      funcL1 = new TF1("funcL1", funcPulseLaserB, 0.0, 120.0, 3);
+      funcL2 = new TF1("funcL2", funcPulseLaserB, 0.0, 120.0, 3);
+    }
+    funcB1->SetNpx(10*N_PADE_SAMPLES);
+    funcB2->SetNpx(10*N_PADE_SAMPLES);
+    funcL1->SetNpx(10*N_PADE_SAMPLES);
+    funcL2->SetNpx(10*N_PADE_SAMPLES);
     first=false;
   }
-  TF1 *func;
-  pc->LaserData() ? func=funcL : func=funcB;
   PulseFit result;
   result.aMaxValue  = 0.;
   result.aMaxError  = 0.;
@@ -131,9 +157,21 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
   result.tRiseError = 0.;
   result.status     = -1;
   if (!pc) return result;
+
+  bool chanOdd = false;
+  int brd = pc->GetChannelIndex() / 32;
+  int chn = (pc->GetChannelIndex() % 32) / 4;
+  if(brd==3 && (chn==2 || chn==3 || chn==6 || chn==7)) chanOdd = true;
+
+  TF1 *func;
+  if(chanOdd){
+    pc->LaserData() ? func=funcL2 : func=funcB2;
+  }else{
+    pc->LaserData() ? func=funcL1 : func=funcB1;
+  }
   pc->GetPedestal(result.pedestal,result.noise);
   UShort_t* a=pc->GetWform();
-  for(int i=10; i<80; i++){
+  for(int i=5; i<80; i++){
     if(fabs(a[i] - result.pedestal) >= fabs(result.aMaxValue)){
       result.aMaxValue  = a[i] - result.pedestal;
       result.tRiseValue = i - 1.0;
@@ -154,8 +192,11 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
 
   TH1F h;
   pc->GetHist(&h);
-  pc->LaserData() ? result.status = h.Fit("funcL", "BQW") : result.status = h.Fit("funcB", "BQW");
-
+  if(chanOdd){
+    pc->LaserData() ? result.status = h.Fit("funcL2", "BQW") : result.status = h.Fit("funcB2", "BQW");
+  }else{
+    pc->LaserData() ? result.status = h.Fit("funcL1", "BQW") : result.status = h.Fit("funcB1", "BQW");
+  }
   result.aMaxValue  = func->GetParameter(1);
   result.aMaxError  = func->GetParError(1);
   result.tRiseValue = func->GetParameter(2);
@@ -165,15 +206,29 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
 
   // recalculated chi2 using samples around the peak only
   func->SetParameters( result.pedestal, result.aMaxValue, result.tRiseValue );
-  func->FixParameter(0, result.pedestal);
-  func->FixParameter(1, result.aMaxValue);
-  func->FixParameter(2, result.tRiseValue);
-  if (pc->LaserData())
-    h.Fit("funcL", "BQW", "", result.tRiseValue - 5.0, result.tRiseValue + 15.0 );
-  else
-    h.Fit("funcB", "BQW", "", result.tRiseValue - 5.0, result.tRiseValue + 15.0 );
-  result.chi2Peak       = func->GetChisquare();
-  result.ndofPeak       = func->GetNDF();
+  func->SetParLimits(0,  1.e+0, 1.e+4);
+  func->SetParLimits(1, -1.e+4, 1.e+4);
+  func->SetParLimits(2, result.tRiseValue-1.0 , result.tRiseValue+1.0);
+  //  func->FixParameter(0, result.pedestal);
+  //  func->FixParameter(1, result.aMaxValue);
+  //  func->FixParameter(2, result.tRiseValue);
+  if(chanOdd){
+    if (pc->LaserData())
+      h.Fit("funcL2", "BQW", "", result.tRiseValue - 10.0, result.tRiseValue + 4.0 );
+    else
+      h.Fit("funcB2", "BQW", "", result.tRiseValue - 10.0, result.tRiseValue + 4.0 );
+  }else{
+    if (pc->LaserData())
+      h.Fit("funcL1", "BQW", "", result.tRiseValue - 10.0, result.tRiseValue + 4.0 );
+    else
+      h.Fit("funcB1", "BQW", "", result.tRiseValue - 10.0, result.tRiseValue + 4.0 );
+  }
+  result.aMaxValue  = func->GetParameter(1);
+  result.aMaxError  = func->GetParError(1);
+  result.tRiseValue = func->GetParameter(2);
+  result.tRiseError = func->GetParError(2);
+  result.chi2Peak   = func->GetChisquare();
+  result.ndofPeak   = func->GetNDF();
   result.func = *func;
 
   // Calculate noise using all available samples before the
@@ -182,12 +237,12 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
   double sum0 = 0.;
   double sum1 = 0.;
   double sum2 = 0.;
-  for(int i=0; i<(result.tRiseValue - 2.0); i++){
+  for(int i=0; i<(result.tRiseValue - 2.5); i++){
     sum0 += 1.0;
     sum1 += a[i];
     sum2 += a[i] * a[i];
   }
-  if( sum0 > 5.5 ){
+  if( sum0 > 1.5 ){
     double avg = sum1 / sum0;
     double rms = sqrt( sum2 / sum0 - avg * avg );
     result.noise = rms;

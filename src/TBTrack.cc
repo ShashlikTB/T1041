@@ -8,9 +8,11 @@
 using std::endl;
 using std::cout;
 
+TBTrack::TBTrack(): _mx(0), _my(0), _m2d(0), _dt1(0), _dt2(0), status(0) {;}
 
 TBTrack::TBTrack(WCChannel x1, WCChannel y1, WCChannel x2, WCChannel y2):
-  _x1(x1), _y1(y1), _x2(x2), _y2(y2) {
+  _x1(x1), _y1(y1), _x2(x2), _y2(y2), 
+  _mx(0), _my(0), _m2d(0), _dt1(0), _dt2(0), status(0) {
   SetSlopeX();
   SetSlopeY();
   SetSlope2D();

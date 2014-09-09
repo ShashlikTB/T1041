@@ -22,7 +22,7 @@ class PadeHeader : public TObject{
   /// PADE gain in packed format
   /** 
       Packing format LNA [bits 1:0]  PGA [bits 3:2]  VGA [bits 15:4]
-   **/
+  **/
   UShort_t Gain() const {return _gain;}
   UShort_t BoardID() const {return _boardID;}
   UShort_t Events() const {return _events;}
@@ -49,7 +49,7 @@ class WCChannel : public TObject{
   ClassDef(WCChannel,1); 
  public:
   WCChannel(){;}
-  WCChannel(UChar_t num, UChar_t wire, UShort_t count) :
+ WCChannel(UChar_t num, UChar_t wire, UShort_t count) :
   _tdcNumber(num), _tdcWire(wire), _tdcCount(count){;}
   void Dump() const;
 
@@ -69,16 +69,16 @@ class WCChannel : public TObject{
 /**
    Container for spill-related data
    Beam types are given usin PDG ID's
-    11 : electron
+   11 : electron
    -11 : positron
-    12 : muon
-    211 : pion
-    2212 : proton
-    -22 : Laser
- **/
+   12 : muon
+   211 : pion
+   2212 : proton
+   -22 : Laser
+**/
 class TBSpill : public TObject {
   ClassDef(TBSpill,1);  // Spill header info
-public:
+ public:
  TBSpill(Int_t spillNumber=0, ULong64_t pcTime=0, Int_t nTrigWC=0, ULong64_t wcTime=0, 
 	 Int_t pdgID=0, Float_t nomMomentum=0,
 	 Float_t tableX=-999, Float_t tableY=-999, Float_t angle=0, 
@@ -114,7 +114,7 @@ public:
   void SetnTrigWC(Int_t n) {_nTrigWC=n;}
   void SetWCTime(ULong64_t t) {_wcTime=t;}
   void AddPade(PadeHeader pade){_padeHeader.push_back(pade);}
-private:
+ private:
   Int_t         _spillNumber;              ///< spill # counted by PADE
   ULong64_t     _pcTime;                   ///< spill time stamp from PC
   Int_t         _nTrigWC;                  ///< triggers reported by WC
@@ -133,7 +133,7 @@ private:
 /// Storage container for raw data from test beam
 class TBEvent : public TObject {
   ClassDef(TBEvent,1);  //Event structure
-public:
+ public:
   enum TBRun { 
     TBRun1=0,   ///< April 2014
     TBRun2a=1,  ///< Start of July-Aug 2014 run (32 ADC samples used for porch)
@@ -152,6 +152,22 @@ public:
       Now end of spill time reported.  This is 0-1 seconds behind spill time reported by WC DAQ **/
   static const ULong64_t START_NEWWCSYNC=635432861909176340L;  
   static const ULong64_t END_TBEAM2=635440566331915360L;
+
+  /// Times when change in pulse shapes occur
+  /** Times of changes in PADE configuration that caused changes in pulse shapes:
+      31-Jul-2014 23:45 
+      11-Aug-2014 11:10
+      14-Aug-2014 00:00
+      16-Aug-2014 14:15
+      Timestamp in .NET format is 100ns ticks from Jan 1, 0001 00:00:00
+      It is calculated using universal unix time (seconds since Jan 1, 1970 00:00:00) using
+      timestamp = unixtime * 10000000 + 621355968000000000
+  **/
+  static const ULong64_t PULSESHAPE_T1=635424471000000000L;  
+  static const ULong64_t PULSESHAPE_T2=635433522000000000L;  
+  static const ULong64_t PULSESHAPE_T3=635435712000000000L;  
+  static const ULong64_t PULSESHAPE_T4=635437953000000000L;  
+
 
   void Reset();    // clear data
 
@@ -175,7 +191,7 @@ public:
   void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
 
 
-private:
+ private:
   vector<PadeChannel> padeChannel;
   vector<WCChannel> wc; 
 };
