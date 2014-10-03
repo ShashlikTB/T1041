@@ -119,7 +119,7 @@ def ParsePadeSpillHeader(padeline):
     spill = { 'number':0, 'pctime':0, 'nTrigWC':0, 'wcTime':0, 'status':0 }
  # check for fake run or # WC time stamp missing
     haveWCtime = True
-    if padeline.endswith("time =") or padeline.endswith("time unknown"): haveWCtime=False
+    if padeline.endswith("time =") or padeline.endswith("time = 0") or padeline.endswith("time unknown"): haveWCtime=False
     padeline=padeline.split()
 
     # hacky special case error checks

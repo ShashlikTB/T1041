@@ -152,6 +152,8 @@ class TBEvent : public TObject {
       Now end of spill time reported.  This is 0-1 seconds behind spill time reported by WC DAQ **/
   static const ULong64_t START_NEWWCSYNC=635432861909176340L;  
   static const ULong64_t END_TBEAM2=635440566331915360L;
+  /// Swap out board 117 for board 16, preparing for H4 TB
+  static const ULong64_t START_H4TB=635479530091849620L;
 
   /// Times when change in pulse shapes occur
   /** Times of changes in PADE configuration that caused changes in pulse shapes:

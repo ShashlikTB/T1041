@@ -98,9 +98,7 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
         logger.Warn("No run data found for",padeDat,"\n Either this run is not logged, or rerun getRunData.py")
         pdgId=0; momentum=0; gain=0; tableX=0; tableY=0; angle=0
     logger.Info("pdgId,momentum,gain,tableX,tableY,angle:",pdgId,momentum,gain,tableX,tableY,angle)
-    
-    
-
+        
     fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
 
     logger.Info("Writing to output file",outFile)
@@ -168,9 +166,9 @@ def filler(padeDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
 
             padeSpill=ParsePadeSpillHeader(padeline)
             nSpills=nSpills+1;
-            if padeSpill['status']<0:
+            if not fakeSpillData and padeSpill['status']<0:
                 skipToNextSpill=True
-                logger.Warn("Spill header error detected: Invalid WC time stamp")
+                logger.Warn("Spill header error detected: Invalid WC time stamp. Status = ",padeSpill['status'])
                 continue
             tbspill.SetSpillData(padeSpill['number'],long(padeSpill['pctime']),
                                  padeSpill['nTrigWC'],long(padeSpill['wcTime']),
