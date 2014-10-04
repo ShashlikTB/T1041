@@ -16,12 +16,14 @@ from ROOT import *
 from string import split
 from array import array
 from TBUtils import *
+from datetime import *
 
 ##### Parameter block #####
 
 DEBUG_LEVEL = 0
 NMAX = 1000000   # stop after NMAX events
 MASTERID = 112   
+if datetime.now() > datetime(2014, 10, 1): MASTERID=16
 MAXPERSPILL=1000  # do not process more that this many events per spill ( mem overwrite issue )
 
 ###########################
